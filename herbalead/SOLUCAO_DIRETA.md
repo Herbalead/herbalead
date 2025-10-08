@@ -72,3 +72,4 @@ Após executar qualquer uma das opções:
 
 **Próximo passo**: Executar SQL em nova query ou usar Table Editor
 
+

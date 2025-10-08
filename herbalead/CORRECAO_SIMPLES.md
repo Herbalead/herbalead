@@ -64,3 +64,4 @@ SELECT 'Políticas criadas com sucesso!' as status;
 - ✅ **SQL**: Pronto para executar
 - ✅ **Solução**: Simples e direta
 
+

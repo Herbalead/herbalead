@@ -41,3 +41,4 @@ Tabela professional_links corrigida com sucesso!
 
 **Execute isso AGORA para resolver o problema!** 🚀
 
+

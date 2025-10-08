@@ -19,3 +19,4 @@ CREATE POLICY "professionals_update_policy" ON professionals
 -- Verificar resultado
 SELECT 'Políticas RLS corrigidas!' as resultado;
 
+

@@ -99,3 +99,4 @@ O sistema já está configurado com Row Level Security:
 - **Vercel Dashboard**: https://vercel.com/dashboard
 - **Site Herbalead**: https://herbalead.vercel.app (após configuração)
 
+

@@ -60,3 +60,4 @@ Ambiente: Production, Preview, Development
 - **GitHub**: ✅ Código atualizado
 - **Vercel**: ❌ Aguardando configuração das variáveis
 
+

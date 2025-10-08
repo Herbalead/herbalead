@@ -119,3 +119,4 @@ const customUrl = `${protocol}://herbalead.com/link/${customSlug}`
 
 **Todas as funcionalidades foram implementadas e testadas com sucesso!** 🌿
 
+

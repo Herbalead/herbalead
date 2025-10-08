@@ -20,3 +20,4 @@ CREATE POLICY "professionals_own_update" ON professionals
 -- 5. Verificar se funcionou
 SELECT 'Políticas criadas com sucesso!' as status;
 
+

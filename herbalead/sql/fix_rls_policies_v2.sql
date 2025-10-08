@@ -146,3 +146,4 @@ WHERE schemaname = 'public'
   AND table_name IN ('professionals', 'leads', 'professional_links', 'lead_notes')
 ORDER BY tablename;
 
+

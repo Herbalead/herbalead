@@ -51,3 +51,4 @@ AND tc.table_schema = 'public';
 -- INSERT INTO professionals (id, name, email) 
 -- VALUES (gen_random_uuid(), 'Teste Manual', 'teste@teste.com');
 
+
