@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
-import { User, LogOut, Plus, Eye, MessageSquare, Settings, Copy, Building, Phone, Mail, Zap, X, Edit, Trash2, ToggleLeft, ToggleRight } from 'lucide-react'
+import { User, LogOut, Plus, Eye, MessageSquare, Copy, Zap, X, Edit, Trash2, ToggleLeft, ToggleRight } from 'lucide-react'
 
 interface UserProfile {
   id: string
@@ -26,7 +26,6 @@ export default function UserDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
-  const [showReportsModal, setShowReportsModal] = useState(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [userLinks, setUserLinks] = useState<Array<{
     id: string;
@@ -42,8 +41,6 @@ export default function UserDashboard() {
     views: number;
     created_at: string;
   }>>([])
-  const [editingPhone, setEditingPhone] = useState('')
-  const [authChecked, setAuthChecked] = useState(false)
   const [newLink, setNewLink] = useState({
     project_name: '',
     tool_name: '',
@@ -114,7 +111,6 @@ export default function UserDashboard() {
       setError('Erro de autenticação')
     } finally {
       setLoading(false)
-      setAuthChecked(true)
     }
   }
 
@@ -273,7 +269,6 @@ export default function UserDashboard() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    // You could add a toast notification here
   }
 
   if (loading) {
@@ -554,12 +549,12 @@ export default function UserDashboard() {
                         <div className="flex">
                           <input
                             type="text"
-                            value={`${window.location.origin}/link/${link.custom_url}`}
+                            value={`${typeof window !== 'undefined' ? window.location.origin : ''}/link/${link.custom_url}`}
                             readOnly
                             className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 text-sm"
                           />
                           <button
-                            onClick={() => copyToClipboard(`${window.location.origin}/link/${link.custom_url}`)}
+                            onClick={() => copyToClipboard(`${typeof window !== 'undefined' ? window.location.origin : ''}/link/${link.custom_url}`)}
                             className="px-3 py-2 bg-gray-200 border border-l-0 border-gray-300 rounded-r-md hover:bg-gray-300"
                           >
                             <Copy className="h-4 w-4" />
@@ -903,103 +898,6 @@ export default function UserDashboard() {
                   </div>
                 )}
               </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Reports Modal */}
-      {showReportsModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Relatórios</h3>
-                <button
-                  onClick={() => setShowReportsModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
-
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <div className="flex items-center">
-                      <Zap className="h-6 w-6 text-green-600" />
-                      <div className="ml-3">
-                        <p className="text-sm font-medium text-green-800">Links Ativos</p>
-                        <p className="text-2xl font-bold text-green-900">
-                          {userLinks.filter(link => link.is_active).length}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <div className="flex items-center">
-                      <Eye className="h-6 w-6 text-blue-600" />
-                      <div className="ml-3">
-                        <p className="text-sm font-medium text-blue-800">Total de Visualizações</p>
-                        <p className="text-2xl font-bold text-blue-900">
-                          {userLinks.reduce((sum, link) => sum + link.views, 0)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-purple-50 rounded-lg p-4">
-                    <div className="flex items-center">
-                      <MessageSquare className="h-6 w-6 text-purple-600" />
-                      <div className="ml-3">
-                        <p className="text-sm font-medium text-purple-800">Total de Links</p>
-                        <p className="text-2xl font-bold text-purple-900">{userLinks.length}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <h4 className="text-lg font-medium text-gray-900 mb-4">Detalhes dos Links</h4>
-                  {userLinks.length === 0 ? (
-                    <div className="text-center py-8">
-                      <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500">Nenhum dado disponível ainda.</p>
-                      <p className="text-sm">Crie seus primeiros links para começar a gerar leads!</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {userLinks.map((link) => (
-                        <div key={link.id} className="bg-white rounded-lg p-4 border">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h5 className="font-medium text-gray-900">{link.tool_name}</h5>
-                              <p className="text-sm text-gray-600">{link.project_name}</p>
-                              <p className="text-sm text-gray-500">
-                                Criado em: {new Date(link.created_at).toLocaleDateString('pt-BR')}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-lg font-semibold text-gray-900">{link.views}</p>
-                              <p className="text-sm text-gray-500">visualizações</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex justify-end mt-6">
-                <button
-                  onClick={() => setShowReportsModal(false)}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-                >
-                  Fechar
-                </button>
-              </div>
             </div>
           </div>
         </div>
