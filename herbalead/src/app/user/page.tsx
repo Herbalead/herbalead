@@ -12,7 +12,7 @@ export default function UserDashboard() {
               <Link href="/" className="text-2xl font-bold text-green-600">
                 Herbalead
               </Link>
-            </div>
+              </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">Usuário</span>
               <Link href="/login" className="text-gray-500 hover:text-gray-700">
@@ -35,9 +35,9 @@ export default function UserDashboard() {
             <p className="text-green-700">
               Sistema funcionando corretamente.
             </p>
-          </div>
-        </div>
-      </main>
+    </div>
+  </div>
+</main>
     </div>
   )
 }
