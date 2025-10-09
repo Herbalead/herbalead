@@ -89,7 +89,7 @@ export default function UserDashboard() {
         tool_name: lead.tool_name,
         status: lead.status,
         created_at: new Date(lead.created_at).toLocaleDateString('pt-BR'),
-        link_name: lead.links?.name || 'Link não encontrado'
+        link_name: Array.isArray(lead.links) ? lead.links[0]?.name || 'Link não encontrado' : lead.links?.name || 'Link não encontrado'
       })) || []
 
       setUserLeads(formattedLeads)
