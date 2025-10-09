@@ -412,7 +412,13 @@ export default function UserDashboard() {
   }
 
   // Função para editar link
-  const editLink = (link: any) => {
+  const editLink = (link: {
+    id: string
+    name: string
+    tool: string
+    cta_text: string
+    redirect_url: string
+  }) => {
     setNewLink({
       project_name: link.name,
       tool_name: link.tool,
