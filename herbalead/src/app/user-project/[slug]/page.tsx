@@ -142,10 +142,21 @@ export default function UserProjectPage({ params }: { params: Promise<{ slug: st
         if (linkData) {
           console.log('📊 Projeto encontrado:', linkData)
           
+          // Buscar dados do profissional para completar o linkData
+          const { data: professionalData, error: professionalError } = await supabase
+            .from('professionals')
+            .select('name, specialty, company')
+            .eq('id', linkData.user_id)
+            .single()
+          
           // Corrigir estrutura dos dados do Supabase
           const formattedLinkData: LinkData = {
             ...linkData,
-            profiles: Array.isArray(linkData.profiles) ? linkData.profiles[0] : linkData.profiles
+            profiles: {
+              full_name: professionalData?.name || 'Profissional',
+              specialty: professionalData?.specialty || '',
+              company: professionalData?.company || ''
+            }
           }
           
           setLinkData(formattedLinkData)
