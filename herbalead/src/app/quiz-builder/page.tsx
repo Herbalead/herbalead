@@ -56,21 +56,13 @@ export default function QuizBuilder() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname
-      const subdomain = hostname.split('.')[0]
       
-      console.log('🔍 Detecting project in quiz builder:', { hostname, subdomain })
+      console.log('🔍 Detecting project in quiz builder:', { hostname })
       
-      // Se não é localhost e tem subdomínio válido
-      if (!hostname.includes('localhost') && subdomain !== 'www' && subdomain.length > 2) {
-        setProjectDomain(subdomain)
-        const config = getProjectConfig(subdomain === 'herbalead' ? 'fitness' : 'fitness')
-        setProjectConfig(config)
-        console.log('✅ Project detected in quiz builder:', subdomain, config)
-      } else {
-        console.log('❌ No project detected in quiz builder, using default')
-        setProjectDomain('ylada')
-        setProjectConfig(getProjectConfig('fitness'))
-      }
+      // Sempre usar herbalead como padrão
+      setProjectDomain('herbalead')
+      setProjectConfig(getProjectConfig('fitness'))
+      console.log('✅ Using herbalead as default project')
     }
   }, [])
 
