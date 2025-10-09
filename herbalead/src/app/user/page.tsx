@@ -15,6 +15,30 @@ export default function UserDashboard() {
     custom_message: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
   })
   const [isCreatingLink, setIsCreatingLink] = useState(false)
+  const [userProfile, setUserProfile] = useState({
+    name: 'João Silva',
+    email: 'joao@email.com',
+    phone: '(11) 99999-9999',
+    specialty: 'nutritionist',
+    company: 'Nutrição & Vida',
+    website: 'https://nutricaovida.com'
+  })
+
+  // Função para preencher automaticamente o WhatsApp
+  const fillWhatsApp = () => {
+    if (userProfile.phone) {
+      const cleanPhone = userProfile.phone.replace(/\D/g, '')
+      const whatsappUrl = `https://wa.me/55${cleanPhone}`
+      setNewLink({...newLink, redirect_url: whatsappUrl})
+    }
+  }
+
+  // Função para preencher automaticamente o site
+  const fillWebsite = () => {
+    if (userProfile.website) {
+      setNewLink({...newLink, redirect_url: userProfile.website})
+    }
+  }
 
   // Função para criar novo link
   const handleCreateLink = async () => {
@@ -116,6 +140,16 @@ export default function UserDashboard() {
               Leads
             </button>
             <button
+              onClick={() => setActiveTab('profile')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'profile'
+                  ? 'border-green-500 text-green-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Perfil
+            </button>
+            <button
               onClick={() => setActiveTab('settings')}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'settings'
@@ -140,7 +174,7 @@ export default function UserDashboard() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Links Criados</p>
-                    <p className="text-2xl font-semibold text-gray-900">3</p>
+                    <p className="text-2xl font-semibold text-gray-900">0</p>
                   </div>
                 </div>
               </div>
@@ -152,7 +186,7 @@ export default function UserDashboard() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Leads Coletados</p>
-                    <p className="text-2xl font-semibold text-gray-900">12</p>
+                    <p className="text-2xl font-semibold text-gray-900">0</p>
                   </div>
                 </div>
               </div>
@@ -164,7 +198,7 @@ export default function UserDashboard() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Conversões</p>
-                    <p className="text-2xl font-semibold text-gray-900">25%</p>
+                    <p className="text-2xl font-semibold text-gray-900">0%</p>
                   </div>
                 </div>
               </div>
@@ -185,7 +219,6 @@ export default function UserDashboard() {
 
             {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button 
                   onClick={() => setShowCreateLinkModal(true)}
@@ -225,40 +258,9 @@ export default function UserDashboard() {
             {/* Recent Activity */}
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Atividade Recente</h3>
-              <div className="space-y-4">
-                {/* Atividade de Exemplo */}
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <Users className="w-4 h-4 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Novo lead coletado</p>
-                    <p className="text-xs text-gray-500">Maria Silva completou o quiz "Desafio 7 Dias - IMC"</p>
-                  </div>
-                  <span className="text-xs text-gray-400">há 2h</span>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <LinkIcon className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Link criado</p>
-                    <p className="text-xs text-gray-500">"Desafio 7 Dias - IMC" foi criado e está ativo</p>
-                  </div>
-                  <span className="text-xs text-gray-400">há 1 dia</span>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Conversão realizada</p>
-                    <p className="text-xs text-gray-500">João Santos entrou em contato via WhatsApp</p>
-                  </div>
-                  <span className="text-xs text-gray-400">há 2 dias</span>
-                </div>
+              <div className="text-center py-8">
+                <p className="text-gray-500">Nenhuma atividade recente</p>
+                <p className="text-sm text-gray-400 mt-2">Crie seu primeiro link para começar a coletar leads</p>
               </div>
             </div>
           </div>
@@ -277,47 +279,10 @@ export default function UserDashboard() {
               </button>
             </div>
             
-            {/* Lista de Links (simulada) */}
-            <div className="space-y-4">
-              {/* Link de Exemplo */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-900">Desafio 7 Dias - IMC</h4>
-                    <p className="text-sm text-gray-600">Calculadora de IMC</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      https://herbalead.com/link/desafio-7-dias-imc
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                      Ativo
-                    </span>
-                    <button className="text-blue-600 hover:text-blue-800 text-sm">
-                      Copiar
-                    </button>
-                    <button className="text-gray-400 hover:text-gray-600">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center text-xs text-gray-500">
-                  <span>0 cliques</span>
-                  <span className="mx-2">•</span>
-                  <span>0 leads</span>
-                  <span className="mx-2">•</span>
-                  <span>Criado há 2 dias</span>
-                </div>
-              </div>
-
-              {/* Estado vazio (comentado para mostrar exemplo) */}
-              {/* <div className="text-center py-8">
-                <LinkIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 mb-2">Nenhum link criado ainda</p>
-                <p className="text-sm text-gray-400">Crie seu primeiro link personalizado para começar a gerar leads</p>
-              </div> */}
+            <div className="text-center py-8">
+              <LinkIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 mb-2">Nenhum link criado ainda</p>
+              <p className="text-sm text-gray-400">Crie seu primeiro link personalizado para começar a gerar leads</p>
             </div>
           </div>
         )}
@@ -336,38 +301,118 @@ export default function UserDashboard() {
               </div>
             </div>
             
-            {/* Lista de Leads (simulada) */}
-            <div className="space-y-4">
-              {/* Lead de Exemplo */}
-              <div className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-900">Maria Silva</h4>
-                    <p className="text-sm text-gray-600">maria.silva@email.com</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      IMC: 24.2 • Peso Normal • 28 anos
-                    </p>
+            <div className="text-center py-8">
+              <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 mb-2">Nenhum lead coletado ainda</p>
+              <p className="text-sm text-gray-400">Compartilhe seus links para começar a receber leads</p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'profile' && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Editar Perfil</h3>
+            <div className="space-y-6">
+              {/* Informações Pessoais */}
+              <div>
+                <h4 className="text-md font-medium text-gray-900 mb-4">Informações Pessoais</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nome Completo *
+                    </label>
+                    <input
+                      type="text"
+                      value={userProfile.name}
+                      onChange={(e) => setUserProfile({...userProfile, name: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="Seu nome completo"
+                    />
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                      Novo
-                    </span>
-                    <span className="text-xs text-gray-500">há 2h</span>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      value={userProfile.email}
+                      onChange={(e) => setUserProfile({...userProfile, email: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="seu@email.com"
+                    />
                   </div>
-                </div>
-                <div className="mt-3 flex items-center space-x-4 text-xs text-gray-500">
-                  <span>Fonte: Desafio 7 Dias - IMC</span>
-                  <span>•</span>
-                  <span>WhatsApp: (11) 99999-9999</span>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Telefone/WhatsApp *
+                    </label>
+                    <input
+                      type="tel"
+                      value={userProfile.phone}
+                      onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="(11) 99999-9999"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Especialidade
+                    </label>
+                    <select 
+                      value={userProfile.specialty}
+                      onChange={(e) => setUserProfile({...userProfile, specialty: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    >
+                      <option value="">Selecione sua especialidade</option>
+                      <option value="nutritionist">Nutricionista</option>
+                      <option value="personal-trainer">Personal Trainer</option>
+                      <option value="wellness-coach">Coach de Bem-estar</option>
+                      <option value="distributor">Distribuidor</option>
+                      <option value="other">Outro</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              {/* Estado vazio (comentado para mostrar exemplo) */}
-              {/* <div className="text-center py-8">
-                <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 mb-2">Nenhum lead coletado ainda</p>
-                <p className="text-sm text-gray-400">Compartilhe seus links para começar a receber leads</p>
-              </div> */}
+              {/* Informações Profissionais */}
+              <div>
+                <h4 className="text-md font-medium text-gray-900 mb-4">Informações Profissionais</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Empresa/Organização
+                    </label>
+                    <input
+                      type="text"
+                      value={userProfile.company}
+                      onChange={(e) => setUserProfile({...userProfile, company: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="Nome da sua empresa"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Site/URL
+                    </label>
+                    <input
+                      type="url"
+                      value={userProfile.website}
+                      onChange={(e) => setUserProfile({...userProfile, website: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="https://seusite.com"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Botões de Ação */}
+              <div className="flex space-x-3 pt-4">
+                <button className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                  Salvar Alterações
+                </button>
+                <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                  Cancelar
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -463,6 +508,22 @@ export default function UserDashboard() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     URL de Redirecionamento *
                   </label>
+                  <div className="flex space-x-2 mb-2">
+                    <button
+                      type="button"
+                      onClick={fillWhatsApp}
+                      className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-lg hover:bg-green-200"
+                    >
+                      Usar meu WhatsApp
+                    </button>
+                    <button
+                      type="button"
+                      onClick={fillWebsite}
+                      className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200"
+                    >
+                      Usar meu Site
+                    </button>
+                  </div>
                   <input
                     type="url"
                     value={newLink.redirect_url}
