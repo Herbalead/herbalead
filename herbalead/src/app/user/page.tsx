@@ -392,7 +392,10 @@ export default function UserDashboard() {
         tool_name: 'bmi',
         cta_text: 'Falar com Especialista',
         redirect_url: '',
-        custom_message: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
+        custom_message: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!',
+        capture_type: 'direct',
+        material_title: '',
+        material_description: ''
       })
       setShowCreateLinkModal(false)
       
@@ -455,7 +458,10 @@ export default function UserDashboard() {
       tool_name: link.tool,
       cta_text: link.cta_text,
       redirect_url: link.redirect_url,
-      custom_message: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
+      custom_message: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!',
+      capture_type: 'direct',
+      material_title: '',
+      material_description: ''
     })
     setShowCreateLinkModal(true)
     // TODO: Implementar lógica de edição
