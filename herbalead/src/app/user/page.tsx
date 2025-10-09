@@ -305,19 +305,6 @@ export default function UserDashboard() {
         return
       }
 
-      // Gerar URL personalizada com estrutura: herbalead.com/[usuario]/[projeto]
-      const userName = userProfile.name
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 30)
-      
-      const projectName = newLink.project_name
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 30)
-      
       // Buscar nome do usuário para criar URL
       const { data: userProfile } = await supabase
         .from('professionals')
@@ -325,7 +312,7 @@ export default function UserDashboard() {
         .eq('id', user.id)
         .single()
       
-      const userName = userProfile?.name || 'usuario'
+      const userName = (userProfile?.name || 'usuario')
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
