@@ -70,7 +70,17 @@ export default function CustomLinkPage({ params }: { params: Promise<{ slug: str
           }
           console.log('📊 Link data encontrado:', linkData)
           console.log('🔗 Redirect URL:', linkData.redirect_url)
+          console.log('🛠️ Tool name:', linkData.tool_name)
+          
           setLinkData(linkData)
+          
+          // REDIRECIONAMENTO IMEDIATO para a ferramenta
+          if (linkData.tool_name) {
+            const toolUrl = `/tools/${linkData.tool_name}?ref=${resolvedParams.slug}`
+            console.log('🚀 Redirecionando para ferramenta:', toolUrl)
+            window.location.href = toolUrl
+            return
+          }
         }
       } catch (error) {
         console.error('Erro ao buscar dados do link:', error)
