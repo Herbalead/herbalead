@@ -78,7 +78,7 @@ export default function UserDashboard() {
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-blue-100 rounded-lg">
@@ -111,6 +111,19 @@ export default function UserDashboard() {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Conversões</p>
                     <p className="text-2xl font-semibold text-gray-900">0%</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg shadow p-6 border border-orange-200">
+                <div className="flex items-center">
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <Calendar className="w-6 h-6 text-orange-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-orange-600">Dias Restantes</p>
+                    <p className="text-2xl font-semibold text-orange-700">7</p>
+                    <p className="text-xs text-orange-500">Período de teste</p>
                   </div>
                 </div>
               </div>
