@@ -11,6 +11,7 @@ interface SpecialistCTAProps {
 
 interface LinkData {
   id: string
+  user_id: string
   tool_name: string
   cta_text: string
   redirect_url: string
@@ -111,7 +112,7 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
             console.log('✅ Dados carregados com sucesso:', data)
             
             // Buscar dados do profissional
-            const { data: professionalData, error: professionalError } = await supabase
+            const { data: professionalData } = await supabase
               .from('professionals')
               .select('name, specialty, company')
               .eq('id', data.user_id)
@@ -152,7 +153,7 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
     }
 
     fetchLinkData()
-  }, []) // Remover dependências para evitar loop
+  }, []) // Dependências removidas intencionalmente para evitar loop infinito
 
   const handleContactSpecialist = () => {
     if (!linkData) return
