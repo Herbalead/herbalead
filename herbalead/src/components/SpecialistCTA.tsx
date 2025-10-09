@@ -100,6 +100,9 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
             // Corrigir estrutura dos dados do Supabase
             const linkData: LinkData = {
               ...data,
+              redirect_type: 'whatsapp', // Assumindo WhatsApp por padrão
+              project_name: data.name,
+              custom_slug: `${usuario}/${projeto}`,
               professional: {
                 name: professionalData?.name || 'Profissional',
                 specialty: professionalData?.specialty || '',
