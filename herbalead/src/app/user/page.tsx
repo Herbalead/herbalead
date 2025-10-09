@@ -318,7 +318,9 @@ export default function UserDashboard() {
         .replace(/\s+/g, '-')
         .substring(0, 30)
       
-      const customUrl = `https://herbalead.com/user-project/${userName}-${projectName}`
+      // Gerar ID único para o link
+      const newLinkId = crypto.randomUUID()
+      const customUrl = `https://herbalead.com/link/${newLinkId}`
       
       // Verificar se já existe um projeto com o mesmo nome para este usuário
       const { data: existingLink, error: checkError } = await supabase
@@ -337,6 +339,7 @@ export default function UserDashboard() {
       const { data: savedLink, error } = await supabase
         .from('links')
         .insert({
+          id: newLinkId,
           user_id: user.id,
           name: newLink.project_name,
           tool_name: newLink.tool_name,
