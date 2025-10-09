@@ -99,6 +99,10 @@ export default function UserProjectPage({ params }: { params: Promise<{ slug: st
           }
 
           // Converter dados da tabela professional_links para o formato esperado
+          const professional = Array.isArray(professionalLinkData.professional) 
+            ? professionalLinkData.professional[0] 
+            : professionalLinkData.professional
+            
           const convertedLinkData = {
             id: professionalLinkData.id,
             name: projeto,
@@ -109,9 +113,9 @@ export default function UserProjectPage({ params }: { params: Promise<{ slug: st
             status: 'active',
             user_id: userData.id,
             profiles: {
-              full_name: professionalLinkData.professional.name,
-              specialty: professionalLinkData.professional.specialty,
-              company: professionalLinkData.professional.company
+              full_name: professional?.name || 'Profissional',
+              specialty: professional?.specialty || '',
+              company: professional?.company || ''
             }
           }
 
