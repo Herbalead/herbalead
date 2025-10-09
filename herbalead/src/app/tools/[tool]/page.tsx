@@ -118,7 +118,7 @@ export default function ToolPage() {
         await supabase
           .from('links')
           .update({ 
-            clicks: (data.clicks || 0) + 1
+            clicks: 1
           })
           .eq('id', data.id)
 
@@ -139,7 +139,7 @@ export default function ToolPage() {
     // Registrar clique (opcional)
     supabase
       .from('links')
-      .update({ leads: (linkData.leads || 0) + 1 })
+      .update({ leads: 1 })
       .eq('id', linkData.id)
 
     // Redirecionar

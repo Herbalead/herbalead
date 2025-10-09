@@ -52,7 +52,7 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
           
           // Buscar por custom_slug
           const { data, error } = await supabase
-            .from('professional_links')
+            .from('links')
             .select(`
               id,
               tool_name,
