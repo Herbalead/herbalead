@@ -318,9 +318,26 @@ export default function UserDashboard() {
         .replace(/\s+/g, '-')
         .substring(0, 30)
       
-      // Gerar ID único para o link
-      const newLinkId = crypto.randomUUID()
-      const customUrl = `https://herbalead.com/link/${newLinkId}`
+      // Buscar nome do usuário para criar URL
+      const { data: userProfile } = await supabase
+        .from('professionals')
+        .select('name')
+        .eq('id', user.id)
+        .single()
+      
+      const userName = userProfile?.name || 'usuario'
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 30)
+      
+      const projectName = newLink.project_name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 30)
+      
+      const customUrl = `https://herbalead.com/${userName}/${projectName}`
       
       // Verificar se já existe um projeto com o mesmo nome para este usuário
       const { data: existingLink, error: checkError } = await supabase
@@ -339,7 +356,6 @@ export default function UserDashboard() {
       const { data: savedLink, error } = await supabase
         .from('links')
         .insert({
-          id: newLinkId,
           user_id: user.id,
           name: newLink.project_name,
           tool_name: newLink.tool_name,

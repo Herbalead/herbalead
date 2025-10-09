@@ -20,7 +20,7 @@ interface LinkData {
   }
 }
 
-export default function LinkPage({ params }: { params: Promise<{ id: string }> }) {
+export default function UserProjectPage({ params }: { params: Promise<{ usuario: string; projeto: string }> }) {
   const [linkData, setLinkData] = useState<LinkData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -30,9 +30,24 @@ export default function LinkPage({ params }: { params: Promise<{ id: string }> }
     const fetchLinkData = async () => {
       try {
         const resolvedParams = await params
-        console.log('🔍 Buscando link ID:', resolvedParams.id)
+        console.log('🔍 Buscando link para usuário:', resolvedParams.usuario, 'projeto:', resolvedParams.projeto)
         
-        // Buscar o link diretamente pelo ID
+        // Buscar o usuário pelo nome (slug)
+        const { data: userData, error: userError } = await supabase
+          .from('professionals')
+          .select('id, name, email')
+          .ilike('name', `%${resolvedParams.usuario.replace(/-/g, ' ')}%`)
+          .single()
+
+        if (userError || !userData) {
+          console.error('Usuário não encontrado:', userError)
+          setError('Usuário não encontrado')
+          return
+        }
+
+        console.log('👤 Usuário encontrado:', userData)
+
+        // Buscar o projeto do usuário na tabela links
         const { data: linkData, error: linkError } = await supabase
           .from('links')
           .select(`
@@ -45,17 +60,18 @@ export default function LinkPage({ params }: { params: Promise<{ id: string }> }
             status,
             user_id
           `)
-          .eq('id', resolvedParams.id)
+          .eq('user_id', userData.id)
+          .ilike('name', `%${resolvedParams.projeto.replace(/-/g, ' ')}%`)
           .eq('status', 'active')
           .single()
 
         if (linkError || !linkData) {
-          console.error('Link não encontrado:', linkError)
-          setError('Link não encontrado ou inativo')
+          console.error('Projeto não encontrado:', linkError)
+          setError('Projeto não encontrado ou inativo')
           return
         }
 
-        console.log('📊 Link encontrado:', linkData)
+        console.log('📊 Projeto encontrado:', linkData)
         
         // Buscar dados do profissional
         const { data: professionalData, error: professionalError } = await supabase
@@ -78,7 +94,7 @@ export default function LinkPage({ params }: { params: Promise<{ id: string }> }
         
         // REDIRECIONAMENTO IMEDIATO para a ferramenta
         if (linkData.tool_name) {
-          const toolUrl = `/tools/${linkData.tool_name}?ref=${resolvedParams.id}`
+          const toolUrl = `/tools/${linkData.tool_name}?ref=${resolvedParams.usuario}/${resolvedParams.projeto}`
           console.log('🚀 Redirecionando para ferramenta:', toolUrl)
           window.location.href = toolUrl
           return
