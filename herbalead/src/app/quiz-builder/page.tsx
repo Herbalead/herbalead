@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Plus, Trash2, Save, Info, Copy, ChevronDown, ChevronRight } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 import { getProjectConfig } from '@/lib/project-config'
@@ -75,7 +75,7 @@ export default function QuizBuilder() {
   }, [])
 
   // Cores padrão baseadas no projeto
-  const getDefaultColors = () => {
+  const getDefaultColors = useCallback(() => {
     if (projectDomain === 'herbalead') {
       return {
         primary: '#3B82F6', // blue-500 (Herbalead)
@@ -91,7 +91,7 @@ export default function QuizBuilder() {
         text: '#1F2937' // gray-800
       }
     }
-  }
+  }, [projectDomain])
 
   const [quiz, setQuiz] = useState<Quiz>({
     professional_id: '',
