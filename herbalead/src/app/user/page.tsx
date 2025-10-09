@@ -3,12 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Plus, Link as LinkIcon, Users, TrendingUp, Calendar, Settings } from 'lucide-react'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+// Supabase será usado quando integrarmos com o banco de dados
 
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -29,8 +24,18 @@ export default function UserDashboard() {
     company: '',
     website: ''
   })
-  const [userLinks, setUserLinks] = useState<any[]>([])
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
+  const [userLinks, setUserLinks] = useState<Array<{
+    id: string
+    name: string
+    tool: string
+    url: string
+    status: string
+    clicks: number
+    leads: number
+    createdAt: string
+    cta_text: string
+    redirect_url: string
+  }>>([])
 
   // Carregar dados do perfil do Supabase
   useEffect(() => {
@@ -48,10 +53,8 @@ export default function UserDashboard() {
         }
         
         setUserProfile(mockUserData)
-        setIsLoadingProfile(false)
       } catch (error) {
         console.error('Erro ao carregar perfil:', error)
-        setIsLoadingProfile(false)
       }
     }
 
