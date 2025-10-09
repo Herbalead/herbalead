@@ -274,24 +274,45 @@ export default function QuizBuilder() {
 
     if (quiz.questions.length === 0) {
       return (
-        <div 
-          className="h-full flex items-center justify-center p-8 rounded-lg"
-          style={{backgroundColor: quiz.colors.background}}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl p-12 text-center max-w-md">
-            <div 
-              className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
-              style={{backgroundColor: quiz.colors.primary + '20'}}
-            >
-              <Plus size={32} style={{color: quiz.colors.primary}} />
+        <div className="p-6">
+          <div 
+            className="h-full flex items-center justify-center p-8 rounded-lg"
+            style={{backgroundColor: quiz.colors.background}}
+          >
+            <div className="bg-white rounded-2xl shadow-2xl p-12 text-center max-w-md">
+              <div 
+                className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+                style={{backgroundColor: quiz.colors.primary + '20'}}
+              >
+                <Plus size={32} style={{color: quiz.colors.primary}} />
+              </div>
+              <h3 className="text-xl font-bold mb-2" style={{color: quiz.colors.text}}>
+                {quiz.title}
+              </h3>
+              <p className="text-gray-500 mb-4">{quiz.description}</p>
+              <p className="text-sm text-gray-400">
+                Adicione perguntas para ver a prévia
+              </p>
             </div>
-            <h3 className="text-xl font-bold mb-2" style={{color: quiz.colors.text}}>
-              {quiz.title}
-            </h3>
-            <p className="text-gray-500 mb-4">{quiz.description}</p>
-            <p className="text-sm text-gray-400">
-              Adicione perguntas para ver a prévia
-            </p>
+          </div>
+          
+          {/* Preview das Configurações */}
+          <div className="mt-6 bg-white rounded-lg shadow p-4">
+            <h3 className="text-lg font-bold mb-4">⚙️ Configurações Ativas</h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${quiz.settings.showCorrectAnswers ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                <span className="text-sm text-gray-600">
+                  {quiz.settings.showCorrectAnswers ? 'Mostrar respostas corretas' : 'Não mostrar respostas corretas'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${quiz.settings.randomizeQuestions ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                <span className="text-sm text-gray-600">
+                  {quiz.settings.randomizeQuestions ? 'Perguntas randomizadas' : 'Perguntas em ordem'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       )
@@ -884,59 +905,6 @@ export default function QuizBuilder() {
             )}
           </div>
 
-          {/* Preview das Configurações */}
-          <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold mb-4">👁️ Preview da Finalização</h2>
-              <div className="space-y-4">
-                {/* Preview da Mensagem de Parabéns */}
-                <div className="p-4 bg-gray-50 rounded-lg border">
-                  <p className="text-sm font-medium text-gray-600 mb-2">Mensagem de Parabéns:</p>
-                  <div className="p-3 bg-white rounded border">
-                    <p className="text-sm" style={{color: quiz.colors.text}}>
-                      {quiz.settings.congratulationsMessage || 'Parabéns! Você concluiu o quiz com sucesso! 🎉'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Preview do Botão Final */}
-                <div className="p-4 bg-gray-50 rounded-lg border">
-                  <p className="text-sm font-medium text-gray-600 mb-2">Botão Final:</p>
-                  <div className="flex items-center gap-3">
-                    <button
-                      className="px-4 py-2 rounded-lg text-white text-sm font-medium"
-                      style={{backgroundColor: quiz.colors.primary}}
-                    >
-                      {quiz.settings.customButtonText || 'Falar com Especialista'}
-                    </button>
-                    {quiz.settings.specialistRedirectUrl && (
-                      <span className="text-xs text-gray-500">
-                        → {quiz.settings.specialistRedirectUrl}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Preview das Configurações de Comportamento */}
-                <div className="p-4 bg-gray-50 rounded-lg border">
-                  <p className="text-sm font-medium text-gray-600 mb-2">Configurações Ativas:</p>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${quiz.settings.showCorrectAnswers ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                      <span className="text-sm text-gray-600">
-                        {quiz.settings.showCorrectAnswers ? 'Mostrar respostas corretas' : 'Não mostrar respostas corretas'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${quiz.settings.randomizeQuestions ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                      <span className="text-sm text-gray-600">
-                        {quiz.settings.randomizeQuestions ? 'Perguntas randomizadas' : 'Perguntas em ordem'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Preview ao Vivo - Direita */}
