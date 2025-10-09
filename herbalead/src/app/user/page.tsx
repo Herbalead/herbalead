@@ -173,6 +173,16 @@ export default function UserDashboard() {
 
   // Carregar dados do perfil do Supabase
   useEffect(() => {
+    // Limpar cache agressivamente
+    if (typeof window !== 'undefined') {
+      localStorage.clear()
+      sessionStorage.clear()
+      // Forçar reload se detectar cache antigo
+      if (localStorage.getItem('portal-fit-cache') || sessionStorage.getItem('old-app')) {
+        window.location.reload()
+      }
+    }
+
     const loadUserProfile = async () => {
       try {
         console.log('Carregando perfil do usuário...')

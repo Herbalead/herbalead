@@ -1,7 +1,5 @@
 import { Inter } from 'next/font/google'
 import './globals.css'
-import PWAInstaller from '@/components/PWAInstaller'
-import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -44,9 +42,7 @@ export default function RootLayout({
         <meta httpEquiv="Expires" content="0" />
       </head>
       <body className={inter.className}>
-        <PWAInstaller />
         {children}
-        <PWAInstallPrompt />
       </body>
     </html>
   )
