@@ -6,14 +6,15 @@ import { createClient } from '@supabase/supabase-js'
 
 interface LinkData {
   id: string
+  name: string
   tool_name: string
   cta_text: string
   redirect_url: string
   custom_message: string
-  redirect_type: string
-  project_name?: string
-  professional: {
-    name: string
+  status: string
+  user_id: string
+  profiles: {
+    full_name: string
     specialty: string
     company: string
   }
@@ -35,23 +36,24 @@ export default function CustomLinkPage({ params }: { params: Promise<{ slug: str
       try {
         const resolvedParams = await params
         const { data, error } = await supabase
-          .from('professional_links')
+          .from('links')
           .select(`
             id,
+            name,
             tool_name,
             cta_text,
             redirect_url,
             custom_message,
-            redirect_type,
-            project_name,
-            professional:professional_id (
-              name,
+            status,
+            user_id,
+            profiles:user_id (
+              full_name,
               specialty,
               company
             )
           `)
-          .eq('custom_slug', resolvedParams.slug)
-          .eq('is_active', true)
+          .eq('custom_url', `https://herbalead.com/link/${resolvedParams.slug}`)
+          .eq('status', 'active')
           .single()
 
         if (error) {
@@ -64,7 +66,7 @@ export default function CustomLinkPage({ params }: { params: Promise<{ slug: str
           // Corrigir estrutura dos dados do Supabase
           const linkData: LinkData = {
             ...data,
-            professional: Array.isArray(data.professional) ? data.professional[0] : data.professional
+            profiles: Array.isArray(data.profiles) ? data.profiles[0] : data.profiles
           }
           console.log('📊 Link data encontrado:', linkData)
           console.log('🔗 Redirect URL:', linkData.redirect_url)
@@ -128,7 +130,7 @@ export default function CustomLinkPage({ params }: { params: Promise<{ slug: str
             <span className="text-2xl">🔗</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {linkData.project_name || 'Link Personalizado'}
+            {linkData.name || 'Link Personalizado'}
           </h1>
           <p className="text-gray-600">
             Ferramenta: {linkData.tool_name.replace('-', ' ')}
@@ -144,12 +146,12 @@ export default function CustomLinkPage({ params }: { params: Promise<{ slug: str
           </div>
         )}
 
-        {linkData.professional && (
+        {linkData.profiles && (
           <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
             <p className="text-sm text-gray-700">
-              👨‍⚕️ <strong>Profissional:</strong> {linkData.professional.name}
-              {linkData.professional.specialty && ` - ${linkData.professional.specialty}`}
-              {linkData.professional.company && ` (${linkData.professional.company})`}
+              👨‍⚕️ <strong>Profissional:</strong> {linkData.profiles.full_name}
+              {linkData.profiles.specialty && ` - ${linkData.profiles.specialty}`}
+              {linkData.profiles.company && ` (${linkData.profiles.company})`}
             </p>
           </div>
         )}
@@ -162,7 +164,7 @@ export default function CustomLinkPage({ params }: { params: Promise<{ slug: str
         </button>
 
         <div className="mt-4 text-xs text-gray-500 text-center">
-          Link personalizado • {linkData.redirect_type}
+          Link personalizado • Herbalead
         </div>
       </div>
     </div>

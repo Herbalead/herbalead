@@ -106,6 +106,49 @@ export default function UserDashboard() {
     loadUserProfile()
   }, [])
 
+  // Carregar links do usuário
+  useEffect(() => {
+    const loadUserLinks = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (user) {
+          const { data: links, error } = await supabase
+            .from('links')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+
+          if (error) {
+            console.error('Erro ao carregar links:', error)
+            return
+          }
+
+          if (links) {
+            const formattedLinks = links.map(link => ({
+              id: link.id,
+              name: link.name,
+              tool: link.tool_name,
+              url: link.custom_url,
+              status: link.status === 'active' ? 'Ativo' : 'Inativo',
+              clicks: link.clicks || 0,
+              leads: link.leads || 0,
+              createdAt: new Date(link.created_at).toLocaleDateString('pt-BR'),
+              cta_text: link.cta_text,
+              redirect_url: link.redirect_url
+            }))
+            
+            setUserLinks(formattedLinks)
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar links:', error)
+      }
+    }
+
+    loadUserLinks()
+  }, [])
+
   // Função para salvar perfil no Supabase
   const saveProfile = async () => {
     try {
@@ -193,9 +236,13 @@ export default function UserDashboard() {
 
     setIsCreatingLink(true)
     try {
-      // Simular criação de link (aqui você integraria com sua API)
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const { data: { user } } = await supabase.auth.getUser()
       
+      if (!user) {
+        alert('Usuário não logado. Faça login primeiro.')
+        return
+      }
+
       // Gerar URL personalizada
       const customSlug = newLink.project_name
         .toLowerCase()
@@ -205,18 +252,40 @@ export default function UserDashboard() {
       
       const customUrl = `https://herbalead.com/link/${customSlug}`
       
-      // Criar objeto do link
+      // Salvar no Supabase
+      const { data: savedLink, error } = await supabase
+        .from('links')
+        .insert({
+          user_id: user.id,
+          name: newLink.project_name,
+          tool_name: newLink.tool_name,
+          cta_text: newLink.cta_text,
+          redirect_url: newLink.redirect_url,
+          custom_url: customUrl,
+          custom_message: newLink.custom_message,
+          status: 'active'
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao salvar link:', error)
+        alert('Erro ao criar link. Tente novamente.')
+        return
+      }
+      
+      // Criar objeto do link para o estado local
       const createdLink = {
-        id: Date.now().toString(),
-        name: newLink.project_name,
-        tool: newLink.tool_name,
-        url: customUrl,
+        id: savedLink.id,
+        name: savedLink.name,
+        tool: savedLink.tool_name,
+        url: savedLink.custom_url,
         status: 'Ativo',
-        clicks: 0,
-        leads: 0,
-        createdAt: new Date().toLocaleDateString('pt-BR'),
-        cta_text: newLink.cta_text,
-        redirect_url: newLink.redirect_url
+        clicks: savedLink.clicks || 0,
+        leads: savedLink.leads || 0,
+        createdAt: new Date(savedLink.created_at).toLocaleDateString('pt-BR'),
+        cta_text: savedLink.cta_text,
+        redirect_url: savedLink.redirect_url
       }
       
       // Adicionar à lista de links
@@ -240,6 +309,57 @@ export default function UserDashboard() {
     } finally {
       setIsCreatingLink(false)
     }
+  }
+
+  // Função para copiar link
+  const copyLink = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url)
+      alert('Link copiado para a área de transferência!')
+    } catch (error) {
+      console.error('Erro ao copiar link:', error)
+      alert('Erro ao copiar link. Tente novamente.')
+    }
+  }
+
+  // Função para excluir link
+  const deleteLink = async (linkId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este link?')) {
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('links')
+        .delete()
+        .eq('id', linkId)
+
+      if (error) {
+        console.error('Erro ao excluir link:', error)
+        alert('Erro ao excluir link. Tente novamente.')
+        return
+      }
+
+      // Remover da lista local
+      setUserLinks(prev => prev.filter(link => link.id !== linkId))
+      alert('Link excluído com sucesso!')
+    } catch (error) {
+      console.error('Erro ao excluir link:', error)
+      alert('Erro ao excluir link. Tente novamente.')
+    }
+  }
+
+  // Função para editar link
+  const editLink = (link: any) => {
+    setNewLink({
+      project_name: link.name,
+      tool_name: link.tool,
+      cta_text: link.cta_text,
+      redirect_url: link.redirect_url,
+      custom_message: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
+    })
+    setShowCreateLinkModal(true)
+    // TODO: Implementar lógica de edição
   }
 
   return (
@@ -459,15 +579,22 @@ export default function UserDashboard() {
                           {link.status}
                         </span>
                         <button 
-                          onClick={() => navigator.clipboard.writeText(link.url)}
+                          onClick={() => copyLink(link.url)}
                           className="text-blue-600 hover:text-blue-800 text-sm"
                         >
                           Copiar
                         </button>
-                        <button className="text-gray-400 hover:text-gray-600">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                          </svg>
+                        <button 
+                          onClick={() => editLink(link)}
+                          className="text-yellow-600 hover:text-yellow-800 text-sm"
+                        >
+                          Editar
+                        </button>
+                        <button 
+                          onClick={() => deleteLink(link.id)}
+                          className="text-red-600 hover:text-red-800 text-sm"
+                        >
+                          Excluir
                         </button>
                       </div>
                     </div>
