@@ -49,21 +49,12 @@ interface Question {
 }
 
 export default function QuizBuilder() {
-  const [projectDomain, setProjectDomain] = useState('')
-  const [projectConfig, setProjectConfig] = useState<ReturnType<typeof getProjectConfig> | null>(null)
+  const [projectDomain, setProjectDomain] = useState('herbalead')
+  const [projectConfig, setProjectConfig] = useState<ReturnType<typeof getProjectConfig>>(getProjectConfig('fitness'))
   
   // Detectar projeto pelo subdomínio
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname
-      
-      console.log('🔍 Detecting project in quiz builder:', { hostname })
-      
-      // Sempre usar herbalead como padrão
-      setProjectDomain('herbalead')
-      setProjectConfig(getProjectConfig('fitness'))
-      console.log('✅ Using herbalead as default project')
-    }
+    console.log('🔍 Quiz Builder initialized with herbalead project')
   }, [])
 
   // Cores padrão baseadas no projeto
@@ -113,13 +104,11 @@ export default function QuizBuilder() {
 
   // Atualizar cores quando projeto mudar
   useEffect(() => {
-    if (projectConfig) {
-      setQuiz(prev => ({
-        ...prev,
-        colors: getDefaultColors()
-      }))
-    }
-  }, [projectDomain, projectConfig, getDefaultColors])
+    setQuiz(prev => ({
+      ...prev,
+      colors: getDefaultColors()
+    }))
+  }, [getDefaultColors])
 
   // Buscar usuário logado
   useEffect(() => {
@@ -508,8 +497,15 @@ export default function QuizBuilder() {
     )
   }
 
+  console.log('🎯 Quiz Builder renderizando:', { 
+    quiz: quiz.title, 
+    user: user?.id, 
+    projectConfig: projectConfig?.name,
+    questionsCount: quiz.questions.length 
+  })
+
   return (
-    <div className="h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
       <header className="bg-white border-b">
         <div className="px-6 py-4 flex items-center justify-between">
@@ -552,9 +548,9 @@ export default function QuizBuilder() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden h-full">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Painel Editor - Esquerda */}
-        <div className="w-full lg:w-1/2 min-w-0 p-4 lg:p-6 space-y-4 lg:space-y-6 h-full">
+        <div className="w-full lg:w-1/2 min-w-0 p-4 lg:p-6 space-y-4 lg:space-y-6">
           {/* Informações do Quiz */}
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-bold mb-4">📋 Informações do Quiz</h2>
@@ -944,7 +940,7 @@ export default function QuizBuilder() {
         </div>
 
         {/* Preview ao Vivo - Direita */}
-        <div className="w-full lg:w-1/2 min-w-0 bg-gray-100 border-t lg:border-t-0 lg:border-l h-full flex flex-col">
+        <div className="w-full lg:w-1/2 min-w-0 bg-gray-100 border-t lg:border-t-0 lg:border-l flex flex-col">
           <div className="sticky top-0 bg-white border-b px-6 py-3 flex-shrink-0">
             <h2 className="text-lg font-bold text-gray-700">👁️ Preview ao Vivo</h2>
             <p className="text-xs text-gray-500">Veja como seu quiz aparece em tempo real</p>
