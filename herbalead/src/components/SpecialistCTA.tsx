@@ -36,6 +36,12 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
 
   useEffect(() => {
     const fetchLinkData = async () => {
+      // Evitar múltiplas execuções
+      if (linkData) {
+        console.log('⚠️ Dados já carregados, pulando busca...')
+        return
+      }
+      
       console.log('🔍 SpecialistCTA: Iniciando busca de dados...')
       const urlParams = new URLSearchParams(window.location.search)
       const linkId = urlParams.get('ref') || urlParams.get('link')
@@ -127,7 +133,7 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
     }
 
     fetchLinkData()
-  }, [supabase])
+  }, []) // Remover dependências para evitar loop
 
   const handleContactSpecialist = () => {
     if (linkData?.redirect_url) {
