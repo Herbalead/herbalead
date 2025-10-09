@@ -1,0 +1,4 @@
+# Ignore everything except herbalead folder
+*
+!herbalead/
+!vercel.json
