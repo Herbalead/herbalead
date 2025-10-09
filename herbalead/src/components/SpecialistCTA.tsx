@@ -115,6 +115,9 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
               redirect_type: 'whatsapp', // Assumindo WhatsApp por padrão
               project_name: projeto, // Usar o nome do projeto extraído
               custom_slug: `${usuario}/${projeto}`,
+              capture_type: data.capture_type || 'direct', // Incluir capture_type
+              material_title: data.material_title || '',
+              material_description: data.material_description || '',
               professional: {
                 name: professionalData?.name || 'Profissional',
                 specialty: professionalData?.specialty || '',
@@ -126,6 +129,8 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
             console.log('💬 Custom message:', linkData.custom_message)
             console.log('🔘 CTA text:', linkData.cta_text)
             console.log('🔗 Redirect URL:', linkData.redirect_url)
+            console.log('📋 Capture type:', linkData.capture_type)
+            console.log('📄 Material title:', linkData.material_title)
           } else {
             console.error('❌ Erro ao buscar dados:', error)
           }
