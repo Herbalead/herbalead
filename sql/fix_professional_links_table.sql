@@ -30,3 +30,4 @@ CREATE INDEX IF NOT EXISTS idx_professional_links_project_name ON professional_l
 SELECT 'Tabela professional_links corrigida com sucesso!' as resultado;
 
 
+

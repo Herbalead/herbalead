@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ArrowLeft, Zap, CheckCircle } from 'lucide-react'
 
 export default function BodyCompositionDemoPage() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     weight: '',
     height: '',
@@ -136,18 +137,16 @@ export default function BodyCompositionDemoPage() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center py-4">
-            <Link href="/" className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <ArrowLeft className="w-6 h-6 text-gray-600" />
-            </Link>
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-lg flex items-center justify-center">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Composição Corporal - Demo</h1>
-                <p className="text-sm text-gray-600">Demonstração da ferramenta profissional</p>
-              </div>
+          <div className="flex justify-between items-center py-4">
+            <button
+              onClick={() => router.push('/')}
+              className="flex items-center text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Voltar para Página Inicial
+            </button>
+            <div className="text-sm text-gray-500">
+              🎯 Demonstração - Composição Corporal
             </div>
           </div>
         </div>

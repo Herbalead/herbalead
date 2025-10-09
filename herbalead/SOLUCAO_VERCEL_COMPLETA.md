@@ -61,3 +61,4 @@ Ambiente: Production, Preview, Development
 - **Vercel**: ❌ Aguardando configuração das variáveis
 
 
+

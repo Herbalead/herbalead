@@ -45,3 +45,4 @@ CREATE INDEX idx_professional_links_custom_slug ON professional_links(custom_slu
 SELECT 'Tabela professional_links criada com sucesso!' as resultado;
 
 
+

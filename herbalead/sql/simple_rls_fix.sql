@@ -21,3 +21,4 @@ CREATE POLICY "professionals_own_update" ON professionals
 SELECT 'Políticas criadas com sucesso!' as status;
 
 
+

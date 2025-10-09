@@ -1,5 +1,5 @@
-// Service Worker para YLADA PWA
-const CACHE_NAME = 'ylada-v1.0.0'
+// Service Worker para Herbalead PWA
+const CACHE_NAME = 'herbalead-v1.0.0'
 const urlsToCache = [
   '/',
   '/calculators',
@@ -71,7 +71,7 @@ self.addEventListener('activate', (event) => {
 // Notificações Push (para futuras implementações)
 self.addEventListener('push', (event) => {
   const options = {
-    body: event.data ? event.data.text() : 'Nova atualização disponível no YLADA!',
+    body: event.data ? event.data.text() : 'Nova atualização disponível no Herbalead!',
     icon: '/icon-192x192.png',
     badge: '/icon-192x192.png',
     vibrate: [100, 50, 100],
@@ -94,7 +94,7 @@ self.addEventListener('push', (event) => {
   }
 
   event.waitUntil(
-    self.registration.showNotification('YLADA', options)
+    self.registration.showNotification('Herbalead', options)
   )
 })
 

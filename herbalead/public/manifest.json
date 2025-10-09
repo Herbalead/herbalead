@@ -1,8 +1,8 @@
 {
-  "name": "YLADA - Your Lead Advanced Data Assistant",
-  "short_name": "YLADA",
-  "description": "Ferramentas avançadas de geração de leads para profissionais de bem-estar e qualidade de vida",
-  "start_url": "/?v=20241220",
+  "name": "Herbalead - Bem-Estar Natural e Tecnologia",
+  "short_name": "Herbalead",
+  "description": "Ferramentas profissionais para distribuidores de bem-estar natural gerarem leads qualificados",
+  "start_url": "/?v=20241221",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#10B981",

@@ -52,3 +52,4 @@ AND tc.table_schema = 'public';
 -- VALUES (gen_random_uuid(), 'Teste Manual', 'teste@teste.com');
 
 
+

@@ -72,3 +72,4 @@ Após executar o SQL:
 **Próximo passo**: Executar o SQL de correção das políticas RLS
 
 
+

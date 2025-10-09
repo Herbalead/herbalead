@@ -65,3 +65,4 @@ SELECT 'Políticas criadas com sucesso!' as status;
 - ✅ **Solução**: Simples e direta
 
 
+

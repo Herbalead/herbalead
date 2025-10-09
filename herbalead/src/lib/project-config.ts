@@ -78,7 +78,7 @@ export function generateProjectUrl(toolName: string, secureId: string, projectDo
   }
   
   // Em produção, usar domínio do projeto
-  const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'ylada.com'
+  const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'herbalead.com'
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
   
   return `${protocol}://${projectDomain}.${baseDomain}/tools/${toolName}?ref=${secureId}`
