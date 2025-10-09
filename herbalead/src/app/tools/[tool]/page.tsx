@@ -91,7 +91,7 @@ export default function ToolPage() {
         }
 
         // Buscar dados do profissional
-        const { data: professionalData, error: professionalError } = await supabase
+        const { data: professionalData } = await supabase
           .from('professionals')
           .select('name, specialty, company')
           .eq('id', data.user_id)

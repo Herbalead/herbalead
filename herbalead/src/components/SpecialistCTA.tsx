@@ -153,7 +153,7 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
     }
 
     fetchLinkData()
-  }, []) // Dependências removidas intencionalmente para evitar loop infinito
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleContactSpecialist = () => {
     if (!linkData) return

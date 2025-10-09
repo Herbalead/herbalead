@@ -85,7 +85,7 @@ export default function UserProjectPage({ params }: { params: Promise<{ usuario:
         }
         
         // Buscar dados do profissional (apenas se não redirecionou)
-        const { data: professionalData, error: professionalError } = await supabase
+        const { data: professionalData } = await supabase
           .from('professionals')
           .select('name, specialty, company')
           .eq('id', linkData.user_id)

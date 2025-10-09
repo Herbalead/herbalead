@@ -49,8 +49,8 @@ interface Question {
 }
 
 export default function QuizBuilder() {
-  const [projectDomain, setProjectDomain] = useState('herbalead')
-  const [projectConfig, setProjectConfig] = useState<ReturnType<typeof getProjectConfig>>(getProjectConfig('fitness'))
+  const [projectDomain] = useState('herbalead')
+  const [projectConfig] = useState<ReturnType<typeof getProjectConfig>>(getProjectConfig('fitness'))
   
   // Detectar projeto pelo subdomínio
   useEffect(() => {

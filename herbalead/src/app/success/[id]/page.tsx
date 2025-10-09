@@ -66,7 +66,7 @@ export default function SuccessPage({ params }: { params: { id: string } }) {
         }
 
         // Buscar dados do profissional
-        const { data: professional, error: professionalError } = await supabase
+        const { data: professional } = await supabase
           .from('professionals')
           .select('name, specialty, company')
           .eq('id', link.user_id)
