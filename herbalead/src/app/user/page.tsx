@@ -318,7 +318,7 @@ export default function UserDashboard() {
         .replace(/\s+/g, '-')
         .substring(0, 30)
       
-      const customUrl = `https://herbalead.com/${userName}/${projectName}`
+      const customUrl = `https://herbalead.com/user-project/${userName}-${projectName}`
       
       // Verificar se já existe um projeto com o mesmo nome para este usuário
       const { data: existingLink, error: checkError } = await supabase
@@ -458,7 +458,7 @@ export default function UserDashboard() {
               <Link href="/" className="text-2xl font-bold text-green-600">
                 Herbalead
               </Link>
-            </div>
+              </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">Usuário</span>
               <Link href="/login" className="text-gray-500 hover:text-gray-700">
@@ -722,7 +722,7 @@ export default function UserDashboard() {
         )}
 
         {activeTab === 'profile' && (
-          <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Editar Perfil</h3>
             <div className="space-y-6">
               {/* Informações Pessoais */}
@@ -1006,10 +1006,10 @@ export default function UserDashboard() {
                   )}
                 </button>
               </div>
-            </div>
-          </div>
+    </div>
+  </div>
         )}
-      </main>
+</main>
     </div>
   )
 }

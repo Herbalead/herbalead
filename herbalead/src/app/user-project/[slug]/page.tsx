@@ -20,7 +20,7 @@ interface LinkData {
   }
 }
 
-export default function UserProjectPage({ params }: { params: Promise<{ usuario: string; projeto: string }> }) {
+export default function UserProjectPage({ params }: { params: Promise<{ slug: string }> }) {
   const [linkData, setLinkData] = useState<LinkData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -30,13 +30,20 @@ export default function UserProjectPage({ params }: { params: Promise<{ usuario:
     const fetchLinkData = async () => {
       try {
         const resolvedParams = await params
-        console.log('🔍 Buscando link para usuário:', resolvedParams.usuario, 'projeto:', resolvedParams.projeto)
+        console.log('🔍 Buscando link para slug:', resolvedParams.slug)
+        
+        // Extrair usuário e projeto do slug (formato: usuario-projeto)
+        const slugParts = resolvedParams.slug.split('-')
+        const usuario = slugParts[0]
+        const projeto = slugParts.slice(1).join('-')
+        
+        console.log('👤 Usuário:', usuario, 'Projeto:', projeto)
         
         // Buscar o usuário pelo nome (slug)
         const { data: userData, error: userError } = await supabase
           .from('professionals')
           .select('id, name, email')
-          .ilike('name', `%${resolvedParams.usuario.replace(/-/g, ' ')}%`)
+          .ilike('name', `%${usuario.replace(/-/g, ' ')}%`)
           .single()
 
         if (userError || !userData) {
@@ -61,7 +68,7 @@ export default function UserProjectPage({ params }: { params: Promise<{ usuario:
             user_id
           `)
           .eq('user_id', userData.id)
-          .ilike('name', `%${resolvedParams.projeto.replace(/-/g, ' ')}%`)
+          .ilike('name', `%${projeto.replace(/-/g, ' ')}%`)
           .eq('status', 'active')
           .single()
 
@@ -94,7 +101,7 @@ export default function UserProjectPage({ params }: { params: Promise<{ usuario:
           // Converter dados da tabela professional_links para o formato esperado
           const convertedLinkData = {
             id: professionalLinkData.id,
-            name: resolvedParams.projeto,
+            name: projeto,
             tool_name: professionalLinkData.tool_name,
             cta_text: professionalLinkData.cta_text,
             redirect_url: professionalLinkData.redirect_url,
@@ -110,7 +117,7 @@ export default function UserProjectPage({ params }: { params: Promise<{ usuario:
           
           // REDIRECIONAMENTO IMEDIATO para a ferramenta
           if (convertedLinkData.tool_name) {
-            const toolUrl = `/tools/${convertedLinkData.tool_name}?ref=${resolvedParams.usuario}/${resolvedParams.projeto}`
+            const toolUrl = `/tools/${convertedLinkData.tool_name}?ref=${usuario}/${projeto}`
             console.log('🚀 Redirecionando para ferramenta:', toolUrl)
             window.location.href = toolUrl
             return
@@ -137,7 +144,7 @@ export default function UserProjectPage({ params }: { params: Promise<{ usuario:
           
           // REDIRECIONAMENTO IMEDIATO para a ferramenta
           if (linkData.tool_name) {
-            const toolUrl = `/tools/${linkData.tool_name}?ref=${resolvedParams.usuario}/${resolvedParams.projeto}`
+            const toolUrl = `/tools/${linkData.tool_name}?ref=${usuario}/${projeto}`
             console.log('🚀 Redirecionando para ferramenta:', toolUrl)
             window.location.href = toolUrl
             return
