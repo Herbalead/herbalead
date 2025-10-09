@@ -305,14 +305,33 @@ export default function UserDashboard() {
         return
       }
 
-      // Gerar URL personalizada
-      const customSlug = newLink.project_name
+      // Gerar URL personalizada com estrutura: herbalead.com/[usuario]/[projeto]
+      const userName = userProfile.name
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
         .substring(0, 30)
       
-      const customUrl = `https://herbalead.com/link/${customSlug}`
+      const projectName = newLink.project_name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 30)
+      
+      const customUrl = `https://herbalead.com/${userName}/${projectName}`
+      
+      // Verificar se já existe um projeto com o mesmo nome para este usuário
+      const { data: existingLink, error: checkError } = await supabase
+        .from('links')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .ilike('name', `%${newLink.project_name}%`)
+        .single()
+
+      if (existingLink && !checkError) {
+        alert(`Já existe um projeto com o nome "${newLink.project_name}" para este usuário. Escolha um nome diferente.`)
+        return
+      }
       
       // Salvar no Supabase
       const { data: savedLink, error } = await supabase
