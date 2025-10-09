@@ -47,7 +47,7 @@ interface Question {
 export default function QuizPage({ params }: { params: { id: string } }) {
   const [quiz, setQuiz] = useState<Quiz | null>(null)
   const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [answers, setAnswers] = useState<Record<string, any>>({})
+  const [answers, setAnswers] = useState<Record<string, string | number>>({})
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [isCompleted, setIsCompleted] = useState(false)
   const [score, setScore] = useState(0)
@@ -89,7 +89,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
         }
 
         // Ordenar perguntas
-        const sortedQuestions = quizData.questions.sort((a: any, b: any) => a.order_number - b.order_number)
+        const sortedQuestions = quizData.questions.sort((a: { order_number: number }, b: { order_number: number }) => a.order_number - b.order_number)
         
         setQuiz({
           ...quizData,
@@ -111,44 +111,6 @@ export default function QuizPage({ params }: { params: { id: string } }) {
 
     loadQuiz()
   }, [params.id])
-
-  // Timer countdown
-  useEffect(() => {
-    if (timeLeft === null || timeLeft <= 0) return
-
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev === null || prev <= 1) {
-          handleComplete()
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [timeLeft])
-
-  const handleAnswer = (questionId: string, answer: any) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: answer
-    }))
-  }
-
-  const handleNext = () => {
-    if (quiz && currentQuestion < quiz.questions.length - 1) {
-      setCurrentQuestion(prev => prev + 1)
-    } else {
-      handleComplete()
-    }
-  }
-
-  const handlePrevious = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(prev => prev - 1)
-    }
-  }
 
   const handleComplete = async () => {
     if (!quiz) return
@@ -191,6 +153,44 @@ export default function QuizPage({ params }: { params: { id: string } }) {
       })
     } catch (err) {
       console.error('Erro ao salvar sessão:', err)
+    }
+  }
+
+  // Timer countdown
+  useEffect(() => {
+    if (timeLeft === null || timeLeft <= 0) return
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev === null || prev <= 1) {
+          handleComplete()
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [timeLeft, handleComplete])
+
+  const handleAnswer = (questionId: string, answer: string | number) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: answer
+    }))
+  }
+
+  const handleNext = () => {
+    if (quiz && currentQuestion < quiz.questions.length - 1) {
+      setCurrentQuestion(prev => prev + 1)
+    } else {
+      handleComplete()
+    }
+  }
+
+  const handlePrevious = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(prev => prev - 1)
     }
   }
 
