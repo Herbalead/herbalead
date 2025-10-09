@@ -918,5 +918,6 @@ export default function QuizBuilder() {
           </div>
         </div>
       </div>
+    </div>
   )
 }

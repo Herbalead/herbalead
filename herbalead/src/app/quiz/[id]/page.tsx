@@ -91,7 +91,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
         // Ordenar perguntas e mapear campos
         const sortedQuestions = quizData.questions
           .sort((a: { order_number: number }, b: { order_number: number }) => a.order_number - b.order_number)
-          .map((q: Question) => ({
+          .map((q: { id: string; question_text: string; question_type: 'multiple' | 'essay'; order_number: number; options: string[]; correct_answer: string | number; points: number; button_text: string }) => ({
             id: q.id,
             question_text: q.question_text,
             question_type: q.question_type,
