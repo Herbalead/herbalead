@@ -1,4 +1,7 @@
-# Ignore everything except herbalead folder
-*
-!herbalead/
-!vercel.json
+# Only include herbalead folder and vercel.json
+herbalead/node_modules/
+herbalead/.next/
+herbalead/.env*
+herbalead/coverage/
+herbalead/dist/
+herbalead/build/
