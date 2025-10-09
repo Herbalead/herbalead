@@ -101,7 +101,7 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
             const linkData: LinkData = {
               ...data,
               redirect_type: 'whatsapp', // Assumindo WhatsApp por padrão
-              project_name: data.name,
+              project_name: projeto, // Usar o nome do projeto extraído
               custom_slug: `${usuario}/${projeto}`,
               professional: {
                 name: professionalData?.name || 'Profissional',
