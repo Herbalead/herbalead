@@ -20,6 +20,8 @@ interface LinkData {
   custom_slug?: string
   professional: {
     name: string
+    specialty?: string
+    company?: string
   }
 }
 
