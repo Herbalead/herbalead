@@ -1,8 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Link as LinkIcon, Users, TrendingUp, Calendar, Settings } from 'lucide-react'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -16,19 +22,67 @@ export default function UserDashboard() {
   })
   const [isCreatingLink, setIsCreatingLink] = useState(false)
   const [userProfile, setUserProfile] = useState({
-    name: 'João Silva',
-    email: 'joao@email.com',
-    phone: '(11) 99999-9999',
-    specialty: 'nutritionist',
-    company: 'Nutrição & Vida',
-    website: 'https://nutricaovida.com'
+    name: '',
+    email: '',
+    phone: '',
+    specialty: '',
+    company: '',
+    website: ''
   })
+  const [userLinks, setUserLinks] = useState<any[]>([])
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
+
+  // Carregar dados do perfil do Supabase
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      try {
+        // Simular carregamento de dados do usuário (aqui você integraria com Supabase Auth)
+        // Por enquanto, vamos usar dados de exemplo
+        const mockUserData = {
+          name: 'João Silva',
+          email: 'joao@email.com',
+          phone: '+5511999999999',
+          specialty: 'nutritionist',
+          company: 'Nutrição & Vida',
+          website: 'https://nutricaovida.com'
+        }
+        
+        setUserProfile(mockUserData)
+        setIsLoadingProfile(false)
+      } catch (error) {
+        console.error('Erro ao carregar perfil:', error)
+        setIsLoadingProfile(false)
+      }
+    }
+
+    loadUserProfile()
+  }, [])
+
+  // Função para salvar perfil no Supabase
+  const saveProfile = async () => {
+    try {
+      // Aqui você integraria com Supabase para salvar os dados do perfil
+      // Por enquanto, vamos simular o salvamento
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      alert('Perfil salvo com sucesso!')
+    } catch (error) {
+      console.error('Erro ao salvar perfil:', error)
+      alert('Erro ao salvar perfil. Tente novamente.')
+    }
+  }
 
   // Função para preencher automaticamente o WhatsApp
   const fillWhatsApp = () => {
     if (userProfile.phone) {
-      const cleanPhone = userProfile.phone.replace(/\D/g, '')
-      const whatsappUrl = `https://wa.me/55${cleanPhone}`
+      // Garantir que o telefone tenha o formato correto (+55)
+      let cleanPhone = userProfile.phone.replace(/\D/g, '')
+      
+      // Se não começar com 55, adicionar
+      if (!cleanPhone.startsWith('55')) {
+        cleanPhone = '55' + cleanPhone
+      }
+      
+      const whatsappUrl = `https://wa.me/${cleanPhone}`
       setNewLink({...newLink, redirect_url: whatsappUrl})
     }
   }
@@ -64,6 +118,23 @@ export default function UserDashboard() {
         .substring(0, 30)
       
       const customUrl = `https://herbalead.com/link/${customSlug}`
+      
+      // Criar objeto do link
+      const createdLink = {
+        id: Date.now().toString(),
+        name: newLink.project_name,
+        tool: newLink.tool_name,
+        url: customUrl,
+        status: 'Ativo',
+        clicks: 0,
+        leads: 0,
+        createdAt: new Date().toLocaleDateString('pt-BR'),
+        cta_text: newLink.cta_text,
+        redirect_url: newLink.redirect_url
+      }
+      
+      // Adicionar à lista de links
+      setUserLinks(prev => [createdLink, ...prev])
       
       alert(`Link criado com sucesso!\n\nURL: ${customUrl}\n\nCopie e compartilhe este link para gerar leads!`)
       
@@ -174,7 +245,7 @@ export default function UserDashboard() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Links Criados</p>
-                    <p className="text-2xl font-semibold text-gray-900">0</p>
+                    <p className="text-2xl font-semibold text-gray-900">{userLinks.length}</p>
                   </div>
                 </div>
               </div>
@@ -279,11 +350,52 @@ export default function UserDashboard() {
               </button>
             </div>
             
-            <div className="text-center py-8">
-              <LinkIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-2">Nenhum link criado ainda</p>
-              <p className="text-sm text-gray-400">Crie seu primeiro link personalizado para começar a gerar leads</p>
-            </div>
+            {userLinks.length === 0 ? (
+              <div className="text-center py-8">
+                <LinkIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500 mb-2">Nenhum link criado ainda</p>
+                <p className="text-sm text-gray-400">Crie seu primeiro link personalizado para começar a gerar leads</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {userLinks.map((link) => (
+                  <div key={link.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">{link.name}</h4>
+                        <p className="text-sm text-gray-600">{link.tool}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {link.url}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                          {link.status}
+                        </span>
+                        <button 
+                          onClick={() => navigator.clipboard.writeText(link.url)}
+                          className="text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                          Copiar
+                        </button>
+                        <button className="text-gray-400 hover:text-gray-600">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center text-xs text-gray-500">
+                      <span>{link.clicks} cliques</span>
+                      <span className="mx-2">•</span>
+                      <span>{link.leads} leads</span>
+                      <span className="mx-2">•</span>
+                      <span>Criado em {link.createdAt}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -350,8 +462,11 @@ export default function UserDashboard() {
                       value={userProfile.phone}
                       onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder="(11) 99999-9999"
+                      placeholder="+5511999999999"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Formato: +5511999999999 (inclua o código do país)
+                    </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -406,7 +521,10 @@ export default function UserDashboard() {
 
               {/* Botões de Ação */}
               <div className="flex space-x-3 pt-4">
-                <button className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                <button 
+                  onClick={saveProfile}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
                   Salvar Alterações
                 </button>
                 <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
