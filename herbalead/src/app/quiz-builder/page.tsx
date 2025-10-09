@@ -246,7 +246,7 @@ export default function QuizBuilder() {
       if (quizData) {
         // Deletar perguntas antigas
         await supabase
-          .from('quiz_questions')
+          .from('questions')
           .delete()
           .eq('quiz_id', quizData.id)
 
@@ -255,7 +255,7 @@ export default function QuizBuilder() {
           quiz_id: quizData.id,
           question_text: q.question_text,
           question_type: q.question_type,
-          order: index,
+          order_number: index,
           options: q.options,
           correct_answer: q.correct_answer,
           points: q.points || 1,
@@ -263,7 +263,7 @@ export default function QuizBuilder() {
         }))
 
         const { error: questionsError } = await supabase
-          .from('quiz_questions')
+          .from('questions')
           .insert(questionsToInsert)
 
         if (questionsError) throw questionsError

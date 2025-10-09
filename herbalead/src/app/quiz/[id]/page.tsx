@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import { ArrowLeft, Clock, CheckCircle, XCircle } from 'lucide-react'
@@ -88,8 +88,19 @@ export default function QuizPage({ params }: { params: { id: string } }) {
           return
         }
 
-        // Ordenar perguntas
-        const sortedQuestions = quizData.questions.sort((a: { order_number: number }, b: { order_number: number }) => a.order_number - b.order_number)
+        // Ordenar perguntas e mapear campos
+        const sortedQuestions = quizData.questions
+          .sort((a: { order_number: number }, b: { order_number: number }) => a.order_number - b.order_number)
+          .map((q: any) => ({
+            id: q.id,
+            question_text: q.question_text,
+            question_type: q.question_type,
+            order: q.order_number, // Mapear order_number para order
+            options: q.options,
+            correct_answer: q.correct_answer,
+            points: q.points,
+            button_text: q.button_text
+          }))
         
         setQuiz({
           ...quizData,
@@ -112,7 +123,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
     loadQuiz()
   }, [params.id])
 
-  const handleComplete = async () => {
+  const handleComplete = useCallback(async () => {
     if (!quiz) return
 
     setIsCompleted(true)
@@ -154,7 +165,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
     } catch (err) {
       console.error('Erro ao salvar sessão:', err)
     }
-  }
+  }, [quiz, answers])
 
   // Timer countdown
   useEffect(() => {
