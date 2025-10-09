@@ -165,7 +165,12 @@ export default function QuizPage({ params }: { params: { id: string } }) {
     } catch (err) {
       console.error('Erro ao salvar sessão:', err)
     }
-  }, [quiz, answers])
+
+    // Redirecionar para página de conclusão após completar
+    setTimeout(() => {
+      router.push(`/quiz-completed/${quiz.id}`)
+    }, 2000)
+  }, [quiz, answers, router])
 
   // Timer countdown
   useEffect(() => {

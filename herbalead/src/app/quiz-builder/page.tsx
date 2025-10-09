@@ -55,6 +55,12 @@ export default function QuizBuilder() {
   // Detectar projeto pelo subdomínio
   useEffect(() => {
     console.log('🔍 Quiz Builder initialized with herbalead project')
+    
+    // Limpar cache do localStorage para evitar problemas
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('quiz-builder-cache')
+      localStorage.removeItem('quiz-draft')
+    }
   }, [])
 
   // Cores padrão baseadas no projeto

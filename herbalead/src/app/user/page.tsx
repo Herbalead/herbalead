@@ -51,6 +51,65 @@ export default function UserDashboard() {
     link_name: string
   }>>([])
   const [isLoadingLeads, setIsLoadingLeads] = useState(false)
+  
+  // Estados para quizzes
+  const [userQuizzes, setUserQuizzes] = useState<Array<{
+    id: string
+    title: string
+    description: string
+    is_active: boolean
+    created_at: string
+    sessions_count: number
+  }>>([])
+  const [isLoadingQuizzes, setIsLoadingQuizzes] = useState(false)
+  const [activeTab, setActiveTab] = useState('overview')
+
+  // Carregar quizzes do usuário
+  const loadUserQuizzes = async () => {
+    setIsLoadingQuizzes(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: quizzes, error } = await supabase
+        .from('quizzes')
+        .select(`
+          id,
+          title,
+          description,
+          is_active,
+          created_at
+        `)
+        .eq('professional_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Erro ao carregar quizzes:', error)
+        return
+      }
+
+      // Buscar contagem de sessões para cada quiz
+      const quizzesWithSessions = await Promise.all(
+        (quizzes || []).map(async (quiz) => {
+          const { count } = await supabase
+            .from('quiz_sessions')
+            .select('*', { count: 'exact', head: true })
+            .eq('quiz_id', quiz.id)
+          
+          return {
+            ...quiz,
+            sessions_count: count || 0
+          }
+        })
+      )
+
+      setUserQuizzes(quizzesWithSessions)
+    } catch (err) {
+      console.error('Erro ao carregar quizzes:', err)
+    } finally {
+      setIsLoadingQuizzes(false)
+    }
+  }
 
   // Carregar leads do Supabase
   const loadUserLeads = async () => {
@@ -218,6 +277,15 @@ export default function UserDashboard() {
 
     loadUserProfile()
   }, [])
+
+  // Carregar dados quando mudar de aba
+  useEffect(() => {
+    if (activeTab === 'leads') {
+      loadUserLeads()
+    } else if (activeTab === 'quizzes') {
+      loadUserQuizzes()
+    }
+  }, [activeTab])
 
   // Carregar links do usuário
   useEffect(() => {
@@ -632,6 +700,16 @@ export default function UserDashboard() {
               Leads
             </button>
             <button
+              onClick={() => setActiveTab('quizzes')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'quizzes'
+                  ? 'border-green-500 text-green-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Meus Quizzes
+            </button>
+            <button
               onClick={() => setActiveTab('profile')}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'profile'
@@ -928,6 +1006,94 @@ export default function UserDashboard() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'quizzes' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900">Meus Quizzes</h3>
+              <Link 
+                href="/quiz-builder"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Criar Novo Quiz
+              </Link>
+            </div>
+
+            {isLoadingQuizzes ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+              </div>
+            ) : userQuizzes.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 text-6xl mb-4">📝</div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum quiz criado</h3>
+                <p className="text-gray-600 mb-6">Crie seu primeiro quiz para começar a coletar respostas dos seus clientes.</p>
+                <Link 
+                  href="/quiz-builder"
+                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Criar Primeiro Quiz
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {userQuizzes.map((quiz) => (
+                  <div key={quiz.id} className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start mb-4">
+                      <h4 className="font-semibold text-gray-900">{quiz.title}</h4>
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                        quiz.is_active 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {quiz.is_active ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </div>
+                    
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      {quiz.description || 'Sem descrição'}
+                    </p>
+                    
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Respostas:</span>
+                        <span className="font-medium text-gray-900">{quiz.sessions_count}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Criado em:</span>
+                        <span className="text-gray-900">
+                          {new Date(quiz.created_at).toLocaleDateString('pt-BR')}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex space-x-2">
+                      <Link
+                        href={`/quiz/${quiz.id}`}
+                        target="_blank"
+                        className="flex-1 px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 text-center"
+                      >
+                        Visualizar
+                      </Link>
+                      <button
+                        onClick={() => {
+                          const url = `${window.location.origin}/quiz/${quiz.id}`
+                          navigator.clipboard.writeText(url)
+                          alert('Link copiado!')
+                        }}
+                        className="flex-1 px-3 py-2 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
+                      >
+                        Copiar Link
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
