@@ -62,7 +62,6 @@ export default function UserDashboard() {
     sessions_count: number
   }>>([])
   const [isLoadingQuizzes, setIsLoadingQuizzes] = useState(false)
-  const [activeTab, setActiveTab] = useState('overview')
 
   // Carregar quizzes do usuário
   const loadUserQuizzes = async () => {
