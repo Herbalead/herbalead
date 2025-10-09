@@ -1,6 +1,6 @@
 'use client'
 
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, Download } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
@@ -18,6 +18,9 @@ interface LinkData {
   redirect_type: string
   project_name?: string
   custom_slug?: string
+  capture_type?: string
+  material_title?: string
+  material_description?: string
   professional: {
     name: string
     specialty?: string
@@ -84,6 +87,9 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
               cta_text,
               redirect_url,
               custom_message,
+              capture_type,
+              material_title,
+              material_description,
               user_id
             `)
             .eq('user_id', userData.id)
@@ -136,10 +142,18 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
   }, []) // Remover dependências para evitar loop
 
   const handleContactSpecialist = () => {
-    if (linkData?.redirect_url) {
-      window.location.href = linkData.redirect_url
+    if (!linkData) return
+    
+    // Se for captura de dados, redirecionar para página de sucesso
+    if (linkData.capture_type === 'capture') {
+      window.location.href = `/success/${linkData.id}`
     } else {
-      window.location.href = '/herbalead'
+      // Se for botão direto, redirecionar para WhatsApp/Site
+      if (linkData.redirect_url) {
+        window.location.href = linkData.redirect_url
+      } else {
+        window.location.href = '/herbalead'
+      }
     }
   }
 
@@ -170,8 +184,17 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
         onClick={handleContactSpecialist}
         className="w-full px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold flex items-center justify-center"
       >
-        <MessageSquare className="w-5 h-5 mr-2" />
-        {linkData?.cta_text || 'Falar com Especialista'}
+        {linkData?.capture_type === 'capture' ? (
+          <>
+            <Download className="w-5 h-5 mr-2" />
+            {linkData?.cta_text || 'Receber Material Gratuito'}
+          </>
+        ) : (
+          <>
+            <MessageSquare className="w-5 h-5 mr-2" />
+            {linkData?.cta_text || 'Falar com Especialista'}
+          </>
+        )}
       </button>
       
       {/* Debug info - remover depois */}

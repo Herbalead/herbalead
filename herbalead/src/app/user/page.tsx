@@ -13,7 +13,10 @@ export default function UserDashboard() {
     tool_name: 'bmi',
     cta_text: 'Falar com Especialista',
     redirect_url: '',
-    custom_message: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
+    custom_message: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!',
+    capture_type: 'direct', // 'direct' ou 'capture'
+    material_title: '',
+    material_description: ''
   })
   const [isCreatingLink, setIsCreatingLink] = useState(false)
   const [userProfile, setUserProfile] = useState({
@@ -350,6 +353,9 @@ export default function UserDashboard() {
           redirect_url: newLink.redirect_url,
           custom_url: customUrl,
           custom_message: newLink.custom_message,
+          capture_type: newLink.capture_type,
+          material_title: newLink.material_title,
+          material_description: newLink.material_description,
           status: 'active'
         })
         .select()
@@ -927,6 +933,43 @@ export default function UserDashboard() {
                   </select>
                 </div>
 
+                {/* Tipo de Captação */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tipo de Captação *
+                  </label>
+                  <div className="space-y-3">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="capture_type"
+                        value="direct"
+                        checked={newLink.capture_type === 'direct'}
+                        onChange={(e) => setNewLink({...newLink, capture_type: e.target.value})}
+                        className="mr-2"
+                      />
+                      <div>
+                        <span className="font-medium">Botão Direto (WhatsApp)</span>
+                        <p className="text-sm text-gray-500">Usuário clica e vai direto para seu WhatsApp</p>
+                      </div>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="capture_type"
+                        value="capture"
+                        checked={newLink.capture_type === 'capture'}
+                        onChange={(e) => setNewLink({...newLink, capture_type: e.target.value})}
+                        className="mr-2"
+                      />
+                      <div>
+                        <span className="font-medium">Captura de Dados (Lead)</span>
+                        <p className="text-sm text-gray-500">Usuário preenche dados e você recebe notificação</p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
                 {/* URL de Redirecionamento */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -987,6 +1030,42 @@ export default function UserDashboard() {
                     placeholder="Quer receber orientações personalizadas? Clique abaixo e fale comigo!"
                   />
                 </div>
+
+                {/* Campos de Material (apenas se capture_type for 'capture') */}
+                {newLink.capture_type === 'capture' && (
+                  <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h3 className="font-medium text-blue-900">Material Gratuito</h3>
+                    <p className="text-sm text-blue-700">
+                      Configure o material que o usuário receberá após preencher os dados
+                    </p>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-blue-800 mb-2">
+                        Título do Material *
+                      </label>
+                      <input
+                        type="text"
+                        value={newLink.material_title}
+                        onChange={(e) => setNewLink({...newLink, material_title: e.target.value})}
+                        className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Ex: E-book Guia Completo de Nutrição"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-blue-800 mb-2">
+                        Descrição do Material *
+                      </label>
+                      <textarea
+                        value={newLink.material_description}
+                        onChange={(e) => setNewLink({...newLink, material_description: e.target.value})}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Ex: Receba nosso guia completo com dicas de nutrição e alimentação saudável"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
               
               <div className="flex space-x-3 mt-6">
