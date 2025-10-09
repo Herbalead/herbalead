@@ -42,15 +42,43 @@ export default function ToolPage() {
           return
         }
 
-        // Buscar dados do link usando o secure_id
+        // Extrair usuário e projeto do ref (formato: usuario/projeto)
+        const refParts = ref.split('/')
+        const usuario = refParts[0]
+        const projeto = refParts[1]
+        
+        console.log('🔍 Buscando dados para ref:', ref, 'usuario:', usuario, 'projeto:', projeto)
+        
+        // Buscar o usuário pelo nome
+        const { data: userData, error: userError } = await supabase
+          .from('professionals')
+          .select('id, name, email')
+          .ilike('name', `%${usuario.replace(/-/g, ' ')}%`)
+          .single()
+
+        if (userError || !userData) {
+          console.error('Usuário não encontrado:', userError)
+          setError('Usuário não encontrado')
+          setLoading(false)
+          return
+        }
+
+        // Buscar o projeto do usuário na tabela links
         const { data, error: linkError } = await supabase
-          .from('professional_links')
+          .from('links')
           .select(`
-            *,
-            professional:professionals(name, specialty, company)
+            id,
+            name,
+            tool_name,
+            cta_text,
+            redirect_url,
+            custom_message,
+            status,
+            user_id
           `)
-          .eq('secure_id', ref)
-          .eq('is_active', true)
+          .eq('user_id', userData.id)
+          .ilike('name', `%${projeto.replace(/-/g, ' ')}%`)
+          .eq('status', 'active')
           .single()
 
         if (linkError || !data) {
@@ -59,21 +87,38 @@ export default function ToolPage() {
           return
         }
 
-        // Verificar se o profissional está ativo (aqui você pode adicionar lógica de pagamento)
-        if (!data.professional) {
-          setError('Profissional não encontrado')
-          setLoading(false)
-          return
+        // Buscar dados do profissional
+        const { data: professionalData, error: professionalError } = await supabase
+          .from('professionals')
+          .select('name, specialty, company')
+          .eq('id', data.user_id)
+          .single()
+
+        // Criar estrutura compatível com a interface LinkData
+        const formattedData: LinkData = {
+          id: data.id,
+          tool_name: data.tool_name,
+          cta_text: data.cta_text,
+          redirect_url: data.redirect_url,
+          custom_message: data.custom_message || '',
+          redirect_type: 'whatsapp', // Assumindo WhatsApp por padrão
+          secure_id: data.id,
+          is_active: data.status === 'active',
+          professional: {
+            name: professionalData?.name || 'Profissional',
+            specialty: professionalData?.specialty || '',
+            company: professionalData?.company || ''
+          }
         }
 
-        setLinkData(data)
+        console.log('📊 Dados formatados:', formattedData)
+        setLinkData(formattedData)
 
         // Incrementar contador de visualizações
         await supabase
-          .from('professional_links')
+          .from('links')
           .update({ 
-            views: data.views + 1,
-            last_accessed: new Date().toISOString()
+            clicks: (data.clicks || 0) + 1
           })
           .eq('id', data.id)
 
@@ -93,8 +138,8 @@ export default function ToolPage() {
     
     // Registrar clique (opcional)
     supabase
-      .from('professional_links')
-      .update({ last_accessed: new Date().toISOString() })
+      .from('links')
+      .update({ leads: (linkData.leads || 0) + 1 })
       .eq('id', linkData.id)
 
     // Redirecionar
