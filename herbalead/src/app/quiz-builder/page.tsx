@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { Plus, Trash2, Save, Info, Copy, ChevronDown, ChevronRight } from 'lucide-react'
+import { Plus, Trash2, Save, Info, Copy, ChevronDown, ChevronRight, ArrowLeft } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 import { getProjectConfig } from '@/lib/project-config'
+import { useRouter } from 'next/navigation'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -49,6 +50,7 @@ interface Question {
 }
 
 export default function QuizBuilder() {
+  const router = useRouter()
   const [projectDomain] = useState('herbalead')
   const [projectConfig] = useState<ReturnType<typeof getProjectConfig>>(getProjectConfig('fitness'))
   
@@ -548,6 +550,13 @@ export default function QuizBuilder() {
             </p>
           </div>
           <div className="flex gap-3">
+            <button
+              className="px-4 py-2 bg-gray-500 text-white rounded-lg flex items-center gap-2 hover:bg-gray-600"
+              onClick={() => router.push('/user')}
+            >
+              <ArrowLeft size={18} />
+              Voltar ao Dashboard
+            </button>
             {quiz.id && (
               <button
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-2 hover:bg-blue-600"
