@@ -45,12 +45,29 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
         try {
           console.log('🔍 Buscando dados do link com ref:', linkId)
           
-          // O ref agora é o custom_slug diretamente
-          const customSlug = linkId
+          // Extrair usuário e projeto do ref (formato: usuario/projeto)
+          const refParts = linkId.split('/')
+          const usuario = refParts[0]
+          const projeto = refParts[1]
           
-          console.log('🔗 Custom slug extraído:', customSlug)
+          console.log('👤 Usuário extraído:', usuario)
+          console.log('📋 Projeto extraído:', projeto)
           
-          // Buscar por custom_slug
+          // Buscar o usuário pelo nome
+          const { data: userData, error: userError } = await supabase
+            .from('professionals')
+            .select('id, name, email')
+            .ilike('name', `%${usuario.replace(/-/g, ' ')}%`)
+            .single()
+
+          if (userError || !userData) {
+            console.error('❌ Usuário não encontrado:', userError)
+            return
+          }
+
+          console.log('👤 Usuário encontrado:', userData)
+
+          // Buscar o projeto do usuário na tabela links
           const { data, error } = await supabase
             .from('links')
             .select(`
@@ -59,28 +76,39 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
               cta_text,
               redirect_url,
               custom_message,
-              redirect_type,
-              project_name,
-              custom_slug,
-              professional:professional_id (
-                name
-              )
+              user_id
             `)
-            .eq('custom_slug', customSlug)
-            .eq('is_active', true)
+            .eq('user_id', userData.id)
+            .ilike('name', `%${projeto.replace(/-/g, ' ')}%`)
+            .eq('status', 'active')
             .single()
           
           console.log('📊 Dados encontrados:', { data, error })
           
           if (!error && data) {
             console.log('✅ Dados carregados com sucesso:', data)
+            
+            // Buscar dados do profissional
+            const { data: professionalData, error: professionalError } = await supabase
+              .from('professionals')
+              .select('name, specialty, company')
+              .eq('id', data.user_id)
+              .single()
+
             // Corrigir estrutura dos dados do Supabase
             const linkData: LinkData = {
               ...data,
-              professional: Array.isArray(data.professional) ? data.professional[0] : data.professional
+              professional: {
+                name: professionalData?.name || 'Profissional',
+                specialty: professionalData?.specialty || '',
+                company: professionalData?.company || ''
+              }
             }
             setLinkData(linkData)
             console.log('🎯 LinkData final:', linkData)
+            console.log('💬 Custom message:', linkData.custom_message)
+            console.log('🔘 CTA text:', linkData.cta_text)
+            console.log('🔗 Redirect URL:', linkData.redirect_url)
           } else {
             console.error('❌ Erro ao buscar dados:', error)
           }
