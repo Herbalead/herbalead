@@ -64,6 +64,7 @@ export default function ToolPage() {
         }
 
         // Buscar o projeto do usuário na tabela links
+        console.log('🔍 Buscando projeto:', projeto, 'para usuário:', userData.id)
         const { data, error: linkError } = await supabase
           .from('links')
           .select(`
@@ -80,6 +81,8 @@ export default function ToolPage() {
           .ilike('name', `%${projeto.replace(/-/g, ' ')}%`)
           .eq('status', 'active')
           .single()
+        
+        console.log('📋 Resultado da busca:', { data, linkError })
 
         if (linkError || !data) {
           setError('Link não encontrado ou desativado')
@@ -112,6 +115,9 @@ export default function ToolPage() {
         }
 
         console.log('📊 Dados formatados:', formattedData)
+        console.log('💬 Custom message:', formattedData.custom_message)
+        console.log('🔘 CTA text:', formattedData.cta_text)
+        console.log('🔗 Redirect URL:', formattedData.redirect_url)
         setLinkData(formattedData)
 
         // Incrementar contador de visualizações
