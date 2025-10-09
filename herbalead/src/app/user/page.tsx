@@ -48,11 +48,11 @@ export default function UserDashboard() {
         
         if (user) {
           console.log('Buscando perfil do usuário:', user.id)
-          // Buscar perfil do usuário na tabela profiles
-          const { data: profile, error } = await supabase
-            .from('profiles')
+          // Buscar perfil do usuário na tabela professionals (onde estão os dados do cadastro)
+          const { data: professional, error } = await supabase
+            .from('professionals')
             .select('*')
-            .eq('id', user.id)
+            .eq('email', user.email)
             .single()
 
           if (error) {
@@ -60,9 +60,16 @@ export default function UserDashboard() {
             console.error('Código do erro:', error.code)
             console.error('Mensagem do erro:', error.message)
             
-            // Se a tabela não existe (PGRST116), usar dados básicos
-            if (error.code === 'PGRST116') {
-              console.log('Tabela profiles não encontrada, usando dados básicos')
+            // Se não encontrou na tabela professionals, tentar na tabela profiles
+            console.log('Tentando buscar na tabela profiles...')
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', user.id)
+              .single()
+
+            if (profileError) {
+              console.log('Nenhum perfil encontrado, usando dados básicos')
               setUserProfile({
                 name: user.user_metadata?.full_name || '',
                 email: user.email || '',
@@ -71,23 +78,35 @@ export default function UserDashboard() {
                 company: '',
                 website: ''
               })
+              return
+            }
+
+            if (profile) {
+              console.log('Perfil encontrado na tabela profiles:', profile)
+              setUserProfile({
+                name: profile.full_name || '',
+                email: user.email || '',
+                phone: profile.phone || '',
+                specialty: profile.specialty || '',
+                company: profile.company || '',
+                website: profile.website || ''
+              })
             }
             return
           }
 
-          if (profile) {
-            console.log('Perfil encontrado:', profile)
+          if (professional) {
+            console.log('Perfil encontrado na tabela professionals:', professional)
             setUserProfile({
-              name: profile.full_name || '',
+              name: professional.name || '',
               email: user.email || '',
-              phone: profile.phone || '',
-              specialty: profile.specialty || '',
-              company: profile.company || '',
-              website: profile.website || ''
+              phone: professional.phone || '',
+              specialty: professional.specialty || '',
+              company: professional.company || '',
+              website: professional.website_link || ''
             })
           } else {
             console.log('Nenhum perfil encontrado, usando dados básicos')
-            // Se não há perfil, usar dados básicos do usuário
             setUserProfile({
               name: user.user_metadata?.full_name || '',
               email: user.email || '',
@@ -200,23 +219,23 @@ export default function UserDashboard() {
 
       console.log('Telefone formatado:', formattedPhone)
 
-      // Dados para salvar
-      const profileData = {
-        id: user.id,
-        full_name: userProfile.name,
+      // Dados para salvar na tabela professionals
+      const professionalData = {
+        name: userProfile.name,
+        email: user.email,
         phone: formattedPhone,
         specialty: userProfile.specialty,
         company: userProfile.company,
-        website: userProfile.website,
+        website_link: userProfile.website,
         updated_at: new Date().toISOString()
       }
 
-      console.log('Dados para salvar:', profileData)
+      console.log('Dados para salvar na tabela professionals:', professionalData)
 
-      // Salvar ou atualizar perfil na tabela profiles
+      // Salvar ou atualizar perfil na tabela professionals
       const { data, error } = await supabase
-        .from('profiles')
-        .upsert(profileData)
+        .from('professionals')
+        .upsert(professionalData, { onConflict: 'email' })
         .select()
 
       if (error) {
