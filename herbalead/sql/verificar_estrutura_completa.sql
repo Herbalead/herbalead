@@ -82,7 +82,6 @@ SELECT
   cta_text,
   redirect_url,
   custom_slug,
-  status,
   created_at
 FROM professional_links
 ORDER BY created_at DESC

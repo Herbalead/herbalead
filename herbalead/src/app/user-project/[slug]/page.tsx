@@ -109,8 +109,8 @@ export default function UserProjectPage({ params }: { params: Promise<{ slug: st
             tool_name: professionalLinkData.tool_name,
             cta_text: professionalLinkData.cta_text,
             redirect_url: professionalLinkData.redirect_url,
-            custom_message: professionalLinkData.custom_message,
-            status: 'active',
+            custom_message: professionalLinkData.custom_message || '',
+            status: 'active', // Status padrão já que a tabela não tem essa coluna
             user_id: userData.id,
             profiles: {
               full_name: professional?.name || 'Profissional',
