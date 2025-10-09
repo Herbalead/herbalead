@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import SpecialistCTA from '@/components/SpecialistCTA'
 import { Heart, Star, Target, Zap, CheckCircle } from 'lucide-react'
 
 export default function Aproveitando100Page() {
@@ -214,6 +215,9 @@ export default function Aproveitando100Page() {
             </div>
           </div>
         </div>
+        
+        {/* Botão personalizado do especialista */}
+        <SpecialistCTA toolName="aproveitando-100" />
       </div>
     </div>
   )

@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import SpecialistCTA from '@/components/SpecialistCTA'
 import { ArrowRight, Heart, Users, Star } from 'lucide-react'
 
 export default function InspirarPessoasPage() {
@@ -221,6 +222,9 @@ export default function InspirarPessoasPage() {
                 </button>
               ))}
             </div>
+            
+            {/* Botão personalizado do especialista */}
+            <SpecialistCTA toolName="inspirar-pessoas" />
           </div>
         </div>
       </div>

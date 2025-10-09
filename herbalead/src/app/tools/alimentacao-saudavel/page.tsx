@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { ArrowRight, Heart, Apple, Salad } from 'lucide-react'
+import SpecialistCTA from '@/components/SpecialistCTA'
 
 export default function AlimentacaoSaudavelPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)
@@ -152,17 +153,12 @@ export default function AlimentacaoSaudavelPage() {
             </div>
             
             <div className="space-y-4">
-              <button
-                onClick={() => window.open('https://wa.me/55119818680', '_blank')}
-                className="w-full bg-emerald-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-emerald-700 transition-colors flex items-center justify-center space-x-2"
-              >
-                <Heart className="w-5 h-5" />
-                <span>Falar com Especialista em Nutrição</span>
-              </button>
+              {/* Botão personalizado do especialista */}
+              <SpecialistCTA toolName="alimentacao-saudavel" />
               
               <button
                 onClick={resetQuiz}
-                className="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                className="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-200 transition-colors mt-4"
               >
                 Refazer Quiz
               </button>
@@ -215,6 +211,9 @@ export default function AlimentacaoSaudavelPage() {
                 </button>
               ))}
             </div>
+            
+            {/* Botão personalizado do especialista */}
+            <SpecialistCTA toolName="alimentacao-saudavel" />
           </div>
         </div>
       </div>
