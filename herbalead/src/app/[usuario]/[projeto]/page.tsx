@@ -47,7 +47,7 @@ export default function UserProjectPage({ params }: { params: Promise<{ usuario:
 
         console.log('👤 Usuário encontrado:', userData)
 
-        // Buscar o projeto do usuário
+        // Buscar o projeto do usuário na tabela links
         const { data: linkData, error: linkError } = await supabase
           .from('links')
           .select(`
@@ -58,17 +58,65 @@ export default function UserProjectPage({ params }: { params: Promise<{ usuario:
             redirect_url,
             custom_message,
             status,
-            user_id,
-            profiles:user_id (
-              full_name,
-              specialty,
-              company
-            )
+            user_id
           `)
           .eq('user_id', userData.id)
           .ilike('name', `%${resolvedParams.projeto.replace(/-/g, ' ')}%`)
           .eq('status', 'active')
           .single()
+
+        // Se não encontrou na tabela links, tentar na tabela professional_links
+        if (linkError || !linkData) {
+          console.log('Tentando buscar na tabela professional_links...')
+          const { data: professionalLinkData, error: professionalLinkError } = await supabase
+            .from('professional_links')
+            .select(`
+              id,
+              tool_name,
+              cta_text,
+              redirect_url,
+              custom_message,
+              professional:professional_id (
+                name,
+                specialty,
+                company
+              )
+            `)
+            .eq('professional_id', userData.id)
+            .single()
+
+          if (professionalLinkError || !professionalLinkData) {
+            console.error('Projeto não encontrado:', professionalLinkError)
+            setError('Projeto não encontrado ou inativo')
+            return
+          }
+
+          // Converter dados da tabela professional_links para o formato esperado
+          const convertedLinkData = {
+            id: professionalLinkData.id,
+            name: resolvedParams.projeto,
+            tool_name: professionalLinkData.tool_name,
+            cta_text: professionalLinkData.cta_text,
+            redirect_url: professionalLinkData.redirect_url,
+            custom_message: professionalLinkData.custom_message,
+            status: 'active',
+            user_id: userData.id,
+            profiles: professionalLinkData.professional
+          }
+
+          console.log('📊 Projeto encontrado na tabela professional_links:', convertedLinkData)
+          
+          setLinkData(convertedLinkData)
+          
+          // REDIRECIONAMENTO IMEDIATO para a ferramenta
+          if (convertedLinkData.tool_name) {
+            const toolUrl = `/tools/${convertedLinkData.tool_name}?ref=${resolvedParams.usuario}/${resolvedParams.projeto}`
+            console.log('🚀 Redirecionando para ferramenta:', toolUrl)
+            window.location.href = toolUrl
+            return
+          }
+          return
+        }
 
         if (linkError) {
           console.error('Erro ao buscar projeto:', linkError)
