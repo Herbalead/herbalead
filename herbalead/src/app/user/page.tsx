@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Plus, Link as LinkIcon, Users, TrendingUp, Calendar, Settings } from 'lucide-react'
-// Supabase será usado quando integrarmos com o banco de dados
+import { supabase } from '@/lib/supabase'
 
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -41,20 +41,65 @@ export default function UserDashboard() {
   useEffect(() => {
     const loadUserProfile = async () => {
       try {
-        // Simular carregamento de dados do usuário (aqui você integraria com Supabase Auth)
-        // Por enquanto, vamos usar dados de exemplo
-        const mockUserData = {
+        console.log('Carregando perfil do usuário...')
+        // Buscar dados do usuário atual do Supabase
+        const { data: { user } } = await supabase.auth.getUser()
+        console.log('Usuário encontrado:', user)
+        
+        if (user) {
+          // Buscar perfil do usuário na tabela profiles
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single()
+
+          if (error && error.code !== 'PGRST116') {
+            console.error('Erro ao buscar perfil:', error)
+          }
+
+          if (profile) {
+            setUserProfile({
+              name: profile.full_name || '',
+              email: user.email || '',
+              phone: profile.phone || '',
+              specialty: profile.specialty || '',
+              company: profile.company || '',
+              website: profile.website || ''
+            })
+          } else {
+            // Se não há perfil, usar dados básicos do usuário
+            setUserProfile({
+              name: user.user_metadata?.full_name || '',
+              email: user.email || '',
+              phone: '',
+              specialty: '',
+              company: '',
+              website: ''
+            })
+          }
+        } else {
+          // Fallback para dados de exemplo se não há usuário logado
+          setUserProfile({
+            name: 'João Silva',
+            email: 'joao@email.com',
+            phone: '+5511999999999',
+            specialty: 'nutritionist',
+            company: 'Nutrição & Vida',
+            website: 'https://nutricaovida.com'
+          })
+        }
+      } catch (error) {
+        console.error('Erro ao carregar perfil:', error)
+        // Fallback para dados de exemplo em caso de erro
+        setUserProfile({
           name: 'João Silva',
           email: 'joao@email.com',
           phone: '+5511999999999',
           specialty: 'nutritionist',
           company: 'Nutrição & Vida',
           website: 'https://nutricaovida.com'
-        }
-        
-        setUserProfile(mockUserData)
-      } catch (error) {
-        console.error('Erro ao carregar perfil:', error)
+        })
       }
     }
 
@@ -64,9 +109,47 @@ export default function UserDashboard() {
   // Função para salvar perfil no Supabase
   const saveProfile = async () => {
     try {
-      // Aqui você integraria com Supabase para salvar os dados do perfil
-      // Por enquanto, vamos simular o salvamento
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        alert('Usuário não logado. Faça login primeiro.')
+        return
+      }
+
+      // Garantir que o telefone tenha o formato correto (+55)
+      let formattedPhone = userProfile.phone
+      if (formattedPhone && !formattedPhone.startsWith('+55')) {
+        const cleanPhone = formattedPhone.replace(/\D/g, '')
+        if (cleanPhone.length >= 10) {
+          formattedPhone = '+55' + cleanPhone
+        }
+      }
+
+      // Salvar ou atualizar perfil na tabela profiles
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          full_name: userProfile.name,
+          phone: formattedPhone,
+          specialty: userProfile.specialty,
+          company: userProfile.company,
+          website: userProfile.website,
+          updated_at: new Date().toISOString()
+        })
+
+      if (error) {
+        console.error('Erro ao salvar perfil:', error)
+        alert('Erro ao salvar perfil. Tente novamente.')
+        return
+      }
+
+      // Atualizar o estado local com o telefone formatado
+      setUserProfile(prev => ({
+        ...prev,
+        phone: formattedPhone
+      }))
+
       alert('Perfil salvo com sucesso!')
     } catch (error) {
       console.error('Erro ao salvar perfil:', error)
