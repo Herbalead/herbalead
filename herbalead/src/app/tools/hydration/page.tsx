@@ -322,12 +322,6 @@ export default function HydrationPage() {
               </div>
               
               <div className="text-center">
-                <button
-                  onClick={() => setResult(null)}
-                  className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-semibold mr-4"
-                >
-                  Calcular Novamente
-                </button>
                 
                 {/* Botão personalizado do especialista */}
                 <SpecialistCTA toolName="hydration" />
