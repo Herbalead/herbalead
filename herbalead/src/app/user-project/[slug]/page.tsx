@@ -108,7 +108,11 @@ export default function UserProjectPage({ params }: { params: Promise<{ slug: st
             custom_message: professionalLinkData.custom_message,
             status: 'active',
             user_id: userData.id,
-            profiles: professionalLinkData.professional
+            profiles: {
+              full_name: professionalLinkData.professional.name,
+              specialty: professionalLinkData.professional.specialty,
+              company: professionalLinkData.professional.company
+            }
           }
 
           console.log('📊 Projeto encontrado na tabela professional_links:', convertedLinkData)
