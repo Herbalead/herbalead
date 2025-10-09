@@ -39,6 +39,67 @@ export default function UserDashboard() {
     cta_text: string
     redirect_url: string
   }>>([])
+  
+  const [userLeads, setUserLeads] = useState<Array<{
+    id: string
+    name: string
+    phone: string
+    email: string
+    tool_name: string
+    status: string
+    created_at: string
+    link_name: string
+  }>>([])
+  const [isLoadingLeads, setIsLoadingLeads] = useState(false)
+
+  // Carregar leads do Supabase
+  const loadUserLeads = async () => {
+    setIsLoadingLeads(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: leads, error } = await supabase
+        .from('leads')
+        .select(`
+          id,
+          name,
+          phone,
+          email,
+          tool_name,
+          status,
+          created_at,
+          links!inner (
+            name
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Erro ao carregar leads:', error)
+        return
+      }
+
+      const formattedLeads = leads?.map(lead => ({
+        id: lead.id,
+        name: lead.name,
+        phone: lead.phone,
+        email: lead.email || '',
+        tool_name: lead.tool_name,
+        status: lead.status,
+        created_at: new Date(lead.created_at).toLocaleDateString('pt-BR'),
+        link_name: lead.links?.name || 'Link não encontrado'
+      })) || []
+
+      setUserLeads(formattedLeads)
+      console.log('✅ Leads carregados:', formattedLeads)
+    } catch (error) {
+      console.error('Erro ao carregar leads:', error)
+    } finally {
+      setIsLoadingLeads(false)
+    }
+  }
 
   // Carregar dados do perfil do Supabase
   useEffect(() => {
@@ -189,6 +250,44 @@ export default function UserDashboard() {
 
     loadUserLinks()
   }, [])
+
+  // Carregar leads quando a aba de leads for ativada
+  useEffect(() => {
+    if (activeTab === 'leads') {
+      loadUserLeads()
+    }
+  }, [activeTab])
+
+  // Função para exportar leads em CSV
+  const exportLeads = () => {
+    if (userLeads.length === 0) {
+      alert('Nenhum lead para exportar')
+      return
+    }
+
+    const csvContent = [
+      ['Nome', 'WhatsApp', 'Email', 'Ferramenta', 'Link', 'Status', 'Data'],
+      ...userLeads.map(lead => [
+        lead.name,
+        lead.phone,
+        lead.email || '',
+        lead.tool_name.replace(/-/g, ' '),
+        lead.link_name,
+        lead.status === 'new' ? 'Novo' : lead.status === 'contacted' ? 'Contatado' : 'Convertido',
+        lead.created_at
+      ])
+    ].map(row => row.map(field => `"${field}"`).join(',')).join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `leads-${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   // Função para salvar perfil no Supabase
   const saveProfile = async () => {
@@ -720,10 +819,16 @@ export default function UserDashboard() {
         {activeTab === 'leads' && (
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Leads Coletados</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Leads Coletados ({userLeads.length})
+              </h3>
               <div className="flex space-x-2">
-                <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
-                  Exportar
+                <button 
+                  onClick={exportLeads}
+                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center"
+                >
+                  <TrendingUp className="w-4 h-4 mr-1" />
+                  Exportar CSV
                 </button>
                 <button className="px-3 py-1 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700">
                   Filtrar
@@ -731,11 +836,89 @@ export default function UserDashboard() {
               </div>
             </div>
             
-            <div className="text-center py-8">
-              <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-2">Nenhum lead coletado ainda</p>
-              <p className="text-sm text-gray-400">Compartilhe seus links para começar a receber leads</p>
-            </div>
+            {isLoadingLeads ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                <p className="text-gray-500">Carregando leads...</p>
+              </div>
+            ) : userLeads.length === 0 ? (
+              <div className="text-center py-8">
+                <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500 mb-2">Nenhum lead coletado ainda</p>
+                <p className="text-sm text-gray-400">Compartilhe seus links para começar a receber leads</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Nome
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        WhatsApp
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Ferramenta
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Link
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Data
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {userLeads.map((lead) => (
+                      <tr key={lead.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {lead.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <a 
+                            href={`https://wa.me/${lead.phone.replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-green-600 hover:text-green-800"
+                          >
+                            {lead.phone}
+                          </a>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {lead.email || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {lead.tool_name.replace(/-/g, ' ')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {lead.link_name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            lead.status === 'new' ? 'bg-green-100 text-green-800' :
+                            lead.status === 'contacted' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-blue-100 text-blue-800'
+                          }`}>
+                            {lead.status === 'new' ? 'Novo' :
+                             lead.status === 'contacted' ? 'Contatado' : 'Convertido'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {lead.created_at}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 

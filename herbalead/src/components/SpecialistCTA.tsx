@@ -175,6 +175,21 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
     e.preventDefault()
     setSubmitting(true)
 
+    // Validação de email
+    if (formData.email && !isValidEmail(formData.email)) {
+      alert('Por favor, insira um email válido.')
+      setSubmitting(false)
+      return
+    }
+
+    // Validação e formatação de telefone
+    const formattedPhone = formatPhoneNumber(formData.phone)
+    if (!isValidPhone(formattedPhone)) {
+      alert('Por favor, insira um número de WhatsApp válido com código do país.')
+      setSubmitting(false)
+      return
+    }
+
     try {
       // Salvar lead no Supabase
       const { data: lead, error } = await supabase
@@ -183,7 +198,7 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
           user_id: linkData!.user_id,
           link_id: linkData!.id,
           name: formData.name,
-          phone: formData.phone,
+          phone: formattedPhone,
           email: formData.email,
           tool_name: linkData!.tool_name,
           lead_type: 'capture',
@@ -195,6 +210,7 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
       if (error) {
         console.error('Erro ao salvar lead:', error)
         alert('Erro ao salvar dados. Tente novamente.')
+        setSubmitting(false)
         return
       }
 
@@ -209,10 +225,43 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
 
     } catch (error) {
       console.error('Erro ao processar formulário:', error)
-      alert('Erro interno. Tente novamente.')
+      alert('Ocorreu um erro inesperado. Tente novamente.')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  // Função para validar email
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  // Função para validar telefone
+  const isValidPhone = (phone: string): boolean => {
+    // Remove todos os caracteres não numéricos
+    const cleanPhone = phone.replace(/\D/g, '')
+    // Deve ter pelo menos 10 dígitos (código do país + número)
+    return cleanPhone.length >= 10
+  }
+
+  // Função para formatar telefone com código do país
+  const formatPhoneNumber = (phone: string): string => {
+    // Remove todos os caracteres não numéricos
+    const cleanPhone = phone.replace(/\D/g, '')
+    
+    // Se já tem código do país, retorna como está
+    if (cleanPhone.startsWith('55') && cleanPhone.length >= 12) {
+      return '+' + cleanPhone
+    }
+    
+    // Se não tem código do país, adiciona +55
+    if (cleanPhone.length >= 10) {
+      return '+55' + cleanPhone
+    }
+    
+    // Se é muito curto, retorna como está para validação falhar
+    return phone
   }
 
   if (loading) {
@@ -292,7 +341,7 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                placeholder="+55 11 99999-9999"
+                placeholder="+55 11 99999-9999 (com código do país)"
                 required
               />
             </div>
