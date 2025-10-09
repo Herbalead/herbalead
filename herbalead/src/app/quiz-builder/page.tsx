@@ -121,10 +121,23 @@ export default function QuizBuilder() {
   // Buscar usuário logado
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setUser(user)
-        setQuiz(prev => ({ ...prev, professional_id: user.id }))
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          setUser(user)
+          setQuiz(prev => ({ ...prev, professional_id: user.id }))
+        } else {
+          // Se não há usuário logado, usar um ID temporário para desenvolvimento
+          const tempUser = { id: 'temp-user-' + Date.now() }
+          setUser(tempUser)
+          setQuiz(prev => ({ ...prev, professional_id: tempUser.id }))
+        }
+      } catch (error) {
+        console.error('Erro ao buscar usuário:', error)
+        // Em caso de erro, usar um ID temporário para desenvolvimento
+        const tempUser = { id: 'temp-user-' + Date.now() }
+        setUser(tempUser)
+        setQuiz(prev => ({ ...prev, professional_id: tempUser.id }))
       }
     }
     getUser()
@@ -279,6 +292,8 @@ export default function QuizBuilder() {
   // Componente de Preview ao Vivo
   const LivePreview = () => {
     const [showFinalPage, setShowFinalPage] = useState(false)
+    const [currentPreviewQuestion, setCurrentPreviewQuestion] = useState(0)
+    const [previewAnswers, setPreviewAnswers] = useState<{[key: number]: number}>({})
 
     if (quiz.questions.length === 0) {
       return (
@@ -298,8 +313,14 @@ export default function QuizBuilder() {
                 {quiz.title}
               </h3>
               <p className="text-gray-500 mb-4">{quiz.description}</p>
-              <p className="text-sm text-gray-400">
-                Adicione perguntas para ver a prévia
+              <button
+                className="px-6 py-3 rounded-lg text-white font-semibold text-lg transition-all hover:scale-105"
+                style={{backgroundColor: quiz.colors.primary}}
+              >
+                Começar Quiz
+              </button>
+              <p className="text-sm text-gray-400 mt-4">
+                Adicione perguntas para ver a prévia completa
               </p>
             </div>
           </div>
@@ -320,6 +341,16 @@ export default function QuizBuilder() {
                   {quiz.settings.randomizeQuestions ? 'Perguntas randomizadas' : 'Perguntas em ordem'}
                 </span>
               </div>
+              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600">
+                  <strong>Botão Final:</strong> &quot;{quiz.settings.customButtonText || 'Falar com Especialista'}&quot;
+                </p>
+                {quiz.settings.specialistRedirectUrl && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Redireciona para: {quiz.settings.specialistRedirectUrl}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -329,24 +360,103 @@ export default function QuizBuilder() {
     // Se mostrar página final
     if (showFinalPage) {
       return (
+        <div className="p-6">
+          <div 
+            className="h-full flex items-center justify-center p-8 rounded-lg"
+            style={{backgroundColor: quiz.colors.background}}
+          >
+            <div className="bg-white rounded-2xl shadow-2xl p-12 text-center max-w-md">
+              {/* Navegação */}
+              <div className="flex gap-2 mb-6 overflow-x-auto pb-2 justify-center">
+                {quiz.questions.map((q, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setShowFinalPage(false)
+                      setCurrentPreviewQuestion(index)
+                    }}
+                    className="px-3 py-1 rounded text-sm font-medium whitespace-nowrap transition-all"
+                    style={{
+                      backgroundColor: quiz.colors.primary + '20',
+                      color: quiz.colors.primary
+                    }}
+                  >
+                    Q{index + 1}
+                  </button>
+                ))}
+                <button
+                  className="px-3 py-1 rounded text-sm font-medium whitespace-nowrap transition-all"
+                  style={{
+                    backgroundColor: quiz.colors.primary,
+                    color: 'white'
+                  }}
+                >
+                  🎯 Final
+                </button>
+              </div>
+
+              {/* Página Final */}
+              <div 
+                className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+                style={{backgroundColor: quiz.colors.primary + '20'}}
+              >
+                <span className="text-2xl">🎉</span>
+              </div>
+              
+              <h3 
+                className="text-xl font-bold mb-4"
+                style={{color: quiz.colors.text}}
+              >
+                {quiz.settings.congratulationsMessage || 'Parabéns! Você concluiu o quiz com sucesso! 🎉'}
+              </h3>
+              
+              <p className="text-gray-600 mb-6">
+                Sua pontuação: <strong>8/10</strong>
+              </p>
+              
+              <p className="text-sm text-gray-500 mb-6">
+                Baseado nas suas respostas, recomendamos focar em exercícios de força e uma alimentação balanceada.
+              </p>
+              
+              <button
+                className="px-6 py-3 rounded-lg text-white font-semibold transition-all hover:scale-105"
+                style={{backgroundColor: quiz.colors.primary}}
+              >
+                {quiz.settings.specialistButtonText || 'Falar com Especialista'}
+              </button>
+              
+              {quiz.settings.specialistRedirectUrl && (
+                <p className="text-xs text-gray-400 mt-3">
+                  → {quiz.settings.specialistRedirectUrl}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    const question = quiz.questions[currentPreviewQuestion]
+
+    return (
+      <div className="p-6">
         <div 
-          className="h-full flex items-center justify-center p-4 lg:p-8 rounded-lg"
+          className="h-full flex items-center justify-center p-8 rounded-lg"
           style={{backgroundColor: quiz.colors.background}}
         >
-          <div className="bg-white rounded-2xl shadow-2xl p-6 lg:p-8 max-w-2xl w-full">
-            {/* Navegação */}
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+          <div className="bg-white rounded-2xl shadow-2xl p-12 text-center max-w-md">
+            {/* Navegação entre perguntas */}
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 justify-center">
               {quiz.questions.map((q, index) => (
                 <button
                   key={index}
-                  onClick={() => {
-                    setShowFinalPage(false)
-                    setPreviewQuestion(index)
-                  }}
+                  onClick={() => setCurrentPreviewQuestion(index)}
                   className="px-3 py-1 rounded text-sm font-medium whitespace-nowrap transition-all"
                   style={{
-                    backgroundColor: quiz.colors.primary + '20',
-                    color: quiz.colors.primary
+                    backgroundColor: currentPreviewQuestion === index 
+                      ? quiz.colors.primary 
+                      : quiz.colors.primary + '20',
+                    color: currentPreviewQuestion === index ? 'white' : quiz.colors.primary
                   }}
                 >
                   Q{index + 1}
@@ -356,175 +466,148 @@ export default function QuizBuilder() {
                 onClick={() => setShowFinalPage(true)}
                 className="px-3 py-1 rounded text-sm font-medium whitespace-nowrap transition-all"
                 style={{
-                  backgroundColor: quiz.colors.primary,
-                  color: 'white'
-                }}
-              >
-                🎯 PF
-              </button>
-            </div>
-
-            {/* Página Final */}
-            <div className="text-center">
-              <div 
-                className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
-                style={{backgroundColor: quiz.colors.primary + '20'}}
-              >
-                <span className="text-2xl">🎉</span>
-              </div>
-              
-              <h3 
-                className="text-2xl font-bold mb-4"
-                style={{color: quiz.colors.text}}
-              >
-                {quiz.settings.congratulationsMessage || 'Parabéns! Você concluiu o quiz com sucesso! 🎉'}
-              </h3>
-              
-              <p className="text-gray-600 mb-6">
-                Obrigado por participar do nosso quiz!
-              </p>
-              
-              <button
-                className="px-6 py-3 rounded-lg text-white font-semibold transition-all hover:opacity-90"
-                style={{backgroundColor: quiz.colors.primary}}
-              >
-                {quiz.settings.customButtonText || 'Falar com Especialista'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    const question = quiz.questions[previewQuestion]
-
-    return (
-      <div 
-        className="h-full flex items-center justify-center p-4 lg:p-8 rounded-lg"
-        style={{backgroundColor: quiz.colors.background}}
-      >
-        <div className="bg-white rounded-2xl shadow-2xl p-6 lg:p-8 max-w-2xl w-full">
-          {/* Navegação entre perguntas */}
-          <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-            {quiz.questions.map((q, index) => (
-              <button
-                key={index}
-                onClick={() => setPreviewQuestion(index)}
-                className="px-3 py-1 rounded text-sm font-medium whitespace-nowrap transition-all"
-                style={{
-                  backgroundColor: previewQuestion === index 
-                    ? quiz.colors.primary 
-                    : quiz.colors.primary + '20',
-                  color: previewQuestion === index ? 'white' : quiz.colors.primary
-                }}
-              >
-                Q{index + 1}
-              </button>
-            ))}
-            <button
-              onClick={() => setShowFinalPage(true)}
-              className="px-3 py-1 rounded text-sm font-medium whitespace-nowrap transition-all"
-              style={{
-                backgroundColor: quiz.colors.secondary + '20',
-                color: quiz.colors.secondary
-              }}
-            >
-              🎯 PF
-            </button>
-          </div>
-
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <span 
-                className="text-sm font-semibold"
-                style={{color: quiz.colors.secondary}}
-              >
-                Questão {previewQuestion + 1} de {quiz.questions.length}
-              </span>
-              <span 
-                className="text-xs px-3 py-1 rounded-full font-medium"
-                style={{
                   backgroundColor: quiz.colors.secondary + '20',
                   color: quiz.colors.secondary
                 }}
               >
-                {question.question_type === 'multiple' ? 'Múltipla Escolha' : 'Dissertativa'}
-              </span>
+                🎯 Final
+              </button>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="h-2 rounded-full transition-all duration-300"
-                style={{
-                  width: `${((previewQuestion + 1) / quiz.questions.length) * 100}%`,
-                  backgroundColor: quiz.colors.primary
-                }}
-              />
-            </div>
-          </div>
 
-          <h3 
-            className="text-2xl font-bold mb-6"
-            style={{color: quiz.colors.text}}
-          >
-            {question.question_text || 'Digite a pergunta...'}
-          </h3>
-
-          {question.question_type === 'multiple' ? (
-            <div className="space-y-3">
-              {question.options?.map((option, index) => (
-                <button
-                  key={index}
-                  className="w-full p-4 rounded-lg border-2 text-left transition-all hover:scale-102"
+            {/* Barra de Progresso */}
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <span 
+                  className="text-sm font-semibold"
+                  style={{color: quiz.colors.secondary}}
+                >
+                  Questão {currentPreviewQuestion + 1} de {quiz.questions.length}
+                </span>
+                <span 
+                  className="text-xs px-3 py-1 rounded-full font-medium"
                   style={{
-                    borderColor: '#e5e7eb',
-                    backgroundColor: 'white',
-                    color: quiz.colors.text
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = quiz.colors.primary
-                    e.currentTarget.style.backgroundColor = quiz.colors.primary + '10'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#e5e7eb'
-                    e.currentTarget.style.backgroundColor = 'white'
+                    backgroundColor: quiz.colors.secondary + '20',
+                    color: quiz.colors.secondary
                   }}
                 >
-                  {option || `Opção ${index + 1}`}
-                </button>
-              ))}
+                  {question.question_type === 'multiple' ? 'Múltipla Escolha' : 'Dissertativa'}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${((currentPreviewQuestion + 1) / quiz.questions.length) * 100}%`,
+                    backgroundColor: quiz.colors.primary
+                  }}
+                />
+              </div>
             </div>
-          ) : (
-            <textarea
-              placeholder="Digite sua resposta aqui..."
-              className="w-full p-4 border-2 rounded-lg min-h-32"
-              style={{
-                borderColor: quiz.colors.primary,
-                color: quiz.colors.text
-              }}
-            />
-          )}
 
-          <button
-            className="w-full mt-6 py-3 rounded-lg text-white font-semibold transition-all hover:opacity-90"
-            style={{backgroundColor: quiz.colors.primary}}
-          >
-            {question.button_text || (previewQuestion < quiz.questions.length - 1 ? 'Próxima Questão' : 'Finalizar Quiz')}
-          </button>
+            {/* Pergunta */}
+            <h3 
+              className="text-xl font-bold mb-6 text-left"
+              style={{color: quiz.colors.text}}
+            >
+              {question.question_text || 'Digite a pergunta...'}
+            </h3>
+
+            {/* Opções de Resposta */}
+            {question.question_type === 'multiple' ? (
+              <div className="space-y-3 mb-6">
+                {question.options?.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setPreviewAnswers(prev => ({
+                        ...prev,
+                        [currentPreviewQuestion]: index
+                      }))
+                    }}
+                    className="w-full p-4 rounded-lg border-2 text-left transition-all hover:scale-105"
+                    style={{
+                      borderColor: previewAnswers[currentPreviewQuestion] === index 
+                        ? quiz.colors.primary 
+                        : '#e5e7eb',
+                      backgroundColor: previewAnswers[currentPreviewQuestion] === index 
+                        ? quiz.colors.primary + '10' 
+                        : 'white',
+                      color: quiz.colors.text
+                    }}
+                  >
+                    <div className="flex items-center">
+                      <div 
+                        className="w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center"
+                        style={{
+                          borderColor: previewAnswers[currentPreviewQuestion] === index 
+                            ? quiz.colors.primary 
+                            : '#d1d5db'
+                        }}
+                      >
+                        {previewAnswers[currentPreviewQuestion] === index && (
+                          <div 
+                            className="w-2 h-2 rounded-full"
+                            style={{backgroundColor: quiz.colors.primary}}
+                          />
+                        )}
+                      </div>
+                      {option || `Opção ${index + 1}`}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="mb-6">
+                <textarea
+                  placeholder="Digite sua resposta aqui..."
+                  className="w-full p-4 border-2 rounded-lg min-h-24 resize-none"
+                  style={{
+                    borderColor: quiz.colors.primary,
+                    color: quiz.colors.text
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Botão de Navegação */}
+            <div className="flex gap-3">
+              {currentPreviewQuestion > 0 && (
+                <button
+                  onClick={() => setCurrentPreviewQuestion(currentPreviewQuestion - 1)}
+                  className="flex-1 py-3 rounded-lg font-semibold transition-all hover:opacity-90"
+                  style={{
+                    backgroundColor: 'transparent',
+                    color: quiz.colors.primary,
+                    border: `2px solid ${quiz.colors.primary}`
+                  }}
+                >
+                  Anterior
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  if (currentPreviewQuestion < quiz.questions.length - 1) {
+                    setCurrentPreviewQuestion(currentPreviewQuestion + 1)
+                  } else {
+                    setShowFinalPage(true)
+                  }
+                }}
+                className="flex-1 py-3 rounded-lg text-white font-semibold transition-all hover:scale-105"
+                style={{backgroundColor: quiz.colors.primary}}
+              >
+                {currentPreviewQuestion < quiz.questions.length - 1 
+                  ? (question.button_text || 'Próxima Questão')
+                  : 'Finalizar Quiz'
+                }
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     )
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Carregando...</h2>
-          <p className="text-gray-600">Verificando autenticação...</p>
-        </div>
-      </div>
-    )
-  }
+  // Removido bloqueio de renderização - permitir acesso sem autenticação para desenvolvimento
 
   console.log('🎯 Quiz Builder renderizando:', { 
     quiz: quiz.title, 

@@ -299,7 +299,10 @@ export default function UniversalLandingPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {/* Example Tools */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+            <div 
+              onClick={() => handleDemoClick('bmi')}
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+            >
               <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mb-3">
                 <Calculator className="w-4 h-4 text-white" />
               </div>
@@ -310,7 +313,10 @@ export default function UniversalLandingPage() {
                 Testar Demo
               </div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+            <div 
+              onClick={() => handleDemoClick('protein')}
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+            >
               <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center mb-3">
                 <Zap className="w-4 h-4 text-white" />
               </div>
@@ -321,7 +327,10 @@ export default function UniversalLandingPage() {
                 Testar Demo
               </div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+            <div 
+              onClick={() => handleDemoClick('body-composition')}
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+            >
               <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mb-3">
                 <Target className="w-4 h-4 text-white" />
               </div>
@@ -332,7 +341,10 @@ export default function UniversalLandingPage() {
                 Testar Demo
               </div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+            <div 
+              onClick={() => handleDemoClick('meal-planner')}
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+            >
               <div className="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center mb-3">
                 <Users className="w-4 h-4 text-white" />
               </div>
@@ -343,7 +355,10 @@ export default function UniversalLandingPage() {
                 Testar Demo
               </div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+            <div 
+              onClick={() => handleDemoClick('hydration')}
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+            >
               <div className="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center mb-3">
                 <Globe className="w-4 h-4 text-white" />
               </div>
@@ -354,7 +369,10 @@ export default function UniversalLandingPage() {
                 Testar Demo
               </div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+            <div 
+              onClick={() => handleDemoClick('nutrition-assessment')}
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+            >
               <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
                 <Award className="w-4 h-4 text-white" />
               </div>
@@ -387,7 +405,10 @@ export default function UniversalLandingPage() {
                 Testar Demo
               </div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+            <div 
+              onClick={() => handleDemoClick('bem-estar-diario')}
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+            >
               <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center mb-3">
                 <Shield className="w-4 h-4 text-white" />
               </div>
@@ -409,7 +430,10 @@ export default function UniversalLandingPage() {
                 Testar Demo
               </div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+            <div 
+              onClick={() => handleDemoClick('desafio-7-dias')}
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+            >
               <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center mb-3">
                 <Target className="w-4 h-4 text-white" />
               </div>
