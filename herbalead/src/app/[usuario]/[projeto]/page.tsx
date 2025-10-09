@@ -72,8 +72,19 @@ export default function UserProjectPage({ params }: { params: Promise<{ usuario:
         }
 
         console.log('📊 Projeto encontrado:', linkData)
+        console.log('🔧 Tool name:', linkData.tool_name)
         
-        // Buscar dados do profissional
+        // REDIRECIONAMENTO IMEDIATO para a ferramenta
+        if (linkData.tool_name) {
+          const toolUrl = `/tools/${linkData.tool_name}?ref=${resolvedParams.usuario}/${resolvedParams.projeto}`
+          console.log('🚀 Redirecionando para ferramenta:', toolUrl)
+          window.location.href = toolUrl
+          return
+        } else {
+          console.error('❌ Tool name não encontrado:', linkData)
+        }
+        
+        // Buscar dados do profissional (apenas se não redirecionou)
         const { data: professionalData, error: professionalError } = await supabase
           .from('professionals')
           .select('name, specialty, company')
@@ -91,14 +102,6 @@ export default function UserProjectPage({ params }: { params: Promise<{ usuario:
         }
         
         setLinkData(formattedLinkData)
-        
-        // REDIRECIONAMENTO IMEDIATO para a ferramenta
-        if (linkData.tool_name) {
-          const toolUrl = `/tools/${linkData.tool_name}?ref=${resolvedParams.usuario}/${resolvedParams.projeto}`
-          console.log('🚀 Redirecionando para ferramenta:', toolUrl)
-          window.location.href = toolUrl
-          return
-        }
       } catch (error) {
         console.error('Erro ao buscar dados do link:', error)
         setError('Erro interno do servidor')
