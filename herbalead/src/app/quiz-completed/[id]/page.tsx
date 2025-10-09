@@ -124,7 +124,7 @@ export default function QuizCompletedPage({ params }: { params: Promise<{ id: st
             {quiz.settings.congratulationsMessage || 'Parabéns! Você concluiu o quiz com sucesso! 🎉'}
           </p>
           <p className="text-gray-600 text-sm">
-            Obrigado por participar do quiz "{quiz.title}"
+            Obrigado por participar do quiz &quot;{quiz.title}&quot;
           </p>
         </div>
 
