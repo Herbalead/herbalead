@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "buildCommand": "cd herbalead && npm run build",
+  "outputDirectory": "herbalead/.next",
+  "installCommand": "cd herbalead && npm install",
+  "framework": "nextjs",
+  "rootDirectory": "herbalead",
+  "env": {
+    "NEXT_PUBLIC_BASE_DOMAIN": "herbalead.com"
+  }
+}
