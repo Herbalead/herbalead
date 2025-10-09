@@ -1,6 +1,6 @@
 'use client'
 
-import { MessageSquare, Download } from 'lucide-react'
+import { MessageSquare, Download, CheckCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
@@ -31,6 +31,14 @@ interface LinkData {
 export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
   const [linkData, setLinkData] = useState<LinkData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: ''
+  })
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -149,9 +157,9 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
   const handleContactSpecialist = () => {
     if (!linkData) return
     
-    // Se for captura de dados, redirecionar para página de sucesso
+    // Se for captura de dados, mostrar formulário na mesma página
     if (linkData.capture_type === 'capture') {
-      window.location.href = `/success/${linkData.id}`
+      setShowForm(true)
     } else {
       // Se for botão direto, redirecionar para WhatsApp/Site
       if (linkData.redirect_url) {
@@ -159,6 +167,50 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
       } else {
         window.location.href = '/herbalead'
       }
+    }
+  }
+
+  const handleSubmitForm = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitting(true)
+
+    try {
+      // Salvar lead no Supabase
+      const { data: lead, error } = await supabase
+        .from('leads')
+        .insert({
+          user_id: linkData!.user_id,
+          link_id: linkData!.id,
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          tool_name: linkData!.tool_name,
+          lead_type: 'capture',
+          status: 'new'
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao salvar lead:', error)
+        alert('Erro ao salvar dados. Tente novamente.')
+        return
+      }
+
+      console.log('✅ Lead salvo com sucesso:', lead)
+      setSubmitted(true)
+
+      // Incrementar contador de leads no link
+      await supabase
+        .from('links')
+        .update({ leads: 1 })
+        .eq('id', linkData!.id)
+
+    } catch (error) {
+      console.error('Erro ao processar formulário:', error)
+      alert('Erro interno. Tente novamente.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -201,6 +253,109 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
           </>
         )}
       </button>
+
+      {/* Formulário de captura (aparece quando showForm é true) */}
+      {showForm && !submitted && (
+        <div className="mt-4 p-4 bg-white border border-gray-200 rounded-lg">
+          <h3 className="font-semibold text-gray-900 mb-4">
+            {linkData?.material_title || 'Receber Material Gratuito'}
+          </h3>
+          
+          {linkData?.material_description && (
+            <p className="text-sm text-gray-600 mb-4">
+              {linkData.material_description}
+            </p>
+          )}
+
+          <form onSubmit={handleSubmitForm} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nome Completo *
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="Seu nome completo"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                WhatsApp *
+              </label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="+55 11 99999-9999"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email (Opcional)
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="seu@email.com"
+              />
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="authorize"
+                className="mr-2"
+                required
+              />
+              <label htmlFor="authorize" className="text-sm text-gray-700">
+                Autorizo receber o material gratuito e futuras comunicações
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold flex items-center justify-center"
+            >
+              {submitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Download className="w-5 h-5 mr-2" />
+                  Receber Material Gratuito
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Mensagem de sucesso */}
+      {submitted && (
+        <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center">
+            <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+            <div>
+              <p className="font-semibold text-green-900">Parabéns! 🎉</p>
+              <p className="text-sm text-green-800">
+                Seus dados foram enviados com sucesso! Em breve você receberá o material gratuito.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Debug info - remover depois */}
       {process.env.NODE_ENV === 'development' && linkData && (
