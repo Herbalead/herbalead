@@ -47,6 +47,7 @@ export default function UserDashboard() {
         console.log('Usuário encontrado:', user)
         
         if (user) {
+          console.log('Buscando perfil do usuário:', user.id)
           // Buscar perfil do usuário na tabela profiles
           const { data: profile, error } = await supabase
             .from('profiles')
@@ -54,11 +55,28 @@ export default function UserDashboard() {
             .eq('id', user.id)
             .single()
 
-          if (error && error.code !== 'PGRST116') {
+          if (error) {
             console.error('Erro ao buscar perfil:', error)
+            console.error('Código do erro:', error.code)
+            console.error('Mensagem do erro:', error.message)
+            
+            // Se a tabela não existe (PGRST116), usar dados básicos
+            if (error.code === 'PGRST116') {
+              console.log('Tabela profiles não encontrada, usando dados básicos')
+              setUserProfile({
+                name: user.user_metadata?.full_name || '',
+                email: user.email || '',
+                phone: '',
+                specialty: '',
+                company: '',
+                website: ''
+              })
+            }
+            return
           }
 
           if (profile) {
+            console.log('Perfil encontrado:', profile)
             setUserProfile({
               name: profile.full_name || '',
               email: user.email || '',
@@ -68,6 +86,7 @@ export default function UserDashboard() {
               website: profile.website || ''
             })
           } else {
+            console.log('Nenhum perfil encontrado, usando dados básicos')
             // Se não há perfil, usar dados básicos do usuário
             setUserProfile({
               name: user.user_metadata?.full_name || '',
@@ -152,12 +171,23 @@ export default function UserDashboard() {
   // Função para salvar perfil no Supabase
   const saveProfile = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      console.log('Iniciando salvamento do perfil...')
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      
+      if (userError) {
+        console.error('Erro ao buscar usuário:', userError)
+        alert('Erro de autenticação. Faça login novamente.')
+        return
+      }
       
       if (!user) {
+        console.log('Usuário não logado')
         alert('Usuário não logado. Faça login primeiro.')
         return
       }
+
+      console.log('Usuário encontrado:', user.id)
+      console.log('Dados do perfil:', userProfile)
 
       // Garantir que o telefone tenha o formato correto (+55)
       let formattedPhone = userProfile.phone
@@ -168,24 +198,37 @@ export default function UserDashboard() {
         }
       }
 
+      console.log('Telefone formatado:', formattedPhone)
+
+      // Dados para salvar
+      const profileData = {
+        id: user.id,
+        full_name: userProfile.name,
+        phone: formattedPhone,
+        specialty: userProfile.specialty,
+        company: userProfile.company,
+        website: userProfile.website,
+        updated_at: new Date().toISOString()
+      }
+
+      console.log('Dados para salvar:', profileData)
+
       // Salvar ou atualizar perfil na tabela profiles
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
-        .upsert({
-          id: user.id,
-          full_name: userProfile.name,
-          phone: formattedPhone,
-          specialty: userProfile.specialty,
-          company: userProfile.company,
-          website: userProfile.website,
-          updated_at: new Date().toISOString()
-        })
+        .upsert(profileData)
+        .select()
 
       if (error) {
         console.error('Erro ao salvar perfil:', error)
-        alert('Erro ao salvar perfil. Tente novamente.')
+        console.error('Código do erro:', error.code)
+        console.error('Mensagem do erro:', error.message)
+        console.error('Detalhes do erro:', error.details)
+        alert(`Erro ao salvar perfil: ${error.message}`)
         return
       }
+
+      console.log('Perfil salvo com sucesso:', data)
 
       // Atualizar o estado local com o telefone formatado
       setUserProfile(prev => ({
@@ -195,7 +238,7 @@ export default function UserDashboard() {
 
       alert('Perfil salvo com sucesso!')
     } catch (error) {
-      console.error('Erro ao salvar perfil:', error)
+      console.error('Erro geral ao salvar perfil:', error)
       alert('Erro ao salvar perfil. Tente novamente.')
     }
   }
