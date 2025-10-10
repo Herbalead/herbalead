@@ -33,6 +33,21 @@ export default function ToolPage() {
   useEffect(() => {
     const fetchLinkData = async () => {
       try {
+        // Verificar se é uma rota antiga que deve ser redirecionada
+        const currentPath = window.location.pathname
+        if (currentPath === '/tools/perfil-bem-estar') {
+          window.location.href = '/demo/wellness-profile'
+          return
+        }
+        if (currentPath === '/tools/bem-estar-diario') {
+          window.location.href = '/demo/daily-wellness'
+          return
+        }
+        if (currentPath === '/tools/alimentacao-saudavel') {
+          window.location.href = '/demo/healthy-eating'
+          return
+        }
+
         const urlParams = new URLSearchParams(window.location.search)
         const ref = urlParams.get('ref')
         

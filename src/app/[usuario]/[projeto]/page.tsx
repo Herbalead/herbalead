@@ -123,7 +123,10 @@ export default function PersonalizedLinkPage() {
             'hydration': '/calculators/hydration',
             'body-composition': '/calculators/body-composition',
             'meal-planner': '/calculators/meal-planner',
-            'nutrition-assessment': '/calculators/nutrition-assessment'
+            'nutrition-assessment': '/calculators/nutrition-assessment',
+            'wellness-profile': '/quiz-builder',
+            'daily-wellness': '/calculators/daily-wellness',
+            'healthy-eating': '/calculators/healthy-eating'
           }
           
           const toolUrl = toolUrls[link.tool_name] || '/calculators/bmi'

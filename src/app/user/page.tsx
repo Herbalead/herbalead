@@ -684,7 +684,7 @@ export default function UserDashboard() {
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-semibold text-gray-900">Meus Links</h3>
               <button 
-                onClick={() => setShowCreateLinkModal(true)}
+                onClick={openCreateLinkModal}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -750,7 +750,7 @@ export default function UserDashboard() {
                 <div className="text-center py-8">
                   <p className="text-gray-500">Nenhum link criado ainda</p>
                 <button 
-                    onClick={() => setShowCreateLinkModal(true)}
+                    onClick={openCreateLinkModal}
                     className="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
                   >
                     Criar Primeiro Link
@@ -953,6 +953,9 @@ export default function UserDashboard() {
                     <option value="body-composition">Composição Corporal</option>
                     <option value="meal-planner">Planejador de Refeições</option>
                     <option value="nutrition-assessment">Avaliação Nutricional</option>
+                    <option value="wellness-profile">Quiz: Perfil de Bem-Estar</option>
+                    <option value="daily-wellness">Tabela: Bem-Estar Diário</option>
+                    <option value="healthy-eating">Quiz: Alimentação Saudável</option>
                   </select>
                 </div>
 
@@ -1058,6 +1061,12 @@ export default function UserDashboard() {
                   <option value="bmi">Calculadora IMC</option>
                   <option value="protein">Calculadora de Proteína</option>
                   <option value="hydration">Calculadora de Hidratação</option>
+                  <option value="body-composition">Composição Corporal</option>
+                  <option value="meal-planner">Planejador de Refeições</option>
+                  <option value="nutrition-assessment">Avaliação Nutricional</option>
+                  <option value="wellness-profile">Quiz: Perfil de Bem-Estar</option>
+                  <option value="daily-wellness">Tabela: Bem-Estar Diário</option>
+                  <option value="healthy-eating">Quiz: Alimentação Saudável</option>
                 </select>
                 </div>
                     

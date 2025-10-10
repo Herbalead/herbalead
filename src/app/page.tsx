@@ -49,14 +49,16 @@ export default function HerbaleadLandingPage() {
   }
 
   const handleDemoClick = (demoType: string) => {
-    // Redirecionar para demos específicos do Herbalead
+    // Redirecionar para demos específicos do Herbalead (apenas MVP)
     switch(demoType) {
-      // Ferramentas Básicas
       case 'bmi':
         router.push('/demo/bmi')
         break
       case 'protein':
         router.push('/demo/protein')
+        break
+      case 'hydration':
+        router.push('/demo/hydration')
         break
       case 'body-composition':
         router.push('/demo/body-composition')
@@ -64,63 +66,32 @@ export default function HerbaleadLandingPage() {
       case 'meal-planner':
         router.push('/demo/meal-planner')
         break
-      case 'hydration':
-        router.push('/demo/hydration')
-        break
       case 'nutrition-assessment':
         router.push('/demo/nutrition-assessment')
         break
-      case 'health-goals':
-        router.push('/demo/quiz/health-goals')
+      case 'wellness-profile':
+        router.push('/demo/wellness-profile')
         break
-      
-      // Para Leads Frios
-      case 'perfil-bem-estar':
-        router.push('/tools/perfil-bem-estar')
+      case 'daily-wellness':
+        router.push('/demo/daily-wellness')
         break
-      case 'bem-estar-diario':
-        router.push('/tools/bem-estar-diario')
+      case 'healthy-eating':
+        router.push('/demo/healthy-eating')
         break
-      case 'alimentacao-saudavel':
-        router.push('/tools/alimentacao-saudavel')
-        break
-      
-      // Para Clientes Atuais
-      case 'desafio-7-dias':
-        router.push('/tools/desafio-7-dias')
-        break
-      case 'aproveitando-100':
-        router.push('/tools/aproveitando-100')
-        break
-      case 'metas-semanais':
-        router.push('/tools/metas-semanais')
-        break
-      
-      // Para Recrutamento
-      case 'inspirar-pessoas':
-        router.push('/tools/inspirar-pessoas')
-        break
-      case 'perfil-empreendedor':
-        router.push('/tools/perfil-empreendedor')
-        break
-      case 'onboarding-rapido':
-        router.push('/tools/onboarding-rapido')
-        break
-      
       default:
         router.push('/demo/bmi')
     }
   }
 
   const demos = [
-    // 📊 Ferramentas Básicas
+    // 📊 Ferramentas MVP (9 funcionalidades)
     {
       id: 'bmi',
-      title: 'Calculadora de IMC',
+      title: 'Calculadora IMC',
       description: 'Calcule o Índice de Massa Corporal dos seus clientes',
       icon: Calculator,
       color: 'bg-blue-500',
-      category: 'Ferramentas Básicas',
+      category: 'Ferramentas MVP',
       tag: 'Demo disponível'
     },
     {
@@ -129,25 +100,7 @@ export default function HerbaleadLandingPage() {
       description: 'Calcule necessidades proteicas individuais',
       icon: Zap,
       color: 'bg-orange-500',
-      category: 'Ferramentas Básicas',
-      tag: 'Demo disponível'
-    },
-    {
-      id: 'body-composition',
-      title: 'Composição Corporal',
-      description: 'Avalie massa muscular, gordura e hidratação',
-      icon: Target,
-      color: 'bg-green-500',
-      category: 'Ferramentas Básicas',
-      tag: 'Demo disponível'
-    },
-    {
-      id: 'meal-planner',
-      title: 'Planejador de Refeições',
-      description: 'Crie planos alimentares personalizados',
-      icon: Users,
-      color: 'bg-pink-500',
-      category: 'Ferramentas Básicas',
+      category: 'Ferramentas MVP',
       tag: 'Demo disponível'
     },
     {
@@ -156,7 +109,25 @@ export default function HerbaleadLandingPage() {
       description: 'Avalie necessidades de água e eletrólitos',
       icon: Globe,
       color: 'bg-cyan-500',
-      category: 'Ferramentas Básicas',
+      category: 'Ferramentas MVP',
+      tag: 'Demo disponível'
+    },
+    {
+      id: 'body-composition',
+      title: 'Composição Corporal',
+      description: 'Avalie massa muscular, gordura e hidratação',
+      icon: Target,
+      color: 'bg-green-500',
+      category: 'Ferramentas MVP',
+      tag: 'Demo disponível'
+    },
+    {
+      id: 'meal-planner',
+      title: 'Planejador de Refeições',
+      description: 'Crie planos alimentares personalizados',
+      icon: Users,
+      color: 'bg-pink-500',
+      category: 'Ferramentas MVP',
       tag: 'Demo disponível'
     },
     {
@@ -165,103 +136,34 @@ export default function HerbaleadLandingPage() {
       description: 'Questionário completo de hábitos alimentares',
       icon: Award,
       color: 'bg-purple-500',
-      category: 'Ferramentas Básicas',
+      category: 'Ferramentas MVP',
       tag: 'Demo disponível'
     },
     {
-      id: 'health-goals',
-      title: 'Objetivos de Saúde',
-      description: 'Defina e acompanhe objetivos de saúde personalizados',
-      icon: TrendingUp,
-      color: 'bg-indigo-500',
-      category: 'Ferramentas Básicas',
-      tag: 'Demo disponível'
-    },
-    
-    // 🎯 Para Leads Frios
-    {
-      id: 'perfil-bem-estar',
+      id: 'wellness-profile',
       title: 'Quiz: Perfil de Bem-Estar',
       description: 'Descubra o perfil de bem-estar dos seus leads',
       icon: Star,
       color: 'bg-yellow-500',
-      category: 'Para Leads Frios',
+      category: 'Ferramentas MVP',
       tag: 'Demo disponível'
     },
     {
-      id: 'bem-estar-diario',
+      id: 'daily-wellness',
       title: 'Tabela: Bem-Estar Diário',
       description: 'Acompanhe métricas de bem-estar diárias',
       icon: Shield,
       color: 'bg-teal-500',
-      category: 'Para Leads Frios',
+      category: 'Ferramentas MVP',
       tag: 'Demo disponível'
     },
     {
-      id: 'alimentacao-saudavel',
+      id: 'healthy-eating',
       title: 'Quiz: Alimentação Saudável',
       description: 'Avalie hábitos alimentares e oriente nutricionalmente',
       icon: Calculator,
       color: 'bg-lime-500',
-      category: 'Para Leads Frios',
-      tag: 'Demo disponível'
-    },
-    
-    // 💚 Para Clientes Atuais
-    {
-      id: 'desafio-7-dias',
-      title: 'Tabela: Desafio 7 Dias',
-      description: 'Engaje clientes com desafios de 7 dias',
-      icon: Target,
-      color: 'bg-red-500',
-      category: 'Para Clientes Atuais',
-      tag: 'Demo disponível'
-    },
-    {
-      id: 'aproveitando-100',
-      title: 'Quiz: Aproveitando 100%',
-      description: 'Maximize o potencial dos seus clientes',
-      icon: Award,
-      color: 'bg-amber-500',
-      category: 'Para Clientes Atuais',
-      tag: 'Demo disponível'
-    },
-    {
-      id: 'metas-semanais',
-      title: 'Tabela: Metas Semanais',
-      description: 'Defina e acompanhe metas semanais',
-      icon: TrendingUp,
-      color: 'bg-emerald-500',
-      category: 'Para Clientes Atuais',
-      tag: 'Demo disponível'
-    },
-    
-    // 🧭 Para Recrutamento
-    {
-      id: 'inspirar-pessoas',
-      title: 'Quiz: Inspirar Pessoas',
-      description: 'Identifique líderes e inspiradores',
-      icon: Users,
-      color: 'bg-violet-500',
-      category: 'Para Recrutamento',
-      tag: 'Demo disponível'
-    },
-    {
-      id: 'perfil-empreendedor',
-      title: 'Quiz: Perfil Empreendedor',
-      description: 'Descubra perfis empreendedores',
-      icon: Star,
-      color: 'bg-rose-500',
-      category: 'Para Recrutamento',
-      tag: 'Demo disponível'
-    },
-    {
-      id: 'onboarding-rapido',
-      title: 'Tabela: Onboarding Rápido',
-      description: 'Facilite integração de novos membros',
-      icon: Shield,
-      color: 'bg-sky-500',
-      category: 'Para Recrutamento',
+      category: 'Ferramentas MVP',
       tag: 'Demo disponível'
     }
   ]
