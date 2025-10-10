@@ -144,10 +144,10 @@ export default function QuizPage({ params }: { params: Promise<{ usuario: string
     loadQuiz()
   }, [params])
 
-  const handleAnswer = (questionIndex: number, answerIndex: number) => {
+  const handleAnswer = (questionIndex: number, answer: number | string) => {
     setAnswers(prev => ({
       ...prev,
-      [questionIndex]: answerIndex
+      [questionIndex]: answer
     }))
   }
 
@@ -304,25 +304,44 @@ export default function QuizPage({ params }: { params: Promise<{ usuario: string
             {currentQ.question_text}
           </h2>
           
-          <div className="space-y-3">
-            {currentQ.options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleAnswer(currentQuestion, index)}
-                className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
-                  answers[currentQuestion] === index
-                    ? 'border-emerald-500 bg-emerald-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
+          {/* Multiple Choice Questions */}
+          {currentQ.question_type === 'multiple_choice' && (
+            <div className="space-y-3">
+              {currentQ.options.map((option, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleAnswer(currentQuestion, index)}
+                  className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
+                    answers[currentQuestion] === index
+                      ? 'border-emerald-500 bg-emerald-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  style={{
+                    backgroundColor: answers[currentQuestion] === index ? quiz.colors.background : 'white',
+                    borderColor: answers[currentQuestion] === index ? quiz.colors.primary : undefined
+                  }}
+                >
+                  <span className="font-medium">{option}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          
+          {/* Essay Questions */}
+          {currentQ.question_type === 'essay' && (
+            <div className="space-y-3">
+              <textarea
+                value={answers[currentQuestion] || ''}
+                onChange={(e) => handleAnswer(currentQuestion, e.target.value)}
+                placeholder="Digite sua resposta aqui..."
+                className="w-full p-4 border-2 border-gray-200 rounded-lg resize-none focus:border-emerald-500 focus:outline-none transition-colors"
+                rows={4}
                 style={{
-                  backgroundColor: answers[currentQuestion] === index ? quiz.colors.background : 'white',
-                  borderColor: answers[currentQuestion] === index ? quiz.colors.primary : undefined
+                  borderColor: answers[currentQuestion] ? quiz.colors.primary : undefined
                 }}
-              >
-                <span className="font-medium">{option}</span>
-              </button>
-            ))}
-          </div>
+              />
+            </div>
+          )}
         </div>
 
         {/* Navigation */}
@@ -337,7 +356,10 @@ export default function QuizPage({ params }: { params: Promise<{ usuario: string
           
           <button
             onClick={nextQuestion}
-            disabled={answers[currentQuestion] === undefined}
+            disabled={
+              answers[currentQuestion] === undefined || 
+              (currentQ.question_type === 'essay' && !answers[currentQuestion])
+            }
             className="px-8 py-3 text-white rounded-lg font-semibold hover:opacity-90 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: quiz.colors.primary }}
           >
