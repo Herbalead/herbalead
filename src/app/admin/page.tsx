@@ -86,7 +86,7 @@ export default function AdminDashboard() {
       const [usersResult, leadsResult, linksResult] = await Promise.all([
         supabase.from('professionals').select('*'),
         supabase.from('leads').select('*, professional:professionals(name, specialty)'),
-        supabase.from('professional_links').select('*, professional:professionals(name, specialty)')
+        supabase.from('links').select('*, professional:professionals(name, specialty)')
       ])
 
       if (usersResult.data) setUsers(usersResult.data)

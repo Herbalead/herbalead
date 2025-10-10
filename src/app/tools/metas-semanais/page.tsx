@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import SpecialistCTA from '@/components/SpecialistCTA'
 import { Target, Plus, CheckCircle, TrendingUp, ArrowRight } from 'lucide-react'
 
 export default function MetasSemanaisPage() {
@@ -202,6 +203,9 @@ export default function MetasSemanaisPage() {
               Mantenha o foco e alcance suas metas!
             </p>
           </div>
+          
+          {/* Botão personalizado do especialista */}
+          <SpecialistCTA toolName="metas-semanais" />
         </div>
       </div>
     </div>

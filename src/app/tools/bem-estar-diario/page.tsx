@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import SpecialistCTA from '@/components/SpecialistCTA'
 import { CheckCircle, Circle, Heart, Zap, Moon, Sun, ArrowRight } from 'lucide-react'
 
 export default function BemEstarDiarioPage() {
@@ -169,6 +170,9 @@ export default function BemEstarDiarioPage() {
               Compartilhe seus resultados e receba dicas personalizadas
             </p>
           </div>
+          
+          {/* Botão personalizado do especialista */}
+          <SpecialistCTA toolName="bem-estar-diario" />
         </div>
       </div>
     </div>

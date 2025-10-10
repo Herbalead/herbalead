@@ -52,7 +52,7 @@ export default function PaymentPage() {
                 <ArrowRight className="w-6 h-6 text-white rotate-180" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">FitLead</h1>
+                <h1 className="text-xl font-bold text-gray-900">Herbalead</h1>
                 <p className="text-sm text-gray-600">Área do Profissional</p>
               </div>
             </Link>
@@ -67,7 +67,7 @@ export default function PaymentPage() {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Escolha seu Plano FitLead
+            Escolha seu Plano Herbalead
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             Comece a gerar leads profissionais hoje mesmo
@@ -81,7 +81,7 @@ export default function PaymentPage() {
               ))}
             </div>
             <p className="text-gray-700 italic mb-4">
-              &ldquo;Em 2 semanas já gerei mais leads do que em 3 meses usando métodos tradicionais. O FitLead é revolucionário!&rdquo;
+              &ldquo;Em 2 semanas já gerei mais leads do que em 3 meses usando métodos tradicionais. O Herbalead é revolucionário!&rdquo;
             </p>
             <p className="text-sm text-gray-500">- Maria Silva, Nutricionista</p>
           </div>

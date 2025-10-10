@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import SpecialistCTA from '@/components/SpecialistCTA'
 import { CheckCircle, Circle, Droplets, Coffee, Footprints, Share2, Trophy, ArrowRight } from 'lucide-react'
 
 export default function Desafio7DiasPage() {
@@ -188,6 +189,9 @@ export default function Desafio7DiasPage() {
               Continue o desafio e mantenha seus hábitos saudáveis!
             </p>
           </div>
+          
+          {/* Botão personalizado do especialista */}
+          <SpecialistCTA toolName="desafio-7-dias" />
         </div>
       </div>
     </div>

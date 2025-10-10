@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import SpecialistCTA from '@/components/SpecialistCTA'
 import { CheckCircle, Circle, Users, Target, Zap } from 'lucide-react'
 
 export default function OnboardingRapidoPage() {
@@ -167,6 +168,9 @@ export default function OnboardingRapidoPage() {
               Cada passo te aproxima do sucesso!
             </p>
           </div>
+          
+          {/* Botão personalizado do especialista */}
+          <SpecialistCTA toolName="onboarding-rapido" />
         </div>
       </div>
     </div>

@@ -7,55 +7,6 @@ import { ArrowLeft, MessageCircle, Info } from 'lucide-react'
 export default function BMIDemoPage() {
   const router = useRouter()
   const [showExplanation, setShowExplanation] = useState(false)
-  const [formData, setFormData] = useState({
-    height: '179',
-    weight: '90'
-  })
-  const [bmiResult, setBmiResult] = useState<{
-    bmi: number
-    category: string
-    color: string
-    message: string
-  } | null>(null)
-
-  const calculateBMI = () => {
-    const height = parseFloat(formData.height) / 100 // Convert cm to meters
-    const weight = parseFloat(formData.weight)
-    
-    if (!height || !weight) return
-    
-    const bmi = weight / (height * height)
-    
-    let category = ''
-    let color = ''
-    let message = ''
-    
-    if (bmi < 18.5) {
-      category = 'Abaixo do peso'
-      color = 'text-blue-600'
-      message = 'Seu IMC indica que você está abaixo do peso ideal. Consulte um nutricionista para um plano de ganho de peso saudável.'
-    } else if (bmi < 25) {
-      category = 'Peso normal'
-      color = 'text-green-600'
-      message = 'Seu IMC está dentro da faixa considerada saudável. Continue mantendo hábitos equilibrados!'
-    } else if (bmi < 30) {
-      category = 'Sobrepeso'
-      color = 'text-yellow-600'
-      message = 'Seu IMC indica sobrepeso. Consulte um nutricionista para um plano de emagrecimento saudável.'
-    } else {
-      category = 'Obesidade'
-      color = 'text-red-600'
-      message = 'Seu IMC indica obesidade. É importante consultar um médico e nutricionista para um acompanhamento adequado.'
-    }
-    
-    setBmiResult({
-      bmi: Math.round(bmi * 10) / 10,
-      category,
-      color,
-      message
-    })
-    setShowExplanation(true)
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-100">
@@ -64,11 +15,11 @@ export default function BMIDemoPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <button
-              onClick={() => router.push('/fitlead')}
+              onClick={() => router.push('/')}
               className="flex items-center text-gray-600 hover:text-gray-900"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
-              Voltar para FitLead
+              Voltar para Página Inicial
             </button>
             <div className="text-sm text-gray-500">
               🎯 Demonstração - Calculadora de IMC
@@ -94,7 +45,7 @@ export default function BMIDemoPage() {
                 <ul className="text-sm text-gray-700 space-y-1">
                   <li>• <strong>Texto do botão:</strong> Você escolhe (ex: &quot;Saiba Mais&quot;, &quot;Falar com Especialista&quot;)</li>
                   <li>• <strong>Redirecionamento:</strong> Pode ser WhatsApp, seu site, formulário, etc.</li>
-                  <li>• <strong>URL personalizada:</strong> fitlead.ylada.com/seu-nome/nome-do-projeto</li>
+                  <li>• <strong>URL personalizada:</strong> herbalead.ylada.com/seu-nome/nome-do-projeto</li>
                   <li>• <strong>Mensagem personalizada:</strong> Aparece antes do botão</li>
                 </ul>
               </div>
@@ -124,8 +75,6 @@ export default function BMIDemoPage() {
                   type="number"
                   placeholder="Ex: 175"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={formData.height}
-                  onChange={(e) => setFormData({...formData, height: e.target.value})}
                 />
               </div>
               
@@ -137,13 +86,11 @@ export default function BMIDemoPage() {
                   type="number"
                   placeholder="Ex: 70"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={formData.weight}
-                  onChange={(e) => setFormData({...formData, weight: e.target.value})}
                 />
               </div>
 
               <button
-                onClick={calculateBMI}
+                onClick={() => setShowExplanation(!showExplanation)}
                 className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 font-semibold"
               >
                 Calcular IMC
@@ -151,18 +98,18 @@ export default function BMIDemoPage() {
             </div>
           </div>
 
-          {/* Resultado Calculado */}
-          {showExplanation && bmiResult && (
+          {/* Resultado Simulado */}
+          {showExplanation && (
             <div className="mt-8 bg-green-50 border border-green-200 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-green-800 mb-4">
                 📊 Resultado do IMC
               </h3>
               <div className="bg-white rounded-lg p-4 mb-4">
                 <div className="text-center">
-                  <div className={`text-3xl font-bold mb-2 ${bmiResult.color}`}>{bmiResult.bmi}</div>
-                  <div className="text-lg font-semibold text-gray-900 mb-2">{bmiResult.category}</div>
+                  <div className="text-3xl font-bold text-green-600 mb-2">22.9</div>
+                  <div className="text-lg font-semibold text-gray-900 mb-2">Peso Normal</div>
                   <p className="text-gray-600 text-sm">
-                    {bmiResult.message}
+                    Seu IMC está dentro da faixa considerada saudável. Continue mantendo hábitos equilibrados!
                   </p>
                 </div>
               </div>

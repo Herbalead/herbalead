@@ -15,11 +15,11 @@ export default function ProteinDemoPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <button
-              onClick={() => router.push('/fitlead')}
+              onClick={() => router.push('/')}
               className="flex items-center text-gray-600 hover:text-gray-900"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
-              Voltar para FitLead
+              Voltar para Página Inicial
             </button>
             <div className="text-sm text-gray-500">
               🎯 Demonstração - Calculadora de Proteína
@@ -45,7 +45,7 @@ export default function ProteinDemoPage() {
                 <ul className="text-sm text-gray-700 space-y-1">
                   <li>• <strong>Texto do botão:</strong> Você escolhe (ex: &quot;Saiba Mais&quot;, &quot;Falar com Especialista&quot;)</li>
                   <li>• <strong>Redirecionamento:</strong> Pode ser WhatsApp, seu site, formulário, etc.</li>
-                  <li>• <strong>URL personalizada:</strong> fitlead.ylada.com/seu-nome/nome-do-projeto</li>
+                  <li>• <strong>URL personalizada:</strong> herbalead.ylada.com/seu-nome/nome-do-projeto</li>
                   <li>• <strong>Mensagem personalizada:</strong> Aparece antes do botão</li>
                 </ul>
               </div>

@@ -1,12 +1,12 @@
 'use client'
 
-interface FitLeadLogoProps {
+interface HerbaleadLogoProps {
   size?: 'sm' | 'md' | 'lg'
   showText?: boolean
   className?: string
 }
 
-export default function FitLeadLogo({ size = 'md', showText = true, className = '' }: FitLeadLogoProps) {
+export default function HerbaleadLogo({ size = 'md', showText = true, className = '' }: HerbaleadLogoProps) {
   const sizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-12 h-12', 
@@ -28,9 +28,9 @@ export default function FitLeadLogo({ size = 'md', showText = true, className = 
           <div className="w-full h-full bg-gradient-to-br from-white/30 to-transparent"></div>
         </div>
         
-        {/* Letter F */}
+        {/* Letter H */}
         <div className={`text-white font-bold ${textSizes[size]} relative z-10`}>
-          F
+          H
         </div>
         
         {/* Decorative Elements */}
@@ -44,12 +44,12 @@ export default function FitLeadLogo({ size = 'md', showText = true, className = 
           <h1 className={`font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent ${
             size === 'sm' ? 'text-lg' : size === 'md' ? 'text-2xl' : 'text-3xl'
           }`}>
-            FitLead
+            Herbalead
           </h1>
           <p className={`text-gray-500 font-medium ${
             size === 'sm' ? 'text-xs' : 'text-xs'
           }`}>
-            Powered by YLADA
+            Bem-estar natural
           </p>
         </div>
       )}

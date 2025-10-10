@@ -92,7 +92,7 @@ export default function BMIPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center space-x-3">
-              <Link href="/fitlead" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
+              <Link href="/herbalead" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
                 <ArrowLeft className="w-5 h-5" />
                 <span>Voltar</span>
               </Link>
@@ -229,13 +229,6 @@ export default function BMIPage() {
               </div>
               
               <div className="text-center">
-                <button
-                  onClick={() => setResult(null)}
-                  className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-semibold mr-4"
-                >
-                  Calcular Novamente
-                </button>
-                
                 {/* Botão personalizado do especialista */}
                 <SpecialistCTA toolName="bmi" />
               </div>

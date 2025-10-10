@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Mail, Lock, User, Phone, Building, GraduationCap } from 'lucide-react'
-import { signUp, signIn, signOut } from '@/lib/auth'
+import { signUp, signIn, signOut } from '@/lib/supabase'
 
 interface FormData {
   email: string
@@ -46,7 +46,7 @@ export default function RegisterPage() {
         setProjectDomain(subdomain)
       } else {
         // Fallback para desenvolvimento ou domínio principal
-        setProjectDomain('fitlead')
+        setProjectDomain('herbalead')
       }
     }
   }, [])
@@ -93,10 +93,10 @@ export default function RegisterPage() {
 
   const getProjectName = () => {
     switch (projectDomain) {
-      case 'fitlead': return 'FitLead'
+      case 'herbalead': return 'Herbalead'
       case 'nutri': return 'Nutri'
       case 'beauty': return 'Beauty'
-      default: return 'FitLead'
+      default: return 'Herbalead'
     }
   }
 
