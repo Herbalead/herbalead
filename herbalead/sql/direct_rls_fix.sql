@@ -22,3 +22,4 @@ SELECT 'Políticas RLS corrigidas!' as resultado;
 
 
 
+

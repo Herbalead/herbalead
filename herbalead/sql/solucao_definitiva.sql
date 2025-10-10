@@ -108,3 +108,4 @@ SELECT 'Políticas RLS configuradas com sucesso!' as resultado;
 
 
 
+

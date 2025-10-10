@@ -62,6 +62,29 @@ export default function UniversalLandingPage() {
     }
   }
 
+  const handleDemoClick = (demoType: string) => {
+    console.log('🎯 Demo clicked:', demoType)
+    
+    // Mapear tipos de demo para rotas
+    const demoRoutes: { [key: string]: string } = {
+      'bmi': '/demo/bmi',
+      'protein': '/demo/protein', 
+      'body-composition': '/demo/body-composition',
+      'meal-planner': '/demo/meal-planner',
+      'hydration': '/demo/hydration',
+      'nutrition-assessment': '/demo/nutrition-assessment',
+      'bem-estar-diario': '/tools/bem-estar-diario',
+      'desafio-7-dias': '/tools/desafio-7-dias'
+    }
+    
+    const route = demoRoutes[demoType]
+    if (route) {
+      router.push(route)
+    } else {
+      console.error('❌ Demo route not found:', demoType)
+    }
+  }
+
   const content = {
     title: 'Herbalead',
     subtitle: 'Tecnologia para Distribuidores de Bem-Estar',
