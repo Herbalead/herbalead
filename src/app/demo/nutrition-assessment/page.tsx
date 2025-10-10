@@ -2,16 +2,9 @@
 
 import { useState } from 'react'
 import { 
-  Calculator, 
   ArrowLeft, 
   ArrowRight, 
-  CheckCircle, 
   AlertTriangle, 
-  Heart,
-  Activity,
-  Target,
-  Star,
-  MessageCircle,
   ClipboardList
 } from 'lucide-react'
 import Link from 'next/link'
@@ -30,7 +23,7 @@ interface NutritionData {
   symptoms: string[]
 }
 
-interface NutritionResults {
+interface _NutritionResults {
   bmi: string
   tdee: string
   score: string
@@ -62,8 +55,6 @@ export default function NutritionAssessmentDemoPage() {
     healthConditions: [],
     symptoms: []
   })
-  const [showResults, setShowResults] = useState(false)
-  const [results, setResults] = useState<NutritionResults | null>(null)
 
   const healthConditions = [
     'Diabetes',
@@ -83,7 +74,7 @@ export default function NutritionAssessmentDemoPage() {
     'Alterações de humor'
   ]
 
-  const calculateNutritionAssessment = () => {
+  const _calculateNutritionAssessment = () => {
     const weight = parseFloat(formData.weight)
     const height = parseFloat(formData.height) / 100
     const age = parseInt(formData.age)
@@ -532,9 +523,9 @@ export default function NutritionAssessmentDemoPage() {
           <h3 className="text-3xl font-bold mb-4 text-gray-800">
             💼 Pronto para ter esta ferramenta com seu nome e link personalizado?
           </h3>
-          <p className="text-gray-600 mb-8 text-lg">
-            Clique em "Assinar Agora" e comece a gerar seus próprios leads com o Herbalead.
-          </p>
+            <p className="text-gray-600 mb-8 text-lg">
+              Clique em &quot;Assinar Agora&quot; e comece a gerar seus próprios leads com o Herbalead.
+            </p>
           <button className="px-12 py-6 bg-green-600 text-white rounded-xl font-bold text-xl hover:bg-green-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl">
             Assinar Agora
           </button>

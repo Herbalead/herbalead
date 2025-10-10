@@ -4,30 +4,15 @@ import { useState } from 'react'
 import { 
   ArrowLeft, 
   ArrowRight, 
-  CheckCircle, 
   AlertTriangle, 
-  Heart,
-  Activity,
+  ClipboardList,
+  CheckCircle,
   Target,
   Star,
-  MessageCircle,
-  ClipboardList
+  MessageCircle
 } from 'lucide-react'
 import Link from 'next/link'
 
-interface QuizData {
-  age: string
-  gender: string
-  weight: string
-  height: string
-  activity: string
-  dietQuality: string
-  mealFrequency: string
-  waterIntake: string
-  supplements: string
-  healthConditions: string[]
-  symptoms: string[]
-}
 
 interface QuizResults {
   score: string

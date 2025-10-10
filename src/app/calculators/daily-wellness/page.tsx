@@ -2,17 +2,16 @@
 
 import { useState } from 'react'
 import { 
-  Calculator, 
   ArrowLeft, 
   ArrowRight, 
-  CheckCircle, 
   AlertTriangle, 
-  Heart,
-  Activity,
-  Target,
+  Calendar,
   Star,
+  Heart,
+  CheckCircle,
   MessageCircle,
-  Calendar
+  Activity,
+  Target
 } from 'lucide-react'
 
 interface WellnessEntry {

@@ -2,17 +2,16 @@
 
 import { useState } from 'react'
 import { 
-  Calculator, 
   ArrowLeft, 
   ArrowRight, 
   CheckCircle, 
   AlertTriangle, 
-  Heart,
-  Activity,
-  Target,
   Star,
   MessageCircle,
-  Users
+  Users,
+  Heart,
+  Activity,
+  Target
 } from 'lucide-react'
 
 interface BodyCompositionResults {

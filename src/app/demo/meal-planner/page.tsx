@@ -2,17 +2,14 @@
 
 import { useState } from 'react'
 import { 
-  Calculator, 
   ArrowLeft, 
   ArrowRight, 
   CheckCircle, 
   AlertTriangle, 
-  Heart,
-  Activity,
-  Target,
   Star,
   MessageCircle,
-  Utensils
+  Utensils,
+  Heart
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -598,9 +595,9 @@ export default function MealPlannerDemoPage() {
           <h3 className="text-3xl font-bold mb-4 text-gray-800">
             💼 Pronto para ter esta ferramenta com seu nome e link personalizado?
           </h3>
-          <p className="text-gray-600 mb-8 text-lg">
-            Clique em "Assinar Agora" e comece a gerar seus próprios leads com o Herbalead.
-          </p>
+            <p className="text-gray-600 mb-8 text-lg">
+              Clique em &quot;Assinar Agora&quot; e comece a gerar seus próprios leads com o Herbalead.
+            </p>
           <button className="px-12 py-6 bg-orange-600 text-white rounded-xl font-bold text-xl hover:bg-orange-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl">
             Assinar Agora
           </button>

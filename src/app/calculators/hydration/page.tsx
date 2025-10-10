@@ -2,17 +2,16 @@
 
 import { useState } from 'react'
 import { 
-  Calculator, 
   ArrowLeft, 
   ArrowRight, 
   CheckCircle, 
   AlertTriangle, 
-  Heart,
-  Activity,
-  Target,
   Star,
   MessageCircle,
-  Droplets
+  Droplets,
+  Heart,
+  Activity,
+  Target
 } from 'lucide-react'
 
 interface HydrationResults {
