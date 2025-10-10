@@ -1,7 +1,6 @@
 {
   "version": 2,
   "framework": "nextjs",
-  "rootDirectory": "herbalead",
   "env": {
     "NEXT_PUBLIC_BASE_DOMAIN": "herbalead.com"
   }
