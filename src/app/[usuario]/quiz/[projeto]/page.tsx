@@ -36,10 +36,10 @@ interface Question {
   id: string
   quiz_id: string
   question_text: string
-  question_type: string
+  question_type: 'multiple' | 'essay'
   order_number: number
   options: string[]
-  correct_answer: number
+  correct_answer: number | string
   points: number
   button_text: string
 }
@@ -305,7 +305,7 @@ export default function QuizPage({ params }: { params: Promise<{ usuario: string
           </h2>
           
           {/* Multiple Choice Questions */}
-          {currentQ.question_type === 'multiple_choice' && (
+          {currentQ.question_type === 'multiple' && (
             <div className="space-y-3">
               {currentQ.options.map((option, index) => (
                 <button
