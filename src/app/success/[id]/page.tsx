@@ -19,7 +19,7 @@ interface LinkData {
   }
 }
 
-export default function SuccessPage({ params }: { params: { id: string } }) {
+export default function SuccessPage({ params }: { params: Promise<{ id: string }> }) {
   const [linkData, setLinkData] = useState<LinkData | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -34,7 +34,8 @@ export default function SuccessPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchLinkData = async () => {
       try {
-        console.log('🔍 Buscando dados do link:', params.id)
+        const resolvedParams = await params
+        console.log('🔍 Buscando dados do link:', resolvedParams.id)
         
         // Buscar dados do link
         const { data: link, error: linkError } = await supabase
@@ -48,7 +49,7 @@ export default function SuccessPage({ params }: { params: { id: string } }) {
             user_id,
             capture_type
           `)
-          .eq('id', params.id)
+          .eq('id', resolvedParams.id)
           .eq('status', 'active')
           .single()
 
@@ -93,7 +94,7 @@ export default function SuccessPage({ params }: { params: { id: string } }) {
     }
 
     fetchLinkData()
-  }, [params.id, router])
+  }, [params, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

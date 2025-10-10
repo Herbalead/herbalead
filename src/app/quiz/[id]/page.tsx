@@ -44,7 +44,7 @@ interface Question {
   button_text?: string
 }
 
-export default function QuizPage({ params }: { params: { id: string } }) {
+export default function QuizPage({ params }: { params: Promise<{ id: string }> }) {
   const [quiz, setQuiz] = useState<Quiz | null>(null)
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string | number>>({})
@@ -58,6 +58,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const loadQuiz = async () => {
       try {
+        const resolvedParams = await params
         // Buscar quiz
         const { data: quizData, error: quizError } = await supabase
           .from('quizzes')
@@ -78,7 +79,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
               button_text
             )
           `)
-          .eq('id', params.id)
+          .eq('id', resolvedParams.id)
           .eq('is_active', true)
           .single()
 
@@ -121,7 +122,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
     }
 
     loadQuiz()
-  }, [params.id])
+  }, [params])
 
   const handleComplete = useCallback(async () => {
     if (!quiz) return

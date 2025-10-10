@@ -99,14 +99,14 @@ export default function QuizBuilder() {
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [user, setUser] = useState<{ id: string } | null>(null)
-  const [userProfile, setUserProfile] = useState<any>(null)
+  const [userProfile, setUserProfile] = useState<{ name: string; email: string; phone?: string } | null>(null)
   const [showColors, setShowColors] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showQuestions, setShowQuestions] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
   const [showFinalPage, setShowFinalPage] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
-  const [savedQuizId, setSavedQuizId] = useState<string | null>(null)
+  const [, setSavedQuizId] = useState<string | null>(null)
 
   // Atualizar cores quando projeto mudar
   useEffect(() => {
@@ -138,7 +138,7 @@ export default function QuizBuilder() {
           } else {
             console.log('⚠️ Perfil não encontrado para email:', user.email)
             // Se não encontrar perfil, criar um temporário
-            setUserProfile({ name: 'Usuário', email: user.email })
+            setUserProfile({ name: 'Usuário', email: user.email || 'usuario@exemplo.com' })
           }
         } else {
           // Se não há usuário logado, usar um ID temporário para desenvolvimento
@@ -376,7 +376,7 @@ export default function QuizBuilder() {
         alert(`⚠️ Já existe um quiz com o nome de projeto "${quiz.project_name}"!\n\nTítulo do quiz existente: "${existingQuiz.title}"\n\nEscolha um nome diferente para evitar conflitos.`)
         return
       }
-    } catch (error) {
+    } catch {
       // Se não encontrar nenhum quiz com esse nome, continua normalmente
       console.log('Nome do projeto disponível:', quiz.project_name)
     }
@@ -1266,7 +1266,7 @@ export default function QuizBuilder() {
                             As perguntas aparecem em ordem diferente para cada pessoa
                           </p>
                           <p className="text-xs text-gray-500 mt-1">
-                            💡 Evita que pessoas "coloquem" umas das outras
+                            💡 Evita que pessoas &quot;coloquem&quot; umas das outras
                           </p>
                         </div>
                         <button
@@ -1318,7 +1318,7 @@ export default function QuizBuilder() {
               
               <h2 className="text-2xl font-bold text-gray-800 mb-2">Quiz Criado com Sucesso!</h2>
               <p className="text-gray-600 mb-6">
-                Seu quiz '{quiz.title}' está pronto para ser compartilhado.
+                Seu quiz &apos;{quiz.title}&apos; está pronto para ser compartilhado.
               </p>
 
               {/* Detalhes do Quiz */}

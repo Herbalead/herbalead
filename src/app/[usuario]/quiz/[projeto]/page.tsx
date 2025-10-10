@@ -53,10 +53,10 @@ interface Professional {
   company?: string
 }
 
-export default function QuizPage({ params }: { params: { usuario: string; projeto: string } }) {
+export default function QuizPage({ params }: { params: Promise<{ usuario: string; projeto: string }> }) {
   const [quiz, setQuiz] = useState<Quiz | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
-  const [professional, setProfessional] = useState<Professional | null>(null)
+  const [, setProfessional] = useState<Professional | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentQuestion, setCurrentQuestion] = useState(0)
@@ -67,7 +67,8 @@ export default function QuizPage({ params }: { params: { usuario: string; projet
   useEffect(() => {
     const loadQuiz = async () => {
       try {
-        console.log('🔍 Carregando quiz:', { usuario: params.usuario, projeto: params.projeto })
+        const resolvedParams = await params
+        console.log('🔍 Carregando quiz:', { usuario: resolvedParams.usuario, projeto: resolvedParams.projeto })
         
         // Buscar profissional pelo slug do usuário
         const { data: professionals } = await supabase
@@ -77,11 +78,11 @@ export default function QuizPage({ params }: { params: { usuario: string; projet
         console.log('👥 Profissionais encontrados:', professionals)
         
         const professional = professionals?.find(p => 
-          p.name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') === params.usuario
+          p.name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') === resolvedParams.usuario
         )
         
         if (!professional) {
-          console.log('❌ Profissional não encontrado para slug:', params.usuario)
+          console.log('❌ Profissional não encontrado para slug:', resolvedParams.usuario)
           setError('Usuário não encontrado')
           return
         }
@@ -94,7 +95,7 @@ export default function QuizPage({ params }: { params: { usuario: string; projet
           .from('quizzes')
           .select('*')
           .eq('professional_id', professional.id)
-          .eq('project_name', params.projeto)
+          .eq('project_name', resolvedParams.projeto)
           .eq('is_active', true)
           .single()
         
@@ -141,7 +142,7 @@ export default function QuizPage({ params }: { params: { usuario: string; projet
     }
 
     loadQuiz()
-  }, [params.usuario, params.projeto])
+  }, [params])
 
   const handleAnswer = (questionIndex: number, answerIndex: number) => {
     setAnswers(prev => ({

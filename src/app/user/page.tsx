@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Plus, Link as LinkIcon, Users, TrendingUp, Calendar, Settings } from 'lucide-react'
+import { Plus, Link as LinkIcon, Users, TrendingUp, Settings } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 export default function UserDashboard() {
@@ -22,10 +22,10 @@ export default function UserDashboard() {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const [editingLink, setEditingLink] = useState<any>(null)
+  const [editingLink, setEditingLink] = useState<Record<string, unknown> | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
   const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null)
-  const [userLinks, setUserLinks] = useState<any[]>([])
+  const [userLinks, setUserLinks] = useState<Record<string, unknown>[]>([])
   const [userProfile, setUserProfile] = useState({
     name: '',
     email: '',
@@ -272,18 +272,18 @@ export default function UserDashboard() {
     }
   }
 
-  const editLink = (link: any) => {
+  const editLink = (link: Record<string, unknown>) => {
     setEditingLink(link)
     setNewLink({
-      name: link.name,
-      tool_name: link.tool_name,
-      cta_text: link.cta_text,
-      redirect_url: link.redirect_url,
-      custom_url: link.custom_url || '',
-      custom_message: link.custom_message,
-      capture_type: link.capture_type,
-      material_title: link.material_title || '',
-      material_description: link.material_description || ''
+      name: String(link.name || ''),
+      tool_name: String(link.tool_name || ''),
+      cta_text: String(link.cta_text || ''),
+      redirect_url: String(link.redirect_url || ''),
+      custom_url: String(link.custom_url || ''),
+      custom_message: String(link.custom_message || ''),
+      capture_type: String(link.capture_type || ''),
+      material_title: String(link.material_title || ''),
+      material_description: String(link.material_description || '')
     })
     setShowEditModal(true)
   }
@@ -380,18 +380,18 @@ export default function UserDashboard() {
     }
   }
 
-  const copyLink = async (link: any) => {
+  const copyLink = async (link: Record<string, unknown>) => {
     try {
       // Gerar slug personalizado baseado no usuário e projeto
       const userSlug = userProfile.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-      const projectSlug = link.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      const projectSlug = String(link.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
       const personalizedUrl = `${window.location.origin}/${userSlug}/${projectSlug}`
       
       // Copiar para a área de transferência
       await navigator.clipboard.writeText(personalizedUrl)
       
       // Mostrar feedback visual
-      setCopiedLinkId(link.id)
+      setCopiedLinkId(String(link.id || ''))
       setTimeout(() => {
         setCopiedLinkId(null)
       }, 2000)
@@ -401,7 +401,7 @@ export default function UserDashboard() {
       console.error('❌ Erro ao copiar link:', error)
       // Fallback para navegadores mais antigos
       const userSlug = userProfile.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-      const projectSlug = link.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      const projectSlug = String(link.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
       const personalizedUrl = `${window.location.origin}/${userSlug}/${projectSlug}`
       
       const textArea = document.createElement('textarea')
@@ -411,7 +411,7 @@ export default function UserDashboard() {
       document.execCommand('copy')
       document.body.removeChild(textArea)
       
-      setCopiedLinkId(link.id)
+      setCopiedLinkId(String(link.id || ''))
       setTimeout(() => {
         setCopiedLinkId(null)
       }, 2000)
@@ -617,13 +617,13 @@ export default function UserDashboard() {
               {userLinks.length > 0 ? (
                 <div className="space-y-3">
                   {userLinks.slice(0, 3).map((link) => (
-                    <div key={link.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={String(link.id || '')} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div>
-                        <p className="font-medium text-gray-900">{link.project_name}</p>
-                        <p className="text-sm text-gray-500">{link.tool_name}</p>
+                        <p className="font-medium text-gray-900">{String(link.project_name || '')}</p>
+                        <p className="text-sm text-gray-500">{String(link.tool_name || '')}</p>
                       </div>
                       <span className="text-sm text-gray-500">
-                        {new Date(link.created_at).toLocaleDateString()}
+                        {new Date(String(link.created_at || '')).toLocaleDateString()}
                       </span>
                     </div>
                   ))}

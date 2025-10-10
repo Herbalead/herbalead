@@ -10,8 +10,6 @@ import {
   Heart,
   Activity,
   Target,
-  Share2,
-  Copy
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -104,19 +102,6 @@ export default function BMICalculatorPage() {
     }
   }
 
-  const copyResults = () => {
-    if (!results) return
-    const text = `Meu IMC: ${results.bmi} - ${results.category}\n\nRecomendações:\n${results.recommendations.map(r => `• ${r}`).join('\n')}\n\nCalculado com Herbalead - Ferramentas profissionais de bem-estar`
-    navigator.clipboard.writeText(text)
-    alert('Resultados copiados para a área de transferência!')
-  }
-
-  const shareResults = () => {
-    if (!results) return
-    const text = `Descobri meu IMC com Herbalead! Meu resultado: ${results.bmi} - ${results.category}. Que tal você também calcular o seu?`
-    const url = window.location.href
-    navigator.share({ title: 'Meu IMC - Herbalead', text, url })
-  }
 
   if (showResults && results) {
     return (
@@ -214,8 +199,8 @@ export default function BMICalculatorPage() {
             <button 
               onClick={() => {
                 // Buscar WhatsApp do distribuidor que criou o link
-                const urlParams = new URLSearchParams(window.location.search)
-                const ref = urlParams.get('ref') || 'andre-faula'
+                // const urlParams = new URLSearchParams(window.location.search)
+                // const referral = urlParams.get('ref') || 'andre-faula'
                 
                 // Por enquanto usar número fixo, depois conectar ao banco
                 const whatsappUrl = 'https://wa.me/5519981868000?text=Olá! Gostaria de consultar um profissional de bem-estar baseado no meu resultado de IMC.'

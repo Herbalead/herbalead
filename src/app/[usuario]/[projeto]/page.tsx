@@ -8,7 +8,16 @@ export default function PersonalizedLinkPage() {
   const params = useParams()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [linkData, setLinkData] = useState<any>(null)
+  const [linkData, setLinkData] = useState<{
+    name?: string
+    tool_name?: string
+    redirect_url?: string
+    cta_text?: string
+    custom_message?: string
+    capture_type?: string
+    material_title?: string
+    material_description?: string
+  } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const usuario = params.usuario as string
@@ -138,7 +147,7 @@ export default function PersonalizedLinkPage() {
   }, [usuario, projeto])
 
   const handleRedirect = () => {
-    if (linkData?.redirect_url) {
+    if (linkData?.redirect_url && typeof linkData.redirect_url === 'string') {
       window.open(linkData.redirect_url, '_blank')
     }
   }
