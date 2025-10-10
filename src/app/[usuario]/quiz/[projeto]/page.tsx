@@ -159,15 +159,16 @@ export default function QuizPage({ params }: { params: Promise<{ usuario: string
     }
   }
 
-  const calculateScore = () => {
-    let correctAnswers = 0
-    questions.forEach((question, index) => {
-      if (answers[index] === question.correct_answer) {
-        correctAnswers++
-      }
-    })
-    return Math.round((correctAnswers / questions.length) * 100)
-  }
+  // Função de pontuação desabilitada por enquanto
+  // const calculateScore = () => {
+  //   let correctAnswers = 0
+  //   questions.forEach((question, index) => {
+  //     if (answers[index] === question.correct_answer) {
+  //       correctAnswers++
+  //     }
+  //   })
+  //   return Math.round((correctAnswers / questions.length) * 100)
+  // }
 
   if (loading) {
     return (
@@ -225,7 +226,6 @@ export default function QuizPage({ params }: { params: Promise<{ usuario: string
   }
 
   if (showResults) {
-    const score = calculateScore()
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: quiz.colors.background }}>
         <div className="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full">
@@ -240,14 +240,8 @@ export default function QuizPage({ params }: { params: Promise<{ usuario: string
               {quiz.settings.congratulationsMessage || 'Parabéns! Você concluiu o quiz com sucesso! 🎉'}
             </h1>
             
-            <div className="text-4xl font-bold mb-4" style={{ color: quiz.colors.primary }}>
-              {score}%
-            </div>
-            
             <p className="text-gray-600 mb-8">
-              Você acertou {Object.values(answers).filter((answer, index) => 
-                answer === questions[index].correct_answer
-              ).length} de {questions.length} perguntas.
+              Obrigado por participar! Suas respostas foram registradas com sucesso.
             </p>
             
             <button 
