@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Download, Play, CheckCircle, Lock, BookOpen, Award, Clock, Users, Star } from 'lucide-react'
+import { Download, Play, CheckCircle, Lock, BookOpen, Clock, Star } from 'lucide-react'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 
 interface Course {
@@ -40,19 +40,23 @@ interface Enrollment {
   is_active: boolean
 }
 
+interface User {
+  id: string
+  email: string
+}
+
 export default function CoursePage() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [hasAccess, setHasAccess] = useState(false)
   const [loading, setLoading] = useState(true)
   const [courses, setCourses] = useState<Course[]>([])
   const [enrolledCourses, setEnrolledCourses] = useState<Enrollment[]>([])
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
   const [modules, setModules] = useState<CourseModule[]>([])
-  const [userProgress, setUserProgress] = useState<any[]>([])
 
   useEffect(() => {
     checkUserAccess()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkUserAccess = async () => {
     try {

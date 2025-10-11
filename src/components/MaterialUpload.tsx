@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Upload, FileText, X, CheckCircle } from 'lucide-react'
+import { Upload, FileText, CheckCircle } from 'lucide-react'
 
 interface MaterialUploadProps {
   moduleId: string

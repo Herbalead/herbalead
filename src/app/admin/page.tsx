@@ -20,7 +20,6 @@ import {
   ChevronDown,
   ChevronRight,
   UserPlus,
-  Database,
   Shield,
   LogOut,
   CheckCircle,
@@ -80,8 +79,15 @@ interface Notification {
   duration?: number
 }
 
+interface User {
+  id: string
+  email: string
+  name?: string
+  is_admin?: boolean
+}
+
 export default function AdminDashboard() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [courses, setCourses] = useState<Course[]>([])
@@ -101,7 +107,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     checkAdminAccess()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Função para mostrar notificações
   const showNotification = (type: Notification['type'], title: string, message: string, duration: number = 5000) => {
@@ -274,18 +280,18 @@ export default function AdminDashboard() {
       const courseModules = modules.filter(m => m.course_id === courseId)
       console.log(`📄 Encontrados ${courseModules.length} módulos para excluir`)
       
-      for (const module of courseModules) {
-        console.log(`🗑️ Excluindo materiais do módulo: ${module.title}`)
+      for (const courseModule of courseModules) {
+        console.log(`🗑️ Excluindo materiais do módulo: ${courseModule.title}`)
         const { error: materialsError } = await supabase
           .from('course_materials')
           .delete()
-          .eq('module_id', module.id)
+          .eq('module_id', courseModule.id)
 
         if (materialsError) {
           console.error('❌ Erro ao excluir materiais:', materialsError)
           throw materialsError
         }
-        console.log(`✅ Materiais do módulo ${module.title} excluídos`)
+        console.log(`✅ Materiais do módulo ${courseModule.title} excluídos`)
       }
 
       // Depois excluir todos os módulos do curso
@@ -602,9 +608,10 @@ export default function AdminDashboard() {
         
         showNotification('success', 'Usuário Criado!', `${newUserData.name} foi criado como administrador!`)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao criar usuário:', error)
-      showNotification('error', 'Erro ao Criar Usuário', error.message || 'Não foi possível criar o usuário.')
+      const errorMessage = error instanceof Error ? error.message : 'Não foi possível criar o usuário.'
+      showNotification('error', 'Erro ao Criar Usuário', errorMessage)
     }
   }
 
