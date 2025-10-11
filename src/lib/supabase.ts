@@ -36,6 +36,12 @@ export async function signUp(email: string, password: string, userType: string, 
     
     // Criar perfil profissional após cadastro
     if (authData.user && userType === 'professional') {
+      console.log('🔧 Criando perfil profissional...', { 
+        userId: authData.user.id, 
+        email, 
+        profileData 
+      })
+      
       try {
         const { error: profileError } = await supabase
           .from('professionals')
@@ -52,6 +58,12 @@ export async function signUp(email: string, password: string, userType: string, 
 
         if (profileError) {
           console.error('❌ Erro ao criar perfil profissional:', profileError)
+          console.error('❌ Detalhes do erro:', {
+            code: profileError.code,
+            message: profileError.message,
+            details: profileError.details,
+            hint: profileError.hint
+          })
           // Não falhar o cadastro se o perfil não for criado
         } else {
           console.log('✅ Perfil profissional criado com sucesso')
@@ -60,6 +72,11 @@ export async function signUp(email: string, password: string, userType: string, 
         console.error('❌ Erro ao criar perfil profissional:', profileError)
         // Não falhar o cadastro se o perfil não for criado
       }
+    } else {
+      console.log('⚠️ Não criando perfil profissional:', { 
+        hasUser: !!authData.user, 
+        userType 
+      })
     }
     
     return authData
