@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Plus, Link as LinkIcon, Users, TrendingUp, Settings } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import HerbaleadLogo from '@/components/HerbaleadLogo'
 
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -540,10 +541,8 @@ export default function UserDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <Link href="/" className="text-2xl font-bold text-green-600">
-                Herbalead
-              </Link>
-              </div>
+              <HerbaleadLogo size="lg" variant="horizontal" />
+            </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">{userProfile.name}</span>
               <Link href="/login" className="text-gray-500 hover:text-gray-700">

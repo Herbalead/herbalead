@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Calculator, Globe, ArrowRight, Users, TrendingUp, Star, Shield, Play, Target, Award, Zap } from 'lucide-react'
+import HerbaleadLogo from '@/components/HerbaleadLogo'
 
 export default function HerbaleadLandingPage() {
   // Fix: Corrigir erro de build no Vercel
@@ -173,19 +174,13 @@ export default function HerbaleadLandingPage() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
+          <div className="flex items-center justify-between py-6">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
-                <Calculator className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Herbalead</h1>
-                <p className="text-sm text-gray-600">Tecnologia para Distribuidores de Bem-Estar</p>
-              </div>
+              <HerbaleadLogo size="lg" variant="horizontal" responsive={true} />
             </div>
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => window.open('https://wa.me/5519996049800', '_blank')}
+                onClick={() => window.open('https://api.whatsapp.com/send?phone=5519996049800&text=Estou%20no%20site%20e%20gostaria%20de%20entender%20melhor', '_blank')}
                 className="px-4 py-2 text-emerald-600 border border-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors flex items-center"
               >
                 <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -352,18 +347,12 @@ export default function HerbaleadLandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => document.getElementById('ferramentas')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => router.push('/login')}
               className="px-8 py-4 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center"
             >
               <Play className="w-5 h-5 mr-2" />
               Começar Agora
               <ArrowRight className="w-5 h-5 ml-2" />
-            </button>
-            <button
-              onClick={() => router.push('/register')}
-              className="px-8 py-4 bg-transparent text-white border-2 border-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
-            >
-              Começar
             </button>
           </div>
         </div>

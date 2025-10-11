@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Mail, Lock, User, Phone, Building, GraduationCap } from 'lucide-react'
 import { signUp, signIn, signOut } from '@/lib/supabase'
+import HerbaleadLogo from '@/components/HerbaleadLogo'
 
 interface FormData {
   email: string

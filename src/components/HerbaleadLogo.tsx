@@ -1,58 +1,66 @@
 'use client'
 
+import React from 'react';
+
 interface HerbaleadLogoProps {
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
   showText?: boolean
   className?: string
+  variant?: 'horizontal' | 'vertical' | 'iconOnly' | 'minimal'
+  responsive?: boolean
 }
 
-export default function HerbaleadLogo({ size = 'md', showText = true, className = '' }: HerbaleadLogoProps) {
+export default function HerbaleadLogo({ 
+  size = 'md', 
+  showText = true, 
+  className = '',
+  variant = 'horizontal',
+  responsive = false
+}: HerbaleadLogoProps) {
+  
   const sizeClasses = {
-    sm: 'w-8 h-8',
-    md: 'w-12 h-12', 
-    lg: 'w-16 h-16'
+    sm: 'h-8',
+    md: 'h-10', 
+    lg: 'h-14',
+    xl: 'h-16'
   }
   
-  const textSizes = {
-    sm: 'text-sm',
-    md: 'text-lg',
-    lg: 'text-xl'
+  const iconSizeClasses = {
+    sm: 'w-8 h-8',
+    md: 'w-10 h-10', 
+    lg: 'w-14 h-14',
+    xl: 'w-16 h-16'
+  }
+
+  // Responsive classes
+  const responsiveClasses = responsive ? 'h-10 md:h-12 lg:h-14' : sizeClasses[size]
+
+  // Logo paths
+  const logoPaths = {
+    horizontal: '/logos/herbalead/herbalead-logo-horizontal.png',
+    vertical: '/logos/herbalead/herbalead-logo-vertical.png',
+    iconOnly: '/logos/herbalead/herbalead-icon-only.png',
+    minimal: '/logos/herbalead/herbalead-logo-minimal.png',
+  }
+
+  // For icon-only variant, don't show text
+  if (variant === 'iconOnly') {
+    return (
+      <img
+        src={logoPaths.iconOnly}
+        alt="HerbaLead"
+        className={`${iconSizeClasses[size]} ${className}`}
+      />
+    )
   }
 
   return (
-    <div className={`flex items-center space-x-3 ${className}`}>
-      {/* Logo Icon */}
-      <div className={`${sizeClasses[size]} bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg relative overflow-hidden`}>
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="w-full h-full bg-gradient-to-br from-white/30 to-transparent"></div>
-        </div>
-        
-        {/* Letter H */}
-        <div className={`text-white font-bold ${textSizes[size]} relative z-10`}>
-          H
-        </div>
-        
-        {/* Decorative Elements */}
-        <div className="absolute top-1 right-1 w-1 h-1 bg-white/40 rounded-full"></div>
-        <div className="absolute bottom-1 left-1 w-1 h-1 bg-white/40 rounded-full"></div>
-      </div>
-      
-      {/* Text */}
-      {showText && (
-        <div>
-          <h1 className={`font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent ${
-            size === 'sm' ? 'text-lg' : size === 'md' ? 'text-2xl' : 'text-3xl'
-          }`}>
-            Herbalead
-          </h1>
-          <p className={`text-gray-500 font-medium ${
-            size === 'sm' ? 'text-xs' : 'text-xs'
-          }`}>
-            Bem-estar natural
-          </p>
-        </div>
-      )}
+    <div className={`flex items-center ${className}`}>
+      <img
+        src={logoPaths[variant]}
+        alt="HerbaLead - Your Lead Accelerator"
+        className={`${responsiveClasses} w-auto`}
+      />
     </div>
   )
 }
