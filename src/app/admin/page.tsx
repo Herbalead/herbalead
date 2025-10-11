@@ -33,25 +33,13 @@ interface Course {
   id: string
   title: string
   description: string
-  modules: any[]
+  modules: Module[]
   is_active: boolean
   created_at: string
   updated_at: string
 }
 
-interface Module {
-  id: string
-  course_id: string
-  title: string
-  description: string
-  duration: string
-  video_url?: string
-  materials: any[]
-  order_index: number
-  is_active: boolean
-}
-
-interface Material {
+interface CourseMaterial {
   id: string
   module_id: string
   title: string
@@ -61,6 +49,19 @@ interface Material {
   download_count: number
   is_active: boolean
 }
+
+interface Module {
+  id: string
+  course_id: string
+  title: string
+  description: string
+  duration: string
+  video_url?: string
+  materials: CourseMaterial[]
+  order_index: number
+  is_active: boolean
+}
+
 
 interface Professional {
   id: string
@@ -92,7 +93,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [courses, setCourses] = useState<Course[]>([])
   const [modules, setModules] = useState<Module[]>([])
-  const [materials, setMaterials] = useState<Material[]>([])
+  const [materials, setMaterials] = useState<CourseMaterial[]>([])
   const [professionals, setProfessionals] = useState<Professional[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set())
