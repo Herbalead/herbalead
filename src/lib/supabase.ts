@@ -33,6 +33,35 @@ export async function signUp(email: string, password: string, userType: string, 
     }
 
     console.log('✅ Usuário criado no auth:', authData.user?.id)
+    
+    // Criar perfil profissional após cadastro
+    if (authData.user && userType === 'professional') {
+      try {
+        const { error: profileError } = await supabase
+          .from('professionals')
+          .insert({
+            id: authData.user.id,
+            email: email,
+            name: profileData.name as string,
+            phone: profileData.phone as string,
+            specialty: profileData.specialty as string,
+            company: profileData.company as string,
+            isActive: true,
+            maxLeads: 100
+          })
+
+        if (profileError) {
+          console.error('❌ Erro ao criar perfil profissional:', profileError)
+          // Não falhar o cadastro se o perfil não for criado
+        } else {
+          console.log('✅ Perfil profissional criado com sucesso')
+        }
+      } catch (profileError) {
+        console.error('❌ Erro ao criar perfil profissional:', profileError)
+        // Não falhar o cadastro se o perfil não for criado
+      }
+    }
+    
     return authData
   } catch (error) {
     console.error('❌ Erro completo no signUp:', error)
@@ -65,6 +94,37 @@ export async function signIn(email: string, password: string) {
 export async function signOut() {
   const { error } = await supabase.auth.signOut()
   if (error) throw error
+}
+
+// Função para criar perfil profissional para usuários existentes
+export async function createProfessionalProfile(userId: string, email: string, profileData: Record<string, unknown>) {
+  try {
+    console.log('👤 Criando perfil profissional para usuário existente...', { userId, email })
+    
+    const { error } = await supabase
+      .from('professionals')
+      .insert({
+        id: userId,
+        email: email,
+        name: profileData.name as string || 'Usuário',
+        phone: profileData.phone as string,
+        specialty: profileData.specialty as string,
+        company: profileData.company as string,
+        isActive: true,
+        maxLeads: 100
+      })
+
+    if (error) {
+      console.error('❌ Erro ao criar perfil profissional:', error)
+      throw error
+    }
+
+    console.log('✅ Perfil profissional criado com sucesso')
+    return true
+  } catch (error) {
+    console.error('❌ Erro completo ao criar perfil profissional:', error)
+    throw error
+  }
 }
 
 // Tipos para o banco de dados
