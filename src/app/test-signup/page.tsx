@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { signUp, createProfessionalProfile } from '@/lib/supabase'
+import { signUp } from '@/lib/supabase'
 
 export default function TestSignup() {
   const [formData, setFormData] = useState({
