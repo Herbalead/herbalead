@@ -51,9 +51,7 @@ export async function signUp(email: string, password: string, userType: string, 
             name: profileData.name as string,
             phone: profileData.phone as string,
             specialty: profileData.specialty as string,
-            company: profileData.company as string,
-            isActive: true,
-            maxLeads: 100
+            company: profileData.company as string
           })
 
         if (profileError) {
@@ -126,9 +124,7 @@ export async function createProfessionalProfile(userId: string, email: string, p
         name: profileData.name as string || 'Usuário',
         phone: profileData.phone as string,
         specialty: profileData.specialty as string,
-        company: profileData.company as string,
-        isActive: true,
-        maxLeads: 100
+        company: profileData.company as string
       })
 
     if (error) {

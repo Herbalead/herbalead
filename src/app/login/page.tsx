@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Mail, Lock, User, Phone, Building, GraduationCap } from 'lucide-react'
-import { signUp, signIn, signOut } from '@/lib/supabase'
+import { signIn, signOut } from '@/lib/supabase'
 
 interface FormData {
   email: string
@@ -80,7 +80,28 @@ export default function LoginPage() {
           project_id: projectDomain // Associar ao projeto detectado
         }
 
-        await signUp(formData.email, formData.password, 'professional', profileData)
+        // Usar API route para cadastro
+        const response = await fetch('/api/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            name: formData.name,
+            phone: formData.phone,
+            specialty: formData.specialty,
+            company: formData.company
+          })
+        })
+
+        const data = await response.json()
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Erro no cadastro')
+        }
+        
         router.push('/user')
       }
     } catch (err: unknown) {

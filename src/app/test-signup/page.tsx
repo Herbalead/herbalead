@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { signUp } from '@/lib/supabase'
+
+console.log('🧪 Teste: Página carregada')
 
 export default function TestSignup() {
   const [formData, setFormData] = useState({
@@ -18,6 +19,7 @@ export default function TestSignup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('🧪 Teste: Formulário submetido!')
     setLoading(true)
     setResult('')
 
@@ -26,21 +28,30 @@ export default function TestSignup() {
         throw new Error('Senhas não coincidem')
       }
 
-      const profileData = {
-        name: formData.name,
-        phone: formData.phone,
-        specialty: formData.specialty,
-        company: formData.company
-      }
-
-      console.log('🧪 Teste: Iniciando cadastro...')
-      const authData = await signUp(formData.email, formData.password, 'professional', profileData)
+      console.log('🧪 Teste: Enviando para API...')
       
-      if (authData.user) {
-        setResult(`✅ Cadastro realizado com sucesso! ID: ${authData.user.id}`)
-      } else {
-        setResult('⚠️ Cadastro realizado, mas usuário não confirmado')
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          name: formData.name,
+          phone: formData.phone,
+          specialty: formData.specialty,
+          company: formData.company
+        })
+      })
+
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro no cadastro')
       }
+      
+      setResult(`✅ ${data.message} ID: ${data.user?.id}`)
     } catch (error) {
       console.error('❌ Erro no teste:', error)
       setResult(`❌ Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
