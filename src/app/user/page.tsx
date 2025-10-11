@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Plus, Link as LinkIcon, Users, TrendingUp, Settings } from 'lucide-react'
+import { Plus, Link as LinkIcon, Users, TrendingUp, Settings, BookOpen } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 
@@ -602,12 +602,13 @@ export default function UserDashboard() {
             </button>
               
             <button
-                onClick={() => setActiveTab('links')}
-                className="bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2"
+                onClick={() => window.location.href = '/course'}
+                className="bg-orange-600 text-white p-4 rounded-lg hover:bg-orange-700 flex items-center justify-center space-x-2"
               >
-                <TrendingUp className="w-5 h-5" />
-                <span>Ver Relatórios</span>
+                <BookOpen className="w-5 h-5" />
+                <span>Acessar Curso</span>
             </button>
+              
         </div>
 
             {/* Atividade Recente - menor e no final */}
