@@ -12,15 +12,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate, max-age=0, private',
-          },
-          {
-            key: 'Pragma',
-            value: 'no-cache',
-          },
-          {
-            key: 'Expires',
-            value: '0',
+            value: 'public, max-age=300, s-maxage=300, stale-while-revalidate=60',
           },
           {
             key: 'X-Content-Type-Options',
@@ -46,7 +38,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: '/(.*).css',
+        source: '/api/(.*)',
         headers: [
           {
             key: 'Cache-Control',
@@ -55,7 +47,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: '/(.*).js',
+        source: '/admin/(.*)',
         headers: [
           {
             key: 'Cache-Control',
