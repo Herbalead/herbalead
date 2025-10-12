@@ -194,6 +194,10 @@ export default function CoursePage() {
     return url.includes('youtube.com') || url.includes('youtu.be')
   }
 
+  const isSupabaseVideoUrl = (url: string): boolean => {
+    return url.includes('supabase') && (url.includes('.mp4') || url.includes('.webm') || url.includes('.ogg') || url.includes('.mov') || url.includes('.avi'))
+  }
+
   const getYouTubeEmbedUrl = (url: string): string => {
     let videoId = ''
     
@@ -482,6 +486,17 @@ export default function CoursePage() {
                           </video>
                         </div>
                       )}
+                      
+                      {/* Indicador do tipo de vídeo */}
+                      <div className="mt-2 text-xs text-gray-500">
+                        {isYouTubeUrl(module.videoUrl) ? (
+                          <span className="text-red-600">📺 YouTube</span>
+                        ) : isSupabaseVideoUrl(module.videoUrl) ? (
+                          <span className="text-green-600">🔒 Vídeo Privado</span>
+                        ) : (
+                          <span className="text-blue-600">🎥 Vídeo Externo</span>
+                        )}
+                      </div>
                       <div className="mt-2 text-xs text-gray-500">
                         URL: {module.videoUrl}
                       </div>

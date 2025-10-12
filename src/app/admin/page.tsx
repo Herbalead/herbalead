@@ -117,10 +117,16 @@ export default function AdminDashboard() {
 
   // Função para mostrar notificações
   const showNotification = (type: Notification['type'], title: string, message: string, duration: number = 5000) => {
+    console.log('🔔 showNotification chamada:', { type, title, message })
     const id = Date.now().toString()
     const notification: Notification = { id, type, title, message, duration }
     
-    setNotifications(prev => [...prev, notification])
+    console.log('📝 Adicionando notificação:', notification)
+    setNotifications(prev => {
+      const newNotifications = [...prev, notification]
+      console.log('📋 Total de notificações:', newNotifications.length)
+      return newNotifications
+    })
     
     // Auto remover após o tempo especificado
     setTimeout(() => {
@@ -578,6 +584,10 @@ export default function AdminDashboard() {
     return url.includes('youtube.com') || url.includes('youtu.be')
   }
 
+  const isSupabaseVideoUrl = (url: string): boolean => {
+    return url.includes('supabase') && (url.includes('.mp4') || url.includes('.webm') || url.includes('.ogg') || url.includes('.mov') || url.includes('.avi'))
+  }
+
   const getYouTubeEmbedUrl = (url: string): string => {
     let videoId = ''
     
@@ -593,7 +603,117 @@ export default function AdminDashboard() {
     return `https://www.youtube.com/embed/${videoId}`
   }
 
+  const uploadVideoForModule = async (moduleId: string) => {
+    console.log('🎬 uploadVideoForModule chamado para:', moduleId)
+    
+    // Bucket público - sem necessidade de autenticação
+    console.log('✅ Usando bucket público - sem autenticação necessária')
+    
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.mp4,.webm,.ogg,.mov,.avi'
+    input.multiple = false
+    
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      console.log('📁 Arquivo selecionado:', file)
+      
+      if (!file) {
+        console.log('❌ Nenhum arquivo selecionado')
+        return
+      }
+
+      try {
+        console.log('🔄 Iniciando upload de vídeo...', { moduleId, fileName: file.name, size: file.size })
+        
+        // Mostrar notificação de início do upload
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1)
+        console.log('📢 Tentando mostrar notificação de início...')
+        showNotification('info', 'Iniciando Upload', `Enviando ${file.name} (${fileSizeMB}MB)...`)
+        console.log('✅ Notificação de início enviada')
+        
+        // Validar tipo de arquivo
+        const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo']
+        if (!allowedTypes.includes(file.type)) {
+          console.warn('⚠️ Tipo de arquivo não suportado:', file.type)
+          showNotification('warning', 'Formato Inválido', 'Formatos suportados: MP4, WebM, OGG, MOV, AVI')
+          return
+        }
+        
+        // Validar tamanho (100MB máximo por arquivo)
+        if (file.size > 100 * 1024 * 1024) {
+          console.warn('⚠️ Arquivo muito grande:', file.size)
+          const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1)
+          showNotification('error', 'Arquivo Muito Grande', `Arquivo de ${fileSizeMB}MB excede o limite de 100MB. Por favor, reduza o tamanho do vídeo.`)
+          return
+        }
+
+        const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+        const filePath = `course-videos/${fileName}`
+        console.log('📤 Fazendo upload para:', filePath)
+
+        console.log('📤 Tentando fazer upload via API...')
+        console.log('📂 Bucket: herbalead-public')
+        console.log('📁 Caminho:', filePath)
+        
+        // Upload via API route para contornar RLS
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('folder', 'course-videos')
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          console.error('❌ Erro no upload:', errorData)
+          throw new Error(errorData.error || 'Erro no upload')
+        }
+
+        const uploadData = await response.json()
+        console.log('✅ Upload realizado com sucesso:', uploadData)
+        console.log('🔗 URL pública gerada:', uploadData.url)
+
+        // Atualizar o módulo com a URL do vídeo
+        const module = modules.find(m => m.id === moduleId)
+        if (module) {
+          console.log('💾 Salvando URL do vídeo no banco de dados...')
+          
+          const { data: updateData, error } = await supabase
+            .from('course_modules')
+            .update({ video_url: uploadData.url })
+            .eq('id', moduleId)
+            .select()
+
+          if (error) {
+            console.error('❌ Erro ao salvar no banco:', error)
+            throw error
+          }
+          console.log('✅ Banco atualizado com sucesso:', updateData)
+
+          setModules(modules.map(m => 
+            m.id === moduleId 
+              ? { ...m, video_url: uploadData.url }
+              : m
+          ))
+          showNotification('success', 'Vídeo Enviado!', 'Vídeo enviado com sucesso!')
+        }
+      } catch (error) {
+        console.error('❌ Erro geral ao enviar vídeo:', error)
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+        showNotification('error', 'Erro ao Enviar Vídeo', `Erro: ${errorMessage}`)
+      }
+    }
+    
+    input.click()
+  }
+
   const uploadPDFForModule = async (moduleId: string) => {
+    // Bucket público - sem necessidade de autenticação
+    console.log('✅ Usando bucket público para PDFs - sem autenticação necessária')
+    
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = '.pdf'
@@ -605,6 +725,9 @@ export default function AdminDashboard() {
 
       try {
         console.log('🔄 Iniciando upload de PDFs...', { moduleId, fileCount: files.length })
+        
+        // Mostrar notificação de início do upload
+        showNotification('info', 'Iniciando Upload', `Enviando ${files.length} PDF(s)...`)
         
         const uploadedFiles: string[] = []
         
@@ -619,36 +742,39 @@ export default function AdminDashboard() {
           }
 
           // Validar tamanho do arquivo (50MB máximo para PDFs)
-          if (file.size > 50 * 1024 * 1024) {
-            console.warn('⚠️ Arquivo muito grande:', file.name, file.size)
-            showNotification('warning', 'Arquivo Muito Grande', `${file.name} é muito grande. Máximo 50MB.`)
-            continue
-          }
+                if (file.size > 50 * 1024 * 1024) {
+                  console.warn('⚠️ Arquivo muito grande:', file.name, file.size)
+                  const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1)
+                  showNotification('error', 'PDF Muito Grande', `${file.name} (${fileSizeMB}MB) excede o limite de 50MB. Por favor, reduza o tamanho do arquivo.`)
+                  continue
+                }
 
           // Upload do arquivo para Supabase Storage
           const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
           const filePath = `course-pdfs/${fileName}`
 
-          console.log('📤 Fazendo upload para:', filePath)
+          console.log('📤 Fazendo upload via API para:', filePath)
 
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('course-materials')
-            .upload(filePath, file)
+          // Upload via API route para contornar RLS
+          const formData = new FormData()
+          formData.append('file', file)
+          formData.append('folder', 'course-pdfs')
 
-          if (uploadError) {
-            console.error('❌ Erro no upload:', uploadError)
-            throw uploadError
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+          })
+
+          if (!response.ok) {
+            const errorData = await response.json()
+            console.error('❌ Erro no upload:', errorData)
+            throw new Error(errorData.error || 'Erro no upload')
           }
 
+          const uploadData = await response.json()
           console.log('✅ Upload realizado com sucesso:', uploadData)
-
-          // Obter URL pública do arquivo
-          const { data: urlData } = supabase.storage
-            .from('course-materials')
-            .getPublicUrl(filePath)
-
-          console.log('🔗 URL pública gerada:', urlData.publicUrl)
-          uploadedFiles.push(urlData.publicUrl)
+          console.log('🔗 URL pública gerada:', uploadData.url)
+          uploadedFiles.push(uploadData.url)
         }
 
         if (uploadedFiles.length > 0) {
@@ -1582,14 +1708,31 @@ export default function AdminDashboard() {
                       {/* URL do Vídeo */}
                       <div className="space-y-2 mb-6">
                         <label className="block text-sm font-medium text-gray-700">
-                          URL do Vídeo
+                          Vídeo do Módulo
                         </label>
+                        
+                        {/* Botão para upload de vídeo */}
+                        <button
+                          onClick={() => {
+                            console.log('🖱️ Botão de upload clicado para módulo:', module.id)
+                            uploadVideoForModule(module.id)
+                          }}
+                          className="w-full px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center mb-3"
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          Enviar Vídeo (MP4, WebM, OGG, MOV, AVI - Máx 100MB)
+                        </button>
+                        
+                        <div className="text-xs text-gray-500 mb-2">
+                          Ou cole a URL do YouTube abaixo:
+                        </div>
+                        
                         <input
                           type="url"
                           value={module.video_url || ''}
                           onChange={(e) => updateEditingModule(module.id, 'video_url', e.target.value)}
                           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                          placeholder="https://youtube.com/watch?v=..."
+                          placeholder="https://youtube.com/watch?v=... ou URL do vídeo enviado"
                         />
                         
                         {/* Preview do vídeo se URL existir */}
@@ -1598,22 +1741,22 @@ export default function AdminDashboard() {
                             <div className="text-xs text-gray-500 mb-2">Preview:</div>
                             <div className="bg-gray-100 rounded-lg p-3">
                               {isYouTubeUrl(module.video_url) ? (
-                                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                                <div className="w-full">
                                   <iframe
                                     src={getYouTubeEmbedUrl(module.video_url)}
                                     title="Preview do Vídeo"
-                                    className="absolute top-0 left-0 w-full h-full rounded"
+                                    className="w-full h-64 rounded"
                                     frameBorder="0"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     allowFullScreen
                                   ></iframe>
                                 </div>
                               ) : (
-                                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                                <div className="w-full">
                                   <video 
                                     src={module.video_url} 
                                     controls 
-                                    className="absolute top-0 left-0 w-full h-full object-cover rounded"
+                                    className="w-full h-64 object-contain rounded"
                                     preload="metadata"
                                     onError={(e) => {
                                       console.error('Erro no preview do vídeo:', e)
@@ -1626,6 +1769,17 @@ export default function AdminDashboard() {
                                     Seu navegador não suporta vídeos.
                                   </video>
                                 </div>
+                              )}
+                            </div>
+                            
+                            {/* Indicador do tipo de vídeo */}
+                            <div className="mt-2 text-xs text-gray-500">
+                              {isYouTubeUrl(module.video_url) ? (
+                                <span className="text-red-600">📺 YouTube</span>
+                              ) : isSupabaseVideoUrl(module.video_url) ? (
+                                <span className="text-green-600">🔒 Vídeo Privado (Supabase)</span>
+                              ) : (
+                                <span className="text-blue-600">🎥 Vídeo Externo</span>
                               )}
                             </div>
                           </div>
