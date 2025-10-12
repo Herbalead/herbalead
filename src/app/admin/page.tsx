@@ -25,7 +25,9 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  X
+  X,
+  Edit3,
+  GripVertical
 } from 'lucide-react'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 
@@ -110,6 +112,19 @@ export default function AdminDashboard() {
   const [showBulkEditModal, setShowBulkEditModal] = useState(false)
   const [, setSelectedCourseForBulkEdit] = useState<string | null>(null)
   const [editingModules, setEditingModules] = useState<Module[]>([])
+  const [showAddModuleModal, setShowAddModuleModal] = useState(false)
+  const [showEditModuleModal, setShowEditModuleModal] = useState(false)
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null)
+  const [selectedModule, setSelectedModule] = useState<Module | null>(null)
+  const [moduleFormData, setModuleFormData] = useState({
+    title: '',
+    description: '',
+    duration: '',
+    video_url: '',
+    pdf_materials: ''
+  })
+  const [uploadingPdf, setUploadingPdf] = useState(false)
+  const [selectedPdfFile, setSelectedPdfFile] = useState<File | null>(null)
 
   useEffect(() => {
     checkAdminAccess()
@@ -192,76 +207,76 @@ export default function AdminDashboard() {
 
   const loadData = async () => {
     try {
-      console.log('🔄 Carregando dados do Supabase...')
+      console.log('=== CARREGANDO DADOS DO SUPABASE ===')
       
       // Carregar cursos
-      console.log('📚 Carregando cursos...')
+      console.log('Carregando cursos...')
       const { data: coursesData, error: coursesError } = await supabase
         .from('courses')
         .select('*')
         .order('created_at', { ascending: false })
 
       if (coursesError) {
-        console.error('❌ Erro ao carregar cursos:', coursesError)
-        showNotification('error', 'Erro de Conexão', 'Não foi possível carregar os cursos do banco de dados.')
+        console.error('ERRO AO CARREGAR CURSOS:', coursesError)
+        alert('ERRO: Não foi possível carregar os cursos')
         return
       }
 
-      console.log('✅ Cursos carregados:', coursesData?.length || 0)
+      console.log('CURSOS CARREGADOS:', coursesData?.length || 0, coursesData)
       setCourses(coursesData || [])
 
       // Carregar módulos
-      console.log('📖 Carregando módulos...')
+      console.log('Carregando módulos...')
       const { data: modulesData, error: modulesError } = await supabase
         .from('course_modules')
         .select('*')
         .order('order_index', { ascending: true })
 
       if (modulesError) {
-        console.error('❌ Erro ao carregar módulos:', modulesError)
-        showNotification('error', 'Erro de Conexão', 'Não foi possível carregar os módulos do banco de dados.')
+        console.error('ERRO AO CARREGAR MÓDULOS:', modulesError)
+        alert('ERRO: Não foi possível carregar os módulos')
         return
       }
 
-      console.log('✅ Módulos carregados:', modulesData?.length || 0)
+      console.log('MÓDULOS CARREGADOS:', modulesData?.length || 0, modulesData)
       setModules(modulesData || [])
 
       // Carregar materiais
-      console.log('📄 Carregando materiais...')
+      console.log('Carregando materiais...')
       const { data: materialsData, error: materialsError } = await supabase
         .from('course_materials')
         .select('*')
         .order('created_at', { ascending: false })
 
       if (materialsError) {
-        console.error('❌ Erro ao carregar materiais:', materialsError)
-        showNotification('error', 'Erro de Conexão', 'Não foi possível carregar os materiais do banco de dados.')
+        console.error('ERRO AO CARREGAR MATERIAIS:', materialsError)
+        alert('ERRO: Não foi possível carregar os materiais')
         return
       }
 
-      console.log('✅ Materiais carregados:', materialsData?.length || 0)
+      console.log('MATERIAIS CARREGADOS:', materialsData?.length || 0, materialsData)
       setMaterials(materialsData || [])
 
       // Carregar profissionais
-      console.log('👥 Carregando profissionais...')
+      console.log('Carregando profissionais...')
       const { data: professionalsData, error: professionalsError } = await supabase
         .from('professionals')
         .select('*')
         .order('created_at', { ascending: false })
 
       if (professionalsError) {
-        console.error('❌ Erro ao carregar profissionais:', professionalsError)
-        showNotification('error', 'Erro de Conexão', 'Não foi possível carregar os profissionais do banco de dados.')
+        console.error('ERRO AO CARREGAR PROFISSIONAIS:', professionalsError)
+        alert('ERRO: Não foi possível carregar os profissionais')
         return
       }
 
-      console.log('✅ Profissionais carregados:', professionalsData?.length || 0)
+      console.log('PROFISSIONAIS CARREGADOS:', professionalsData?.length || 0, professionalsData)
       setProfessionals(professionalsData || [])
       
-      console.log('🎉 Todos os dados carregados com sucesso!')
+      console.log('=== TODOS OS DADOS CARREGADOS COM SUCESSO ===')
     } catch (error) {
-      console.error('❌ Erro geral ao carregar dados:', error)
-      showNotification('error', 'Erro de Conexão', 'Erro ao conectar com o banco de dados. Verifique sua conexão.')
+      console.error('ERRO GERAL AO CARREGAR DADOS:', error)
+      alert('ERRO GERAL: ' + (error as Error).message)
     }
   }
 
@@ -272,6 +287,9 @@ export default function AdminDashboard() {
     if (!title || !description) return
 
     try {
+      console.log(`📚 Criando curso: ${title}`)
+      showNotification('info', 'Criando Curso...', `Adicionando "${title}" ao banco de dados...`)
+      
       const { data, error } = await supabase
         .from('courses')
         .insert({
@@ -283,13 +301,20 @@ export default function AdminDashboard() {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Erro ao criar curso:', error)
+        throw error
+      }
       
-      setCourses([data, ...courses])
+      console.log(`✅ Curso ${title} criado com sucesso:`, data)
+      
+      // Recarregar dados para garantir sincronização
+      await loadData()
+      
       showNotification('success', 'Curso Criado!', `"${title}" foi criado com sucesso!`)
     } catch (error) {
       console.error('Erro ao criar curso:', error)
-      showNotification('error', 'Erro ao Criar Curso', 'Não foi possível criar o curso. Tente novamente.')
+      showNotification('error', 'Erro ao Criar Curso', `Erro: ${(error as Error).message || 'Não foi possível criar o curso. Tente novamente.'}`)
     }
   }
 
@@ -297,120 +322,251 @@ export default function AdminDashboard() {
     if (!confirm(`Tem certeza que deseja excluir o curso "${courseTitle}"?\n\nEsta ação não pode ser desfeita e excluirá todos os módulos e materiais associados.`)) return
 
     try {
-      console.log(`🗑️ Iniciando exclusão do curso: ${courseTitle} (ID: ${courseId})`)
+      console.log('=== INICIANDO EXCLUSÃO DE CURSO ===')
+      console.log('Curso:', courseTitle, 'ID:', courseId)
+      alert('INICIANDO: Excluindo curso "' + courseTitle + '"...')
       
       // Primeiro excluir todos os materiais dos módulos do curso
       const courseModules = modules.filter(m => m.course_id === courseId)
-      console.log(`📄 Encontrados ${courseModules.length} módulos para excluir`)
+      console.log('Módulos encontrados:', courseModules.length)
       
-      for (const courseModule of courseModules) {
-        console.log(`🗑️ Excluindo materiais do módulo: ${courseModule.title}`)
-        const { error: materialsError } = await supabase
-          .from('course_materials')
-          .delete()
-          .eq('module_id', courseModule.id)
+      if (courseModules.length > 0) {
+        alert('EXCLUINDO: Materiais de ' + courseModules.length + ' módulos...')
+        
+        for (const courseModule of courseModules) {
+          console.log('Excluindo materiais do módulo:', courseModule.title)
+          const { error: materialsError } = await supabase
+            .from('course_materials')
+            .delete()
+            .eq('module_id', courseModule.id)
 
-        if (materialsError) {
-          console.error('❌ Erro ao excluir materiais:', materialsError)
-          throw materialsError
+          if (materialsError) {
+            console.error('ERRO AO EXCLUIR MATERIAIS:', materialsError)
+            alert('ERRO: ' + materialsError.message)
+            throw materialsError
+          }
+          console.log('Materiais do módulo', courseModule.title, 'excluídos')
         }
-        console.log(`✅ Materiais do módulo ${courseModule.title} excluídos`)
       }
 
       // Depois excluir todos os módulos do curso
-      console.log(`🗑️ Excluindo módulos do curso...`)
+      console.log('Excluindo módulos do curso...')
+      alert('EXCLUINDO: ' + courseModules.length + ' módulos do curso...')
+      
       const { error: modulesError } = await supabase
         .from('course_modules')
         .delete()
         .eq('course_id', courseId)
 
       if (modulesError) {
-        console.error('❌ Erro ao excluir módulos:', modulesError)
+        console.error('ERRO AO EXCLUIR MÓDULOS:', modulesError)
+        alert('ERRO: ' + modulesError.message)
         throw modulesError
       }
-      console.log(`✅ Módulos do curso excluídos`)
+      console.log('Módulos do curso excluídos')
 
       // Por fim excluir o curso
-      console.log(`🗑️ Excluindo curso...`)
+      console.log('Excluindo curso...')
+      alert('EXCLUINDO: Curso "' + courseTitle + '"...')
+      
       const { error: courseError } = await supabase
         .from('courses')
         .delete()
         .eq('id', courseId)
 
       if (courseError) {
-        console.error('❌ Erro ao excluir curso:', courseError)
+        console.error('ERRO AO EXCLUIR CURSO:', courseError)
+        alert('ERRO: ' + courseError.message)
         throw courseError
       }
-      console.log(`✅ Curso ${courseTitle} excluído com sucesso`)
+      console.log('Curso', courseTitle, 'excluído com sucesso')
       
       // Recarregar dados do banco para garantir sincronização
+      alert('ATUALIZANDO: Recarregando dados do banco...')
       await loadData()
       
+      alert('SUCESSO: Curso "' + courseTitle + '" excluído com sucesso!')
       showNotification('success', 'Curso Excluído!', `"${courseTitle}" foi excluído com sucesso!`)
     } catch (error) {
-      console.error('Erro ao excluir curso:', error)
-      showNotification('error', 'Erro ao Excluir Curso', 'Não foi possível excluir o curso. Tente novamente.')
+      console.error('ERRO GERAL AO EXCLUIR CURSO:', error)
+      alert('ERRO GERAL: ' + (error as Error).message)
+      showNotification('error', 'Erro ao Excluir Curso', `Erro: ${(error as Error).message || 'Não foi possível excluir o curso. Tente novamente.'}`)
+    }
+  }
+
+  const uploadPdfFile = async (file: File) => {
+    setUploadingPdf(true)
+    showNotification('info', 'Enviando PDF...', 'Fazendo upload do arquivo PDF...')
+    
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('folder', 'course-pdfs')
+      
+      console.log('📤 Enviando PDF via API:', file.name)
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+      
+      const result = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Erro no upload')
+      }
+      
+      console.log('✅ PDF enviado com sucesso:', result.url)
+      showNotification('success', 'PDF Enviado!', `Arquivo "${file.name}" enviado com sucesso!`)
+      
+      // Adicionar URL do PDF aos materiais
+      const pdfUrl = `📄 ${file.name}: ${result.url}`
+      setModuleFormData(prev => ({
+        ...prev,
+        pdf_materials: prev.pdf_materials ? `${prev.pdf_materials}\n${pdfUrl}` : pdfUrl
+      }))
+      
+      return result.url
+    } catch (error) {
+      console.error('❌ Erro no upload do PDF:', error)
+      showNotification('error', 'Erro no Upload', `Não foi possível enviar o PDF: ${(error as Error).message}`)
+      throw error
+    } finally {
+      setUploadingPdf(false)
     }
   }
 
   const createModule = async (courseId: string) => {
-    const title = prompt('Título do módulo:')
-    const description = prompt('Descrição do módulo:')
-    const duration = prompt('Duração (ex: 15 min):')
-    
-    if (!title || !description || !duration) return
+    setSelectedCourseId(courseId)
+    setModuleFormData({
+      title: '',
+      description: '',
+      duration: '',
+      video_url: '',
+      pdf_materials: ''
+    })
+    setShowAddModuleModal(true)
+  }
 
+  const handleCreateModule = async () => {
+    console.log('=== INICIANDO CRIAÇÃO DE MÓDULO ===')
+    console.log('Dados do formulário:', moduleFormData)
+    console.log('Course ID selecionado:', selectedCourseId)
+    
+    if (!selectedCourseId || !moduleFormData.title || !moduleFormData.description || !moduleFormData.duration) {
+      console.log('ERRO: Campos obrigatórios não preenchidos')
+      alert('ERRO: Preencha título, descrição e duração!')
+      return
+    }
+
+    console.log('Validação passou, criando módulo...')
+    
     try {
+      // Extrair URLs dos PDFs do campo pdf_materials
+      const pdfUrls: string[] = []
+      if (moduleFormData.pdf_materials) {
+        const lines = moduleFormData.pdf_materials.split('\n')
+        lines.forEach(line => {
+          if (line.includes('http')) {
+            const url = line.split(' ').find(part => part.startsWith('http'))
+            if (url) pdfUrls.push(url)
+          }
+        })
+      }
+
+      const moduleData = {
+        course_id: selectedCourseId,
+        title: moduleFormData.title,
+        description: moduleFormData.description,
+        duration: moduleFormData.duration,
+        video_url: moduleFormData.video_url || null,
+        pdf_materials: moduleFormData.pdf_materials || null,
+        pdf_files: pdfUrls.length > 0 ? pdfUrls : null,
+        order_index: modules.filter(m => m.course_id === selectedCourseId).length + 1,
+        is_active: true
+      }
+      
+      console.log('Enviando dados para Supabase:', moduleData)
+      
       const { data, error } = await supabase
         .from('course_modules')
-        .insert({
-          course_id: courseId,
-          title,
-          description,
-          duration,
-          order_index: modules.length + 1,
-          is_active: true
-        })
+        .insert(moduleData)
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('ERRO DO SUPABASE:', error)
+        alert('ERRO: ' + error.message)
+        throw error
+      }
       
-      setModules([...modules, data])
-      showNotification('success', 'Módulo Criado!', `"${title}" foi criado com sucesso!`)
+      console.log('MÓDULO CRIADO COM SUCESSO:', data)
+      
+      // Recarregar dados do banco para garantir sincronização
+      console.log('Recarregando dados do banco...')
+      await loadData()
+      
+      setShowAddModuleModal(false)
+      console.log('Mostrando notificação de sucesso...')
+      alert('SUCESSO: Módulo "' + moduleFormData.title + '" criado com sucesso!')
+      showNotification('success', 'Módulo Criado!', `"${moduleFormData.title}" foi criado com sucesso!`)
     } catch (error) {
-      console.error('Erro ao criar módulo:', error)
-      showNotification('error', 'Erro ao Criar Módulo', 'Não foi possível criar o módulo. Tente novamente.')
+      console.error('ERRO GERAL:', error)
+      alert('ERRO GERAL: ' + (error as Error).message)
+      showNotification('error', 'Erro ao Criar Módulo', `Erro: ${(error as Error).message || 'Não foi possível criar o módulo. Tente novamente.'}`)
     }
   }
 
   const editModule = async (module: Module) => {
-    const title = prompt('Título do módulo:', module.title)
-    const description = prompt('Descrição do módulo:', module.description)
-    const duration = prompt('Duração (ex: 15 min):', module.duration)
-    const videoUrl = prompt('URL do vídeo (opcional):', module.video_url || '')
-    const pdfMaterials = prompt('Materiais PDF (opcional):', module.pdf_materials || '')
-    
-    if (!title || !description || !duration) return
+    setSelectedModule(module)
+    setModuleFormData({
+      title: module.title,
+      description: module.description,
+      duration: module.duration,
+      video_url: module.video_url || '',
+      pdf_materials: module.pdf_materials || ''
+    })
+    setShowEditModuleModal(true)
+  }
+
+  const handleEditModule = async () => {
+    if (!selectedModule || !moduleFormData.title || !moduleFormData.description || !moduleFormData.duration) {
+      showNotification('warning', 'Campos Obrigatórios', 'Preencha título, descrição e duração.')
+      return
+    }
 
     try {
+      // Extrair URLs dos PDFs do campo pdf_materials
+      const pdfUrls: string[] = []
+      if (moduleFormData.pdf_materials) {
+        const lines = moduleFormData.pdf_materials.split('\n')
+        lines.forEach(line => {
+          if (line.includes('http')) {
+            const url = line.split(' ').find(part => part.startsWith('http'))
+            if (url) pdfUrls.push(url)
+          }
+        })
+      }
+
       const { data, error } = await supabase
         .from('course_modules')
         .update({
-          title,
-          description,
-          duration,
-          video_url: videoUrl || null,
-          pdf_materials: pdfMaterials || null
+          title: moduleFormData.title,
+          description: moduleFormData.description,
+          duration: moduleFormData.duration,
+          video_url: moduleFormData.video_url || null,
+          pdf_materials: moduleFormData.pdf_materials || null,
+          pdf_files: pdfUrls.length > 0 ? pdfUrls : null
         })
-        .eq('id', module.id)
+        .eq('id', selectedModule.id)
         .select()
         .single()
 
       if (error) throw error
       
-      setModules(modules.map(m => m.id === module.id ? data : m))
-      showNotification('success', 'Módulo Atualizado!', `"${title}" foi atualizado com sucesso!`)
+      setModules(modules.map(m => m.id === selectedModule.id ? data : m))
+      setShowEditModuleModal(false)
+      showNotification('success', 'Módulo Atualizado!', `"${moduleFormData.title}" foi atualizado com sucesso!`)
     } catch (error) {
       console.error('Erro ao atualizar módulo:', error)
       showNotification('error', 'Erro ao Atualizar Módulo', 'Não foi possível atualizar o módulo. Tente novamente.')
@@ -483,22 +639,200 @@ export default function AdminDashboard() {
     }
   }
 
-  const deleteModule = async (moduleId: string) => {
-    if (!confirm('Tem certeza que deseja excluir este módulo?')) return
+  const cleanupOrphanFiles = async () => {
+    if (!confirm('⚠️ ATENÇÃO: Esta operação irá deletar TODOS os arquivos órfãos (não usados) do Supabase Storage.\n\nTem certeza que deseja continuar?')) return
 
     try {
+      showNotification('info', 'Limpando Arquivos...', 'Identificando e removendo arquivos órfãos...')
+      
+      // 1. Buscar todos os arquivos no storage
+      const { data: storageFiles, error: storageError } = await supabase.storage
+        .from('herbalead-public')
+        .list('course-pdfs', { limit: 1000 })
+      
+      if (storageError) throw storageError
+      
+      // 2. Buscar URLs usadas nos módulos
+      const { data: modules, error: modulesError } = await supabase
+        .from('course_modules')
+        .select('pdf_files, video_url')
+      
+      if (modulesError) throw modulesError
+      
+      // 3. Identificar arquivos órfãos
+      const usedFiles = new Set<string>()
+      
+      modules?.forEach(module => {
+        // Adicionar PDFs usados
+        if (module.pdf_files) {
+          module.pdf_files.forEach(pdfUrl => {
+            const fileName = pdfUrl.split('/').pop()?.split('?')[0]
+            if (fileName) usedFiles.add(fileName)
+          })
+        }
+        
+        // Adicionar vídeos usados (apenas do Supabase)
+        if (module.video_url && module.video_url.includes('supabase')) {
+          const fileName = module.video_url.split('/').pop()?.split('?')[0]
+          if (fileName) usedFiles.add(fileName)
+        }
+      })
+      
+      // 4. Deletar arquivos órfãos
+      const orphanFiles = storageFiles?.filter(file => !usedFiles.has(file.name)) || []
+      
+      if (orphanFiles.length === 0) {
+        showNotification('success', 'Limpeza Concluída!', 'Nenhum arquivo órfão encontrado!')
+        return
+      }
+      
+      console.log(`🗑️ Deletando ${orphanFiles.length} arquivos órfãos:`, orphanFiles.map(f => f.name))
+      
+      const filesToDelete = orphanFiles.map(file => `course-pdfs/${file.name}`)
+      
+      const { error: deleteError } = await supabase.storage
+        .from('herbalead-public')
+        .remove(filesToDelete)
+      
+      if (deleteError) throw deleteError
+      
+      showNotification('success', 'Limpeza Concluída!', `${orphanFiles.length} arquivos órfãos foram removidos com sucesso!`)
+      
+    } catch (error) {
+      console.error('Erro na limpeza:', error)
+      showNotification('error', 'Erro na Limpeza', `Erro: ${(error as Error).message}`)
+    }
+  }
+
+  const deleteModule = async (moduleId: string) => {
+    const targetModule = modules.find(m => m.id === moduleId)
+    if (!targetModule) return
+    
+    if (!confirm(`Tem certeza que deseja excluir o módulo "${targetModule.title}"?\n\n⚠️ ATENÇÃO: Todos os arquivos (PDFs e vídeos) também serão deletados permanentemente!`)) return
+
+    try {
+      console.log(`🗑️ Excluindo módulo: ${targetModule.title} (ID: ${moduleId})`)
+      showNotification('info', 'Excluindo Módulo...', `Removendo "${targetModule.title}" e seus arquivos...`)
+      
+      // 1. Deletar arquivos do Supabase Storage
+      const filesToDelete: string[] = []
+      
+      // Adicionar PDFs
+      if (targetModule.pdf_files && targetModule.pdf_files.length > 0) {
+        targetModule.pdf_files.forEach(pdfUrl => {
+          const fileName = pdfUrl.split('/').pop()?.split('?')[0]
+          if (fileName) {
+            filesToDelete.push(`course-pdfs/${fileName}`)
+          }
+        })
+      }
+      
+      // Adicionar vídeo se for do Supabase Storage
+      if (targetModule.video_url && targetModule.video_url.includes('supabase')) {
+        const fileName = targetModule.video_url.split('/').pop()?.split('?')[0]
+        if (fileName) {
+          filesToDelete.push(`course-videos/${fileName}`)
+        }
+      }
+      
+      console.log(`📁 Arquivos para deletar:`, filesToDelete)
+      
+      // Deletar arquivos do storage
+      for (const filePath of filesToDelete) {
+        try {
+          const { error: storageError } = await supabase.storage
+            .from('herbalead-public')
+            .remove([filePath])
+          
+          if (storageError) {
+            console.warn(`⚠️ Não foi possível deletar arquivo ${filePath}:`, storageError)
+          } else {
+            console.log(`✅ Arquivo deletado: ${filePath}`)
+          }
+        } catch (storageError) {
+          console.warn(`⚠️ Erro ao deletar arquivo ${filePath}:`, storageError)
+        }
+      }
+      
+      // 2. Deletar módulo do banco de dados
       const { error } = await supabase
         .from('course_modules')
         .delete()
         .eq('id', moduleId)
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Erro ao excluir módulo:', error)
+        throw error
+      }
       
-      setModules(modules.filter(m => m.id !== moduleId))
-      showNotification('success', 'Módulo Excluído!', 'Módulo foi excluído com sucesso!')
+      console.log(`✅ Módulo ${targetModule.title} e arquivos excluídos com sucesso`)
+      
+      // Recarregar dados para garantir sincronização
+      await loadData()
+      
+      showNotification('success', 'Módulo Excluído!', `"${targetModule.title}" e todos os seus arquivos foram excluídos com sucesso!`)
     } catch (error) {
       console.error('Erro ao excluir módulo:', error)
-      showNotification('error', 'Erro ao Excluir Módulo', 'Não foi possível excluir o módulo. Tente novamente.')
+      showNotification('error', 'Erro ao Excluir Módulo', `Erro: ${(error as Error).message || 'Não foi possível excluir o módulo. Tente novamente.'}`)
+    }
+  }
+
+  // Função para reordenar módulos
+  const reorderModules = async (courseId: string, draggedModuleId: string, newOrder: number) => {
+    try {
+      console.log(`🔄 Reordenando módulos do curso ${courseId}`)
+      
+      // Buscar todos os módulos do curso ordenados
+      const courseModules = modules
+        .filter(m => m.course_id === courseId)
+        .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+      
+      // Remover o módulo arrastado da lista
+      const draggedModule = courseModules.find(m => m.id === draggedModuleId)
+      const otherModules = courseModules.filter(m => m.id !== draggedModuleId)
+      
+      if (!draggedModule) return
+      
+      // Inserir o módulo na nova posição
+      const newModules = [
+        ...otherModules.slice(0, newOrder),
+        draggedModule,
+        ...otherModules.slice(newOrder)
+      ]
+      
+      // Atualizar order_index de todos os módulos
+      const updates = newModules.map((module, index) => ({
+        id: module.id,
+        order_index: index + 1
+      }))
+      
+      console.log('📝 Atualizando ordem dos módulos:', updates)
+      
+      // Atualizar no banco de dados
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('course_modules')
+          .update({ order_index: update.order_index })
+          .eq('id', update.id)
+        
+        if (error) {
+          console.error('❌ Erro ao atualizar ordem:', error)
+          throw error
+        }
+      }
+      
+      // Atualizar estado local
+      setModules(modules.map(module => {
+        const update = updates.find(u => u.id === module.id)
+        return update ? { ...module, order_index: update.order_index } : module
+      }))
+      
+      console.log('✅ Módulos reordenados com sucesso')
+      showNotification('success', 'Ordem Atualizada!', 'A ordem dos módulos foi atualizada com sucesso!')
+      
+    } catch (error) {
+      console.error('❌ Erro ao reordenar módulos:', error)
+      showNotification('error', 'Erro ao Reordenar', 'Não foi possível reordenar os módulos. Tente novamente.')
     }
   }
 
@@ -1239,10 +1573,10 @@ export default function AdminDashboard() {
                       </button>
                       <button
                         onClick={() => openBulkEditModal(course.id)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                        title="Editar todos os módulos"
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg border border-green-200"
+                        title="Editar todos os módulos (Edição em Massa)"
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit3 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => toggleCourseStatus(course.id, course.is_active)}
@@ -1268,22 +1602,54 @@ export default function AdminDashboard() {
                   {/* Módulos do Curso - Só mostra quando expandido */}
                   {expandedCourses.has(course.id) && (
                     <div className="mt-4 space-y-3">
-                      {modules.filter(m => m.course_id === course.id).map((module) => (
-                        <div key={module.id} className="bg-gray-50 rounded-lg p-4 border-l-4 border-emerald-500">
+                      {modules
+                        .filter(m => m.course_id === course.id)
+                        .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+                        .map((module, index) => (
+                        <div 
+                          key={module.id} 
+                          className="bg-gray-50 rounded-lg p-4 border-l-4 border-emerald-500 group hover:bg-gray-100 transition-colors"
+                          draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData('text/plain', module.id)
+                            e.dataTransfer.effectAllowed = 'move'
+                          }}
+                          onDragOver={(e) => {
+                            e.preventDefault()
+                            e.dataTransfer.dropEffect = 'move'
+                          }}
+                          onDrop={(e) => {
+                            e.preventDefault()
+                            const draggedModuleId = e.dataTransfer.getData('text/plain')
+                            if (draggedModuleId !== module.id) {
+                              reorderModules(course.id, draggedModuleId, index)
+                            }
+                          }}
+                        >
                           <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center mb-2">
-                                <h4 className="text-lg font-semibold text-gray-900 mr-3">
-                                  {module.title}
-                                </h4>
-                                <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                                  {module.duration}
-                                </span>
+                            <div className="flex items-start space-x-3 flex-1">
+                              {/* Handle de arrastar */}
+                              <div className="flex items-center justify-center w-6 h-6 text-gray-400 hover:text-gray-600 cursor-move opacity-0 group-hover:opacity-100 transition-opacity">
+                                <GripVertical className="w-4 h-4" />
                               </div>
-                              <p className="text-gray-600 mb-2">{module.description}</p>
-                              <div className="flex items-center text-sm text-gray-500">
-                                <FileText className="w-4 h-4 mr-1" />
-                                {materials.filter(m => m.module_id === module.id).length} materiais
+                              
+                              <div className="flex-1">
+                                <div className="flex items-center mb-2">
+                                  <span className="text-sm font-medium text-gray-500 mr-2">
+                                    #{module.order_index || index + 1}
+                                  </span>
+                                  <h4 className="text-lg font-semibold text-gray-900 mr-3">
+                                    {module.title}
+                                  </h4>
+                                  <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                    {module.duration}
+                                  </span>
+                                </div>
+                                <p className="text-gray-600 mb-2">{module.description}</p>
+                                <div className="flex items-center text-sm text-gray-500">
+                                  <FileText className="w-4 h-4 mr-1" />
+                                  {(materials.filter(m => m.module_id === module.id).length + (module.pdf_files?.length || 0))} materiais
+                                </div>
                               </div>
                             </div>
                             <div className="flex items-center space-x-1">
@@ -1311,7 +1677,7 @@ export default function AdminDashboard() {
                               <button
                                 onClick={() => editModule(module)}
                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                                title="Editar módulo"
+                                title="Editar módulo individual"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
@@ -1337,7 +1703,17 @@ export default function AdminDashboard() {
         {/* Materiais */}
         {activeTab === 'materials' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900">Materiais</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Materiais</h2>
+              <button
+                onClick={cleanupOrphanFiles}
+                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center space-x-2"
+                title="Limpar arquivos órfãos do Supabase Storage"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Limpar Arquivos Órfãos</span>
+              </button>
+            </div>
             
             <div className="grid gap-4">
               {materials.map((material) => {
@@ -1611,6 +1987,296 @@ export default function AdminDashboard() {
                 className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700"
               >
                 Criar Usuário
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Adicionar Módulo */}
+      {showAddModuleModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Adicionar Novo Módulo
+                </h3>
+                <button
+                  onClick={() => setShowAddModuleModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                <p className="text-sm text-blue-800">
+                  <strong>Campos obrigatórios:</strong> Título, Descrição e Duração<br/>
+                  <strong>Campos opcionais:</strong> URL do Vídeo e Materiais PDF
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Título do Módulo *
+                </label>
+                <input
+                  type="text"
+                  value={moduleFormData.title}
+                  onChange={(e) => setModuleFormData(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="Ex: Introdução à Plataforma"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Descrição *
+                </label>
+                <textarea
+                  value={moduleFormData.description}
+                  onChange={(e) => setModuleFormData(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+                  placeholder="Descreva o conteúdo deste módulo..."
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Duração *
+                </label>
+                <input
+                  type="text"
+                  value={moduleFormData.duration}
+                  onChange={(e) => setModuleFormData(prev => ({ ...prev, duration: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="Ex: 15 min"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  URL do Vídeo (opcional)
+                </label>
+                <input
+                  type="url"
+                  value={moduleFormData.video_url}
+                  onChange={(e) => setModuleFormData(prev => ({ ...prev, video_url: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="https://youtube.com/watch?v=..."
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Materiais PDF (opcional)
+                </label>
+                <div className="space-y-2">
+                  <textarea
+                    value={moduleFormData.pdf_materials}
+                    onChange={(e) => setModuleFormData(prev => ({ ...prev, pdf_materials: e.target.value }))}
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+                    placeholder="Descrição dos materiais PDF..."
+                  />
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          setSelectedPdfFile(file)
+                          try {
+                            await uploadPdfFile(file)
+                          } catch (error) {
+                            console.error('Erro no upload:', error)
+                          }
+                        }
+                      }}
+                      className="hidden"
+                      id="pdf-upload"
+                      disabled={uploadingPdf}
+                    />
+                    <label
+                      htmlFor="pdf-upload"
+                      className={`px-3 py-1 text-sm rounded-md border border-gray-300 cursor-pointer ${
+                        uploadingPdf 
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {uploadingPdf ? '⏳ Enviando...' : '📄 Escolher PDF'}
+                    </label>
+                    {selectedPdfFile && (
+                      <span className="text-xs text-green-600">
+                        ✅ {selectedPdfFile.name}
+                      </span>
+                    )}
+                    <span className="text-xs text-gray-500">
+                      Ou cole URLs de PDFs na descrição acima
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowAddModuleModal(false)}
+                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCreateModule}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 flex items-center"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Criar Módulo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Editar Módulo */}
+      {showEditModuleModal && selectedModule && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Editar Módulo: {selectedModule.title}
+                </h3>
+                <button
+                  onClick={() => setShowEditModuleModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Título do Módulo *
+                </label>
+                <input
+                  type="text"
+                  value={moduleFormData.title}
+                  onChange={(e) => setModuleFormData(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Descrição *
+                </label>
+                <textarea
+                  value={moduleFormData.description}
+                  onChange={(e) => setModuleFormData(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Duração *
+                </label>
+                <input
+                  type="text"
+                  value={moduleFormData.duration}
+                  onChange={(e) => setModuleFormData(prev => ({ ...prev, duration: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  URL do Vídeo (opcional)
+                </label>
+                <input
+                  type="url"
+                  value={moduleFormData.video_url}
+                  onChange={(e) => setModuleFormData(prev => ({ ...prev, video_url: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Materiais PDF (opcional)
+                </label>
+                <div className="space-y-2">
+                  <textarea
+                    value={moduleFormData.pdf_materials}
+                    onChange={(e) => setModuleFormData(prev => ({ ...prev, pdf_materials: e.target.value }))}
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+                  />
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          setSelectedPdfFile(file)
+                          try {
+                            await uploadPdfFile(file)
+                          } catch (error) {
+                            console.error('Erro no upload:', error)
+                          }
+                        }
+                      }}
+                      className="hidden"
+                      id="pdf-upload-edit"
+                      disabled={uploadingPdf}
+                    />
+                    <label
+                      htmlFor="pdf-upload-edit"
+                      className={`px-3 py-1 text-sm rounded-md border border-gray-300 cursor-pointer ${
+                        uploadingPdf 
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {uploadingPdf ? '⏳ Enviando...' : '📄 Escolher PDF'}
+                    </label>
+                    {selectedPdfFile && (
+                      <span className="text-xs text-green-600">
+                        ✅ {selectedPdfFile.name}
+                      </span>
+                    )}
+                    <span className="text-xs text-gray-500">
+                      Ou cole URLs de PDFs na descrição acima
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowEditModuleModal(false)}
+                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleEditModule}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 flex items-center"
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Salvar Alterações
               </button>
             </div>
           </div>

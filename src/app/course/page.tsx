@@ -155,6 +155,7 @@ export default function CoursePage() {
 
   const loadCourseModules = async (courseId: string) => {
     try {
+      console.log('📖 Carregando módulos do curso:', courseId)
       const { data: modulesData, error } = await supabase
         .from('course_modules')
         .select(`
@@ -165,28 +166,46 @@ export default function CoursePage() {
         .eq('is_active', true)
         .order('order_index', { ascending: true })
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ ERRO ao buscar módulos:', error)
+        throw error
+      }
 
-      const courseModules: CourseModule[] = modulesData?.map(module => ({
-        id: module.id,
-        title: module.title,
-        description: module.description,
-        duration: module.duration,
-        completed: false,
-        locked: false,
-        videoUrl: module.video_url,
-        pdfFiles: module.pdf_files || [],
-        pdfMaterials: module.pdf_materials,
-        materials: module.course_materials?.map(material => ({
-          name: material.title,
-          type: material.file_type as 'pdf' | 'template' | 'checklist' | 'video' | 'audio',
-          path: material.file_path
-        })) || []
-      })) || []
+      console.log('✅ Módulos carregados do banco:', modulesData?.length || 0)
+      console.log('📊 Dados brutos dos módulos:', modulesData)
 
+      const courseModules: CourseModule[] = modulesData?.map(module => {
+        console.log('🔍 Processando módulo:', module.title)
+        console.log('📹 Video URL:', module.video_url)
+        console.log('📄 PDF Files:', module.pdf_files)
+        console.log('📝 PDF Materials:', module.pdf_materials)
+        
+        return {
+          id: module.id,
+          title: module.title,
+          description: module.description,
+          duration: module.duration,
+          completed: false,
+          locked: false,
+          videoUrl: module.video_url,
+          pdfFiles: module.pdf_files || [],
+          pdfMaterials: module.pdf_materials,
+          materials: module.course_materials?.map(material => ({
+            name: material.title,
+            type: material.file_type as 'pdf' | 'template' | 'checklist' | 'video' | 'audio',
+            path: material.file_path
+          })) || []
+        }
+      }) || []
+
+      console.log('📋 Módulos processados para exibição:', courseModules)
+      console.log('🎯 Módulos com vídeo:', courseModules.filter(m => m.videoUrl).length)
+      console.log('📄 Módulos com PDFs:', courseModules.filter(m => m.pdfFiles && m.pdfFiles.length > 0).length)
+      
       setModules(courseModules)
     } catch (error) {
-      console.error('Erro ao carregar módulos:', error)
+      console.error('❌ ERRO ao carregar módulos:', error)
+      alert('ERRO: Não foi possível carregar os módulos do curso. Verifique o console para mais detalhes.')
     }
   }
 
@@ -424,27 +443,33 @@ export default function CoursePage() {
           </div>
 
           <div className="space-y-6">
-            {modules.map((module, index) => (
-              <div key={module.id} id={`module-${module.id}`} className="bg-white rounded-lg shadow-sm border p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {index + 1}. {module.title}
-                    </h3>
-                    <p className="text-gray-600 mb-3">{module.description}</p>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Clock className="w-4 h-4 mr-1" />
-                      {module.duration}
+            {modules.map((module, index) => {
+              console.log(`🎬 Renderizando módulo ${index + 1}:`, module.title)
+              console.log(`📹 Tem vídeo:`, !!module.videoUrl, module.videoUrl)
+              console.log(`📄 Tem PDFs:`, module.pdfFiles?.length || 0, module.pdfFiles)
+              console.log(`📝 Tem materiais:`, module.materials?.length || 0, module.materials)
+              
+              return (
+                <div key={module.id} id={`module-${module.id}`} className="bg-white rounded-lg shadow-sm border p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        {index + 1}. {module.title}
+                      </h3>
+                      <p className="text-gray-600 mb-3">{module.description}</p>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Clock className="w-4 h-4 mr-1" />
+                        {module.duration}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {module.completed ? (
+                        <CheckCircle className="w-6 h-6 text-green-500" />
+                      ) : (
+                        <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    {module.completed ? (
-                      <CheckCircle className="w-6 h-6 text-green-500" />
-                    ) : (
-                      <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
-                    )}
-                  </div>
-                </div>
 
                 {/* Vídeo do módulo */}
                 {module.videoUrl && (
@@ -509,24 +534,74 @@ export default function CoursePage() {
                   <div className="mt-4">
                     <h4 className="text-sm font-medium text-gray-700 mb-3">Materiais PDF:</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {module.pdfFiles.map((pdfUrl, pdfIndex) => {
-                        const fileName = pdfUrl.split('/').pop()?.split('?')[0] || `PDF ${pdfIndex + 1}`
-                        return (
+                  {module.pdfFiles.map((pdfUrl, pdfIndex) => {
+                    console.log(`🔗 Processando PDF ${pdfIndex + 1}:`, pdfUrl)
+                    
+                    // Extrair nome limpo do arquivo (remover timestamp e extensão)
+                    let fileName = pdfUrl.split('/').pop()?.split('?')[0] || `PDF ${pdfIndex + 1}`
+                    
+                    // Remover timestamp do início do nome (ex: 1760290706878-GUIA-DE-CADASTRO-HERBALEAD.pdf)
+                    if (fileName.match(/^\d+-/)) {
+                      fileName = fileName.replace(/^\d+-/, '')
+                    }
+                    
+                    // Remover extensão .pdf para exibição mais limpa
+                    const displayName = fileName.replace(/\.pdf$/i, '')
+                    
+                    // Verificar se a URL está correta
+                    const isValidUrl = pdfUrl.startsWith('http') && pdfUrl.includes('supabase')
+                    console.log(`✅ URL válida:`, isValidUrl, pdfUrl)
+                    
+                    return (
+                      <div key={pdfIndex} className="flex items-center p-3 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-left">
+                        <Download className="w-5 h-5 text-red-600 mr-3" />
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900">{displayName}</p>
+                          <p className="text-sm text-gray-500">PDF</p>
+                        </div>
+                        <div className="flex space-x-2">
                           <a
-                            key={pdfIndex}
                             href={pdfUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center p-3 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-left"
+                            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                            onClick={() => {
+                              console.log('🔗 Tentando abrir PDF:', pdfUrl)
+                              // Testar se a URL é válida
+                              fetch(pdfUrl, { method: 'HEAD' })
+                                .then(response => {
+                                  console.log('📄 Status do PDF:', response.status)
+                                  if (!response.ok) {
+                                    alert(`Erro ao acessar PDF: ${response.status}`)
+                                  }
+                                })
+                                .catch(error => {
+                                  console.error('❌ Erro ao testar PDF:', error)
+                                  alert('Erro ao acessar PDF. Verifique se o arquivo existe.')
+                                })
+                            }}
                           >
-                            <Download className="w-5 h-5 text-red-600 mr-3" />
-                            <div>
-                              <p className="font-medium text-gray-900">{fileName}</p>
-                              <p className="text-sm text-gray-500">PDF</p>
-                            </div>
+                            Abrir
                           </a>
-                        )
-                      })}
+                          <button
+                            onClick={() => {
+                              console.log('📥 Tentando baixar PDF:', pdfUrl)
+                              const link = document.createElement('a')
+                              link.href = pdfUrl
+                              link.download = fileName
+                              link.target = '_blank'
+                              document.body.appendChild(link)
+                              link.click()
+                              document.body.removeChild(link)
+                            }}
+                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                          >
+                            Baixar
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
                     </div>
                   </div>
                 )}
@@ -557,7 +632,8 @@ export default function CoursePage() {
                   </div>
                 )}
               </div>
-            ))}
+            )
+          })}
           </div>
         </main>
       </div>
