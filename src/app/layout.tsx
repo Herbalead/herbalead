@@ -8,13 +8,51 @@ export const metadata = {
   description: 'Conquiste novos clientes todos os dias com bem-estar natural e tecnologia. Ferramentas profissionais para gerar leads qualificados.',
   keywords: 'leads, bem-estar, qualidade de vida, herbalife, distribuidores, profissionais, marketing, herbalead',
   authors: [{ name: 'Herbalead Team' }],
-  viewport: 'width=device-width, initial-scale=1',
-  themeColor: '#10B981',
   manifest: '/manifest.json',
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
   },
+  openGraph: {
+    title: 'Herbalead - Bem-Estar Natural e Tecnologia',
+    description: 'Conquiste novos clientes todos os dias com bem-estar natural e tecnologia. Ferramentas profissionais para gerar leads qualificados.',
+    url: 'https://herbalead.com',
+    siteName: 'Herbalead',
+    images: [
+      {
+        url: '/logos/herbalead/herbalead-og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Herbalead - Your Lead Accelerator',
+      },
+    ],
+    locale: 'pt_BR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Herbalead - Bem-Estar Natural e Tecnologia',
+    description: 'Conquiste novos clientes todos os dias com bem-estar natural e tecnologia.',
+    images: ['/logos/herbalead/herbalead-og-image.png'],
+    creator: '@herbalead',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#10B981',
 }
 
 // Headers moved to next.config.ts
@@ -33,6 +71,26 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#10B981" />
         <meta name="msapplication-tap-highlight" content="no" />
+        
+        {/* WhatsApp e redes sociais específicas */}
+        <meta property="og:image" content="https://herbalead.com/logos/herbalead/herbalead-og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Herbalead - Your Lead Accelerator" />
+        <meta property="og:image:type" content="image/png" />
+        
+        {/* WhatsApp específico */}
+        <meta property="og:image:secure_url" content="https://herbalead.com/logos/herbalead/herbalead-og-image.png" />
+        
+        {/* Twitter Cards */}
+        <meta name="twitter:image" content="https://herbalead.com/logos/herbalead/herbalead-og-image.png" />
+        <meta name="twitter:image:alt" content="Herbalead - Your Lead Accelerator" />
+        
+        {/* LinkedIn */}
+        <meta property="og:image:url" content="https://herbalead.com/logos/herbalead/herbalead-og-image.png" />
+        
+        {/* Facebook */}
+        <meta property="og:image:secure_url" content="https://herbalead.com/logos/herbalead/herbalead-og-image.png" />
       </head>
       <body className={inter.className}>
         {children}
