@@ -108,7 +108,7 @@ export default function AdminDashboard() {
     adminPassword: ''
   })
   const [showBulkEditModal, setShowBulkEditModal] = useState(false)
-  const [selectedCourseForBulkEdit, setSelectedCourseForBulkEdit] = useState<string | null>(null)
+  const [, setSelectedCourseForBulkEdit] = useState<string | null>(null)
   const [editingModules, setEditingModules] = useState<Module[]>([])
 
   useEffect(() => {
@@ -677,8 +677,8 @@ export default function AdminDashboard() {
         console.log('🔗 URL pública gerada:', uploadData.url)
 
         // Atualizar o módulo com a URL do vídeo
-        const module = modules.find(m => m.id === moduleId)
-        if (module) {
+        const targetModule = modules.find(m => m.id === moduleId)
+        if (targetModule) {
           console.log('💾 Salvando URL do vídeo no banco de dados...')
           
           const { data: updateData, error } = await supabase
@@ -781,9 +781,9 @@ export default function AdminDashboard() {
           console.log('💾 Salvando PDFs no banco de dados...', uploadedFiles)
           
           // Atualizar módulo com os PDFs
-          const module = modules.find(m => m.id === moduleId)
-          if (module) {
-            const currentPdfs = module.pdf_files || []
+          const targetModule = modules.find(m => m.id === moduleId)
+          if (targetModule) {
+            const currentPdfs = targetModule.pdf_files || []
             const newPdfs = [...currentPdfs, ...uploadedFiles]
             
             console.log('📝 Atualizando módulo:', { moduleId, currentPdfs, newPdfs })
