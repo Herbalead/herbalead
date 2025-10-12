@@ -199,3 +199,5 @@ SELECT make_user_admin('seu-email@exemplo.com');
 - ✅ Sistema seguro e funcional
 
 **Agora é só executar o comando SQL e fazer login!** 🎯✨
+
+

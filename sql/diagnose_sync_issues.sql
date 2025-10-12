@@ -166,3 +166,5 @@ SELECT id, title FROM courses WHERE title ILIKE '%treinamento%' OR title ILIKE '
 SELECT 
     'Últimas operações:' as status,
     'Execute este script e verifique os resultados acima' as instrucao;
+
+

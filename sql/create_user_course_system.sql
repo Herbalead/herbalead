@@ -148,3 +148,5 @@ FROM information_schema.columns
 WHERE table_schema = 'public' 
 AND table_name IN ('user_course_progress', 'course_enrollments', 'course_certificates')
 ORDER BY table_name, ordinal_position;
+
+

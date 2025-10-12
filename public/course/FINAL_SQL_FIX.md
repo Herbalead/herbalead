@@ -88,3 +88,5 @@ Agora todos os scripts usam a nomenclatura correta:
 - ✅ Políticas RLS funcionando
 
 **Execute o script e o curso funcionará perfeitamente!** 🎯✨
+
+

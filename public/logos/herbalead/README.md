@@ -83,3 +83,4 @@ import herbaleadIcon from '/logos/herbalead/herbalead-icon-only.png'
 **Última atualização**: $(date)
 **Versão**: 1.0
 **Mantido por**: Equipe HerbaLead
+

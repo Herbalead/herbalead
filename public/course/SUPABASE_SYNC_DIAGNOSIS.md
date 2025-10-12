@@ -198,3 +198,5 @@ console.log('User:', user)
 - ✅ **Configuração das variáveis** de ambiente
 
 **Execute os passos de diagnóstico e me informe os resultados!** 🔍✨
+
+

@@ -109,3 +109,5 @@ if (professional) {
 O sistema agora usa a estrutura correta da tabela `professionals` e deve funcionar sem erros!
 
 **Próximo passo:** Execute o script SQL corrigido no Supabase Dashboard. 🎯✨
+
+

@@ -118,3 +118,5 @@ INSERT INTO courses (title, description, modules) VALUES (
 
 -- PASSO 10: Verificar se tudo foi criado
 SELECT 'Tabelas criadas com sucesso!' as status;
+
+

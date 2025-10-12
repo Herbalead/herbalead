@@ -215,3 +215,5 @@ Agora você sabe criar links profissionais no HerbaLead!
 **Versão:** 1.0  
 **Data:** Janeiro 2025  
 **Próxima atualização:** Conforme feedback dos usuários
+
+

@@ -122,3 +122,5 @@ O sistema agora está:
 - ✅ **Pronto para** escalar com múltiplos cursos
 
 **A interface está otimizada e pronta para uso!** 🎯✨
+
+

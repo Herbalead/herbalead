@@ -411,3 +411,5 @@ JOIN course_modules cm ON cm2.module_id = cm.id
 JOIN courses c ON cm.course_id = c.id
 WHERE cm2.is_active = true
 ORDER BY c.title, cm.order_index;
+
+

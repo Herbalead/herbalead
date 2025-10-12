@@ -177,3 +177,5 @@ INSTRUÇÕES PARA GERENCIAR ADMINISTRADORES:
 
 -- 13. Status final
 SELECT 'Sistema de gerenciamento de administradores configurado com sucesso!' as status;
+
+

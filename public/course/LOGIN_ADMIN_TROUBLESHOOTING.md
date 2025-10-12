@@ -212,3 +212,5 @@ AND routine_name LIKE '%admin%';
 ```
 
 **Execute essas verificações e me diga o resultado para eu te ajudar melhor!** 🎯✨
+
+

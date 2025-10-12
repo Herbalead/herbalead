@@ -104,3 +104,5 @@ WHERE email = 'faulaandre@gmail.com';
 - ✅ Acesso administrativo liberado
 
 **Execute o SQL e teste o login com a nova senha!** 🎯✨
+
+

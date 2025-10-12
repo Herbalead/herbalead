@@ -269,3 +269,5 @@ Agora você domina o Quiz Builder do HerbaLead!
 **Versão:** 1.0  
 **Data:** Janeiro 2025  
 **Próxima atualização:** Conforme feedback dos usuários
+
+

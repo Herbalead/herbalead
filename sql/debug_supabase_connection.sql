@@ -115,3 +115,5 @@ FROM pg_policies
 WHERE schemaname = 'public'
 AND tablename IN ('courses', 'course_modules', 'course_materials', 'professionals')
 ORDER BY tablename, policyname;
+
+

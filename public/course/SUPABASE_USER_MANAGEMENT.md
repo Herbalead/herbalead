@@ -318,3 +318,5 @@ ORDER BY created_at DESC;
 - ✅ **Via Table Editor** editando diretamente
 
 **Agora você sabe exatamente onde encontrar e gerenciar todos os usuários e administradores!** 🎯✨
+
+

@@ -23,3 +23,5 @@ FROM course_modules cm
 JOIN courses c ON cm.course_id = c.id
 WHERE c.title = 'HerbaLead Master Course'
 ORDER BY cm.order_index;
+
+

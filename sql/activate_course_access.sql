@@ -18,3 +18,5 @@ SELECT
   COUNT(*) as total_usuarios,
   COUNT(CASE WHEN is_active = true THEN 1 END) as usuarios_ativos
 FROM professionals;
+
+

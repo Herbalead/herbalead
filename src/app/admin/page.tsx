@@ -57,6 +57,8 @@ interface Module {
   description: string
   duration: string
   video_url?: string
+  pdf_materials?: string
+  pdf_files?: string[]
   materials: CourseMaterial[]
   order_index: number
   is_active: boolean
@@ -82,7 +84,7 @@ interface Notification {
 
 interface User {
   id: string
-  email: string
+  email: string | undefined
   name?: string
   is_admin?: boolean
 }
@@ -105,6 +107,9 @@ export default function AdminDashboard() {
     password: '',
     adminPassword: ''
   })
+  const [showBulkEditModal, setShowBulkEditModal] = useState(false)
+  const [selectedCourseForBulkEdit, setSelectedCourseForBulkEdit] = useState<string | null>(null)
+  const [editingModules, setEditingModules] = useState<Module[]>([])
 
   useEffect(() => {
     checkAdminAccess()
@@ -146,7 +151,12 @@ export default function AdminDashboard() {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (user) {
-        setUser(user)
+        setUser({
+          id: user.id,
+          email: user.email || '',
+          name: user.user_metadata?.name,
+          is_admin: false
+        })
         
         // Verificar se usuário é admin
         const { data: professional } = await supabase
@@ -158,6 +168,12 @@ export default function AdminDashboard() {
         setIsAdmin(professional?.is_admin || false)
         
         if (professional?.is_admin) {
+          setUser({ 
+            id: user.id, 
+            email: user.email || '', 
+            name: user.user_metadata?.name,
+            is_admin: professional.is_admin 
+          })
           loadData()
         }
       }
@@ -367,6 +383,7 @@ export default function AdminDashboard() {
     const description = prompt('Descrição do módulo:', module.description)
     const duration = prompt('Duração (ex: 15 min):', module.duration)
     const videoUrl = prompt('URL do vídeo (opcional):', module.video_url || '')
+    const pdfMaterials = prompt('Materiais PDF (opcional):', module.pdf_materials || '')
     
     if (!title || !description || !duration) return
 
@@ -377,7 +394,8 @@ export default function AdminDashboard() {
           title,
           description,
           duration,
-          video_url: videoUrl || null
+          video_url: videoUrl || null,
+          pdf_materials: pdfMaterials || null
         })
         .eq('id', module.id)
         .select()
@@ -390,6 +408,72 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Erro ao atualizar módulo:', error)
       showNotification('error', 'Erro ao Atualizar Módulo', 'Não foi possível atualizar o módulo. Tente novamente.')
+    }
+  }
+
+  const openBulkEditModal = (courseId: string) => {
+    const courseModules = modules.filter(m => m.course_id === courseId)
+    setSelectedCourseForBulkEdit(courseId)
+    setEditingModules([...courseModules])
+    setShowBulkEditModal(true)
+  }
+
+  const updateEditingModule = (moduleId: string, field: keyof Module, value: string | string[]) => {
+    setEditingModules(prev => prev.map(module => 
+      module.id === moduleId 
+        ? { ...module, [field]: value }
+        : module
+    ))
+  }
+
+  const saveBulkEdit = async () => {
+    try {
+      const updates = editingModules.map(module => ({
+        id: module.id,
+        title: module.title,
+        description: module.description,
+        duration: module.duration,
+        video_url: module.video_url || null,
+        pdf_materials: module.pdf_materials || null,
+        pdf_files: module.pdf_files || []
+      }))
+
+      // Atualizar todos os módulos de uma vez
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('course_modules')
+          .update({
+            title: update.title,
+            description: update.description,
+            duration: update.duration,
+            video_url: update.video_url,
+            pdf_materials: update.pdf_materials,
+            pdf_files: update.pdf_files
+          })
+          .eq('id', update.id)
+
+        if (error) throw error
+      }
+
+      // Atualizar estado local
+      setModules(prev => prev.map(module => {
+        const updatedModule = updates.find(u => u.id === module.id)
+        return updatedModule ? { 
+          ...module, 
+          title: updatedModule.title,
+          description: updatedModule.description,
+          duration: updatedModule.duration,
+          video_url: updatedModule.video_url || undefined,
+          pdf_materials: updatedModule.pdf_materials || undefined,
+          pdf_files: updatedModule.pdf_files || []
+        } : module
+      }))
+
+      setShowBulkEditModal(false)
+      showNotification('success', 'Módulos Atualizados!', 'Todos os módulos foram atualizados com sucesso!')
+    } catch (error) {
+      console.error('Erro ao atualizar módulos:', error)
+      showNotification('error', 'Erro ao Atualizar Módulos', 'Não foi possível atualizar os módulos. Tente novamente.')
     }
   }
 
@@ -484,6 +568,130 @@ export default function AdminDashboard() {
       } catch (error) {
         console.error('Erro ao enviar material:', error)
         showNotification('error', 'Erro ao Enviar Material', 'Não foi possível enviar o material. Tente novamente.')
+      }
+    }
+    
+    input.click()
+  }
+
+  const isYouTubeUrl = (url: string): boolean => {
+    return url.includes('youtube.com') || url.includes('youtu.be')
+  }
+
+  const getYouTubeEmbedUrl = (url: string): string => {
+    let videoId = ''
+    
+    // Extrair ID do vídeo de diferentes formatos de URL do YouTube
+    if (url.includes('youtube.com/watch?v=')) {
+      videoId = url.split('v=')[1]?.split('&')[0] || ''
+    } else if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1]?.split('?')[0] || ''
+    } else if (url.includes('youtube.com/embed/')) {
+      videoId = url.split('embed/')[1]?.split('?')[0] || ''
+    }
+    
+    return `https://www.youtube.com/embed/${videoId}`
+  }
+
+  const uploadPDFForModule = async (moduleId: string) => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.pdf'
+    input.multiple = true
+    
+    input.onchange = async (e) => {
+      const files = Array.from((e.target as HTMLInputElement).files || [])
+      if (files.length === 0) return
+
+      try {
+        console.log('🔄 Iniciando upload de PDFs...', { moduleId, fileCount: files.length })
+        
+        const uploadedFiles: string[] = []
+        
+        for (const file of files) {
+          console.log('📄 Processando arquivo:', file.name, { type: file.type, size: file.size })
+          
+          // Validar se é PDF
+          if (file.type !== 'application/pdf') {
+            console.warn('⚠️ Arquivo não é PDF:', file.name, file.type)
+            showNotification('warning', 'Arquivo Inválido', `${file.name} não é um arquivo PDF válido.`)
+            continue
+          }
+
+          // Validar tamanho do arquivo (50MB máximo para PDFs)
+          if (file.size > 50 * 1024 * 1024) {
+            console.warn('⚠️ Arquivo muito grande:', file.name, file.size)
+            showNotification('warning', 'Arquivo Muito Grande', `${file.name} é muito grande. Máximo 50MB.`)
+            continue
+          }
+
+          // Upload do arquivo para Supabase Storage
+          const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+          const filePath = `course-pdfs/${fileName}`
+
+          console.log('📤 Fazendo upload para:', filePath)
+
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('course-materials')
+            .upload(filePath, file)
+
+          if (uploadError) {
+            console.error('❌ Erro no upload:', uploadError)
+            throw uploadError
+          }
+
+          console.log('✅ Upload realizado com sucesso:', uploadData)
+
+          // Obter URL pública do arquivo
+          const { data: urlData } = supabase.storage
+            .from('course-materials')
+            .getPublicUrl(filePath)
+
+          console.log('🔗 URL pública gerada:', urlData.publicUrl)
+          uploadedFiles.push(urlData.publicUrl)
+        }
+
+        if (uploadedFiles.length > 0) {
+          console.log('💾 Salvando PDFs no banco de dados...', uploadedFiles)
+          
+          // Atualizar módulo com os PDFs
+          const module = modules.find(m => m.id === moduleId)
+          if (module) {
+            const currentPdfs = module.pdf_files || []
+            const newPdfs = [...currentPdfs, ...uploadedFiles]
+            
+            console.log('📝 Atualizando módulo:', { moduleId, currentPdfs, newPdfs })
+            
+            const { data: updateData, error } = await supabase
+              .from('course_modules')
+              .update({ pdf_files: newPdfs })
+              .eq('id', moduleId)
+              .select()
+
+            if (error) {
+              console.error('❌ Erro ao salvar no banco:', error)
+              throw error
+            }
+
+            console.log('✅ Banco atualizado com sucesso:', updateData)
+
+            // Atualizar estado local
+            setModules(modules.map(m => 
+              m.id === moduleId 
+                ? { ...m, pdf_files: newPdfs }
+                : m
+            ))
+
+            showNotification('success', 'PDFs Enviados!', `${uploadedFiles.length} PDF(s) enviado(s) com sucesso!`)
+          }
+        } else {
+          console.warn('⚠️ Nenhum arquivo foi enviado')
+          showNotification('warning', 'Nenhum Arquivo Enviado', 'Nenhum arquivo PDF válido foi encontrado.')
+        }
+      } catch (error) {
+        console.error('❌ Erro geral ao enviar PDFs:', error)
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+        showNotification('error', 'Erro ao Enviar PDFs', `Erro: ${errorMessage}`)
       }
     }
     
@@ -904,6 +1112,13 @@ export default function AdminDashboard() {
                         <Plus className="w-4 h-4" />
                       </button>
                       <button
+                        onClick={() => openBulkEditModal(course.id)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                        title="Editar todos os módulos"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
                         onClick={() => toggleCourseStatus(course.id, course.is_active)}
                         className={`p-2 rounded-lg ${
                           course.is_active 
@@ -1270,6 +1485,222 @@ export default function AdminDashboard() {
                 className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700"
               >
                 Criar Usuário
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Edição em Massa de Módulos */}
+      {showBulkEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Edição em Massa - Módulos do Curso
+                </h3>
+                <button
+                  onClick={() => setShowBulkEditModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
+              <div className="px-6 py-4">
+                <div className="space-y-6">
+                  {editingModules.map((module, index) => (
+                    <div key={module.id} className="bg-white rounded-lg border p-6 shadow-sm">
+                      {/* Cabeçalho do módulo */}
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-lg font-semibold text-gray-900">
+                          Módulo {index + 1}
+                        </h4>
+                        <div className="text-sm text-gray-500">
+                          ID: {module.id.slice(0, 8)}...
+                        </div>
+                      </div>
+
+                      {/* Campos principais em grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                        {/* Título */}
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Título
+                          </label>
+                          <input
+                            type="text"
+                            value={module.title}
+                            onChange={(e) => updateEditingModule(module.id, 'title', e.target.value)}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            placeholder="Ex: Introdução à Plataforma"
+                          />
+                        </div>
+
+                        {/* Duração */}
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Duração
+                          </label>
+                          <input
+                            type="text"
+                            value={module.duration}
+                            onChange={(e) => updateEditingModule(module.id, 'duration', e.target.value)}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            placeholder="Ex: 15 min"
+                          />
+                        </div>
+
+                        {/* Ordem */}
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Ordem
+                          </label>
+                          <div className="w-full px-3 py-2 text-sm bg-gray-100 border border-gray-300 rounded-md text-gray-600">
+                            {index + 1}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Descrição */}
+                      <div className="space-y-2 mb-6">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Descrição
+                        </label>
+                        <textarea
+                          value={module.description}
+                          onChange={(e) => updateEditingModule(module.id, 'description', e.target.value)}
+                          rows={3}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+                          placeholder="Descreva o conteúdo deste módulo..."
+                        />
+                      </div>
+
+                      {/* URL do Vídeo */}
+                      <div className="space-y-2 mb-6">
+                        <label className="block text-sm font-medium text-gray-700">
+                          URL do Vídeo
+                        </label>
+                        <input
+                          type="url"
+                          value={module.video_url || ''}
+                          onChange={(e) => updateEditingModule(module.id, 'video_url', e.target.value)}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          placeholder="https://youtube.com/watch?v=..."
+                        />
+                        
+                        {/* Preview do vídeo se URL existir */}
+                        {module.video_url && (
+                          <div className="mt-3">
+                            <div className="text-xs text-gray-500 mb-2">Preview:</div>
+                            <div className="bg-gray-100 rounded-lg p-3">
+                              {isYouTubeUrl(module.video_url) ? (
+                                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                                  <iframe
+                                    src={getYouTubeEmbedUrl(module.video_url)}
+                                    title="Preview do Vídeo"
+                                    className="absolute top-0 left-0 w-full h-full rounded"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                  ></iframe>
+                                </div>
+                              ) : (
+                                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                                  <video 
+                                    src={module.video_url} 
+                                    controls 
+                                    className="absolute top-0 left-0 w-full h-full object-cover rounded"
+                                    preload="metadata"
+                                    onError={(e) => {
+                                      console.error('Erro no preview do vídeo:', e)
+                                      console.error('URL do vídeo:', module.video_url)
+                                    }}
+                                    onLoadStart={() => {
+                                      console.log('Iniciando carregamento do preview:', module.video_url)
+                                    }}
+                                  >
+                                    Seu navegador não suporta vídeos.
+                                  </video>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* PDFs Enviados */}
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Materiais PDF
+                        </label>
+                        
+                        {/* Lista de PDFs já enviados */}
+                        {module.pdf_files && module.pdf_files.length > 0 && (
+                          <div className="space-y-2 mb-3">
+                            {module.pdf_files.map((pdfUrl, pdfIndex) => {
+                              const fileName = pdfUrl.split('/').pop()?.split('?')[0] || `PDF ${pdfIndex + 1}`
+                              return (
+                                <div key={pdfIndex} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                                  <div className="flex items-center flex-1">
+                                    <FileText className="w-4 h-4 text-red-500 mr-3" />
+                                    <a 
+                                      href={pdfUrl} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                      title={fileName}
+                                    >
+                                      {fileName}
+                                    </a>
+                                  </div>
+                                  <button
+                                    onClick={() => {
+                                      const newPdfs = module.pdf_files?.filter((_, i) => i !== pdfIndex) || []
+                                      updateEditingModule(module.id, 'pdf_files', newPdfs)
+                                    }}
+                                    className="text-red-500 hover:text-red-700 p-1"
+                                    title="Remover PDF"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                        
+                        {/* Botão para enviar novos PDFs */}
+                        <button
+                          onClick={() => uploadPDFForModule(module.id)}
+                          className="w-full px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center"
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          Enviar PDFs
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowBulkEditModal(false)}
+                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={saveBulkEdit}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 flex items-center"
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Salvar Todas as Alterações
               </button>
             </div>
           </div>

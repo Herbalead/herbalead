@@ -130,3 +130,4 @@ Mínimo de **1x** a altura do ícone em todos os lados.
 **Versão**: 1.0  
 **Data**: $(date)  
 **Mantido por**: Equipe HerbaLead
+

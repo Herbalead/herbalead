@@ -23,3 +23,5 @@ SELECT
   is_active
 FROM professionals 
 WHERE is_admin = true;
+
+

@@ -72,3 +72,5 @@ function checkEnvironmentVariables() {
 console.log('🚀 Iniciando testes...');
 checkEnvironmentVariables();
 // testSupabaseConnection(); // Descomente quando tiver as credenciais
+
+

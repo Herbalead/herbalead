@@ -90,3 +90,5 @@ SELECT verify_admin_password('faulaandre@gmail.com', 'Hbl@0842') as senha_corret
 
 -- 8. Status final
 SELECT 'Senha administrativa atualizada para Hbl@0842!' as status;
+
+

@@ -286,3 +286,5 @@ Agora você tem todas as estratégias para usar o HerbaLead como uma máquina de
 **Versão:** 1.0  
 **Data:** Janeiro 2025  
 **Próxima atualização:** Conforme feedback dos usuários
+
+

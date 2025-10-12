@@ -168,3 +168,5 @@ INSTRUÇÕES PARA CONFIGURAR SENHA ADMINISTRATIVA:
 
 -- 9. Status final
 SELECT 'Sistema de senha administrativa configurado com sucesso!' as status;
+
+

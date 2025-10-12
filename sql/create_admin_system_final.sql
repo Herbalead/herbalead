@@ -129,3 +129,5 @@ ON CONFLICT DO NOTHING;
 
 -- PASSO 11: Verificar se tudo foi criado
 SELECT 'Tabelas criadas com sucesso!' as status;
+
+

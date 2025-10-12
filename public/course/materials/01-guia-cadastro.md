@@ -140,3 +140,5 @@ Parabéns! Você completou seu cadastro no HerbaLead.
 **Versão:** 1.0  
 **Data:** Janeiro 2025  
 **Próxima atualização:** Conforme feedback dos usuários
+
+

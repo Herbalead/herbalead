@@ -118,3 +118,5 @@ bg-herbalead-gray-900         /* #111827 */
 **Status**: ✅ Concluído  
 **Próximo**: Implementar nos componentes existentes  
 **Data**: $(date)
+
+

@@ -15,3 +15,5 @@ AND column_name LIKE '%subscription%'
 OR column_name LIKE '%trial%' 
 OR column_name LIKE '%plan%'
 OR column_name LIKE '%status%';
+
+

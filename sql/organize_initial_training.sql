@@ -30,3 +30,5 @@ FROM course_modules cm
 JOIN courses c ON cm.course_id = c.id
 WHERE c.title = 'Treinamento Inicial - HerbaLead'
 ORDER BY cm.order_index;
+
+

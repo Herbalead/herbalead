@@ -25,6 +25,8 @@ interface CourseModule {
   completed: boolean
   locked: boolean
   videoUrl?: string
+  pdfFiles?: string[]
+  pdfMaterials?: string
   materials: {
     name: string
     type: 'pdf' | 'template' | 'checklist' | 'video' | 'audio'
@@ -113,10 +115,20 @@ export default function CoursePage() {
     }
   }
 
-  const enrollInCourse = async (courseId: string) => {
+  const startCourse = async (courseId: string) => {
     if (!user) return
 
     try {
+      // Registrar início do curso diretamente
+      await supabase
+        .from('user_course_progress')
+        .insert({
+          user_id: user.id,
+          course_id: courseId,
+          progress_type: 'course_started'
+        })
+
+      // Criar inscrição automaticamente se não existir
       const { data, error } = await supabase
         .from('course_enrollments')
         .insert({
@@ -128,22 +140,16 @@ export default function CoursePage() {
         .select()
         .single()
 
-      if (error) throw error
+      if (error && !error.message.includes('duplicate key')) {
+        throw error
+      }
 
-      // Registrar início do curso
-      await supabase
-        .from('user_course_progress')
-        .insert({
-          user_id: user.id,
-          course_id: courseId,
-          progress_type: 'course_started'
-        })
-
-      setEnrolledCourses([...enrolledCourses, data])
-      alert('Inscrição realizada com sucesso!')
+      // Atualizar lista de cursos inscritos
+      if (data) {
+        setEnrolledCourses([...enrolledCourses, data])
+      }
     } catch (error) {
-      console.error('Erro ao se inscrever no curso:', error)
-      alert('Erro ao se inscrever no curso')
+      console.error('Erro ao iniciar curso:', error)
     }
   }
 
@@ -169,6 +175,8 @@ export default function CoursePage() {
         completed: false,
         locked: false,
         videoUrl: module.video_url,
+        pdfFiles: module.pdf_files || [],
+        pdfMaterials: module.pdf_materials,
         materials: module.course_materials?.map(material => ({
           name: material.title,
           type: material.file_type as 'pdf' | 'template' | 'checklist' | 'video' | 'audio',
@@ -181,6 +189,26 @@ export default function CoursePage() {
       console.error('Erro ao carregar módulos:', error)
     }
   }
+
+  const isYouTubeUrl = (url: string): boolean => {
+    return url.includes('youtube.com') || url.includes('youtu.be')
+  }
+
+  const getYouTubeEmbedUrl = (url: string): string => {
+    let videoId = ''
+    
+    // Extrair ID do vídeo de diferentes formatos de URL do YouTube
+    if (url.includes('youtube.com/watch?v=')) {
+      videoId = url.split('v=')[1]?.split('&')[0] || ''
+    } else if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1]?.split('?')[0] || ''
+    } else if (url.includes('youtube.com/embed/')) {
+      videoId = url.split('embed/')[1]?.split('?')[0] || ''
+    }
+    
+    return `https://www.youtube.com/embed/${videoId}`
+  }
+
 
   const downloadMaterial = async (materialPath: string, materialName: string) => {
     if (!hasAccess) {
@@ -414,9 +442,84 @@ export default function CoursePage() {
                   </div>
                 </div>
 
+                {/* Vídeo do módulo */}
+                {module.videoUrl && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Vídeo do Módulo:</h4>
+                    <div className="bg-gray-100 rounded-lg p-4">
+                      {isYouTubeUrl(module.videoUrl) ? (
+                        <div className="w-full">
+                          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                            <iframe
+                              src={getYouTubeEmbedUrl(module.videoUrl)}
+                              title="Vídeo do Módulo"
+                              className="absolute top-0 left-0 w-full h-full rounded"
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            ></iframe>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                          <video 
+                            src={module.videoUrl} 
+                            controls 
+                            className="absolute top-0 left-0 w-full h-full object-cover rounded"
+                            preload="metadata"
+                            onError={(e) => {
+                              console.error('Erro ao carregar vídeo:', e)
+                              console.error('URL do vídeo:', module.videoUrl)
+                            }}
+                            onLoadStart={() => {
+                              console.log('Iniciando carregamento do vídeo:', module.videoUrl)
+                            }}
+                            onCanPlay={() => {
+                              console.log('Vídeo pode ser reproduzido:', module.videoUrl)
+                            }}
+                          >
+                            Seu navegador não suporta vídeos.
+                          </video>
+                        </div>
+                      )}
+                      <div className="mt-2 text-xs text-gray-500">
+                        URL: {module.videoUrl}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* PDFs do módulo */}
+                {module.pdfFiles && module.pdfFiles.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Materiais PDF:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {module.pdfFiles.map((pdfUrl, pdfIndex) => {
+                        const fileName = pdfUrl.split('/').pop()?.split('?')[0] || `PDF ${pdfIndex + 1}`
+                        return (
+                          <a
+                            key={pdfIndex}
+                            href={pdfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center p-3 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-left"
+                          >
+                            <Download className="w-5 h-5 text-red-600 mr-3" />
+                            <div>
+                              <p className="font-medium text-gray-900">{fileName}</p>
+                              <p className="text-sm text-gray-500">PDF</p>
+                            </div>
+                          </a>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Materiais tradicionais */}
                 {module.materials.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-3">Materiais do Módulo:</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Materiais Complementares:</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {module.materials.map((material, materialIndex) => (
                         <button
@@ -546,11 +649,15 @@ export default function CoursePage() {
                       </div>
                     ) : (
                       <button
-                        onClick={() => enrollInCourse(course.id)}
+                        onClick={() => {
+                          startCourse(course.id)
+                          setSelectedCourse(course)
+                          loadCourseModules(course.id)
+                        }}
                         className="w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center"
                       >
-                        <BookOpen className="w-4 h-4 mr-2" />
-                        Inscrever-se
+                        <Play className="w-4 h-4 mr-2" />
+                        Acessar Curso
                       </button>
                     )}
                   </div>
