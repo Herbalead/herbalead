@@ -21,7 +21,7 @@ interface WellnessEntry {
   notes: string
 }
 
-interface _WellnessResults {
+interface WellnessResults {
   totalScore: string
   category: string
   color: string
@@ -44,7 +44,7 @@ export default function DailyWellnessDemoPage() {
     notes: ''
   })
 
-  const _calculateWellnessScore = () => {
+  const calculateWellnessScore = () => {
     const { sleep, exercise, nutrition, hydration, mood, energy, stress } = wellnessEntry
     
     // Calculate total score (0-10 scale for each category)

@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
-interface _WellnessResults {
+interface WellnessResults {
   score: string
   category: string
   color: string
@@ -106,7 +106,7 @@ export default function WellnessProfileDemoPage() {
     }
   ]
 
-  const _calculateWellnessScore = () => {
+  const calculateWellnessScore = () => {
     let totalScore = 0
     let maxScore = questions.length * 4 // 4 points per question max
     

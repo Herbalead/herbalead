@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Teste de Compartilhamento - Herbalead',
@@ -107,12 +108,12 @@ export default function TestSharePage() {
             </div>
 
             <div className="text-center">
-              <a 
+              <Link 
                 href="/"
                 className="inline-block px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
               >
                 Voltar ao Início
-              </a>
+              </Link>
             </div>
           </div>
         </div>

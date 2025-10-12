@@ -23,7 +23,7 @@ interface NutritionData {
   symptoms: string[]
 }
 
-interface _NutritionResults {
+interface NutritionResults {
   bmi: string
   tdee: string
   score: string
@@ -74,7 +74,7 @@ export default function NutritionAssessmentDemoPage() {
     'Alterações de humor'
   ]
 
-  const _calculateNutritionAssessment = () => {
+  const calculateNutritionAssessment = () => {
     const weight = parseFloat(formData.weight)
     const height = parseFloat(formData.height) / 100
     const age = parseInt(formData.age)

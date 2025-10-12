@@ -10,7 +10,7 @@ import {
 import Link from 'next/link'
 
 
-interface _QuizResults {
+interface QuizResults {
   score: string
   category: string
   color: string
@@ -97,7 +97,7 @@ export default function HealthyEatingDemoPage() {
     }
   ]
 
-  const _calculateResults = () => {
+  const calculateResults = () => {
     const totalScore = answers.reduce((sum, answer) => sum + (answer + 1), 0)
     const maxScore = questions.length * 4
     const percentage = (totalScore / maxScore) * 100
