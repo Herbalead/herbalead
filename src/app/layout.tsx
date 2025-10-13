@@ -20,10 +20,11 @@ export const metadata = {
     siteName: 'Herbalead',
     images: [
       {
-        url: 'https://www.herbalead.com/logos/herbalead/herbalead-og-image.png',
+        url: 'https://www.herbalead.com/logos/herbalead/herbalead-og-image.png?v=2024',
         width: 1200,
         height: 630,
         alt: 'Herbalead - Your Lead Accelerator',
+        type: 'image/png',
       },
     ],
     locale: 'pt_BR',
@@ -33,7 +34,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Herbalead - Bem-Estar Natural e Tecnologia',
     description: 'Conquiste novos clientes todos os dias com bem-estar natural e tecnologia.',
-    images: ['https://www.herbalead.com/logos/herbalead/herbalead-og-image.png'],
+    images: ['https://www.herbalead.com/logos/herbalead/herbalead-og-image.png?v=2024'],
     creator: '@herbalead',
   },
   robots: {

@@ -57,6 +57,23 @@ export default function UserDashboard() {
       .replace(/^-|-$/g, '') // Remove hífens do início e fim
   }
 
+  // Função para gerar mensagem personalizada por ferramenta
+  const getCustomMessageByTool = (toolName: string): string => {
+    const messages = {
+      'bmi': 'Olá! Vi que você tem interesse em calcular seu IMC. Posso te ajudar com orientações personalizadas sobre seu bem-estar e estilo de vida. Vamos conversar?',
+      'protein': 'Oi! Notei seu interesse em calcular suas necessidades de proteína. Tenho algumas dicas valiosas sobre nutrição e bem-estar que podem te interessar. Que tal conversarmos?',
+      'hydration': 'Olá! Vi que você quer saber mais sobre hidratação. Tenho informações importantes sobre como manter seu corpo hidratado e saudável. Vamos trocar uma ideia?',
+      'body-composition': 'Oi! Percebi seu interesse em composição corporal. Posso compartilhar conhecimentos sobre saúde e bem-estar que podem te ajudar. Que tal conversarmos?',
+      'meal-planner': 'Olá! Vi que você tem interesse em planejamento de refeições. Tenho dicas valiosas sobre nutrição e estilo de vida saudável. Vamos conversar?',
+      'nutrition-assessment': 'Oi! Notei seu interesse em avaliação nutricional. Posso te ajudar com orientações personalizadas sobre alimentação e bem-estar. Que tal conversarmos?',
+      'daily-wellness': 'Olá! Vi que você quer saber mais sobre bem-estar diário. Tenho informações importantes sobre como manter uma rotina saudável. Vamos trocar uma ideia?',
+      'healthy-eating': 'Oi! Percebi seu interesse em alimentação saudável. Posso compartilhar conhecimentos sobre nutrição e bem-estar que podem te ajudar. Que tal conversarmos?',
+      'wellness-profile': 'Olá! Vi que você tem interesse em perfil de bem-estar. Tenho dicas valiosas sobre saúde e estilo de vida que podem te interessar. Vamos conversar?'
+    }
+    
+    return messages[toolName as keyof typeof messages] || 'Olá! Vi que você tem interesse em bem-estar e saúde. Posso te ajudar com orientações personalizadas. Vamos conversar?'
+  }
+
   useEffect(() => {
     loadUserProfile()
     loadUserLinks()
@@ -236,7 +253,8 @@ export default function UserDashboard() {
     
     setNewLink({
       ...newLink,
-      redirect_url: whatsappUrl
+      redirect_url: whatsappUrl,
+      custom_message: getCustomMessageByTool(newLink.tool_name)
     })
     setShowCreateLinkModal(true)
   }
@@ -1135,13 +1153,30 @@ export default function UserDashboard() {
                 
                       <div>
                   <label className="block text-sm font-medium text-gray-700">Mensagem Personalizada</label>
-                  <textarea
-                    value={newLink.custom_message}
-                    onChange={(e) => setNewLink({...newLink, custom_message: e.target.value})}
-                    rows={3}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    placeholder="Quer receber orientações personalizadas? Clique abaixo e fale comigo!"
-                  />
+                  <div className="mt-1">
+                    <div className="text-xs text-gray-500 mb-2">
+                      💡 Mensagem sugerida para {newLink.tool_name}:
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 mb-2">
+                      {getCustomMessageByTool(newLink.tool_name)}
+                    </div>
+                    <textarea
+                      value={newLink.custom_message}
+                      onChange={(e) => setNewLink({...newLink, custom_message: e.target.value})}
+                      rows={3}
+                      className="block w-full border border-gray-300 rounded-md px-3 py-2"
+                      placeholder="Digite sua mensagem personalizada aqui..."
+                    />
+                    <div className="mt-1">
+                      <button
+                        type="button"
+                        onClick={() => setNewLink({...newLink, custom_message: getCustomMessageByTool(newLink.tool_name)})}
+                        className="text-xs text-emerald-600 hover:text-emerald-700"
+                      >
+                        ✨ Usar mensagem sugerida
+                      </button>
+                    </div>
+                  </div>
                   </div>
                 </div>
 
@@ -1278,13 +1313,30 @@ export default function UserDashboard() {
                     
                     <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Mensagem Personalizada</label>
+                <div className="mb-2">
+                  <div className="text-xs text-gray-500 mb-2">
+                    💡 Mensagem sugerida para {newLink.tool_name}:
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 mb-2">
+                    {getCustomMessageByTool(newLink.tool_name)}
+                  </div>
+                </div>
                       <textarea
                   value={newLink.custom_message}
                   onChange={(e) => setNewLink({...newLink, custom_message: e.target.value})}
                         rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Quer receber orientações personalizadas? Clique abaixo e fale comigo!"
+                  placeholder="Digite sua mensagem personalizada aqui..."
                       />
+                <div className="mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setNewLink({...newLink, custom_message: getCustomMessageByTool(newLink.tool_name)})}
+                    className="text-xs text-emerald-600 hover:text-emerald-700"
+                  >
+                    ✨ Usar mensagem sugerida
+                  </button>
+                </div>
                     </div>
               </div>
               
