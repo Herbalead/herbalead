@@ -216,6 +216,26 @@ export default function UserDashboard() {
         return
       }
 
+      // Verificar se já existe um projeto com o mesmo nome para este usuário
+      const { data: existingLinks, error: checkError } = await supabase
+        .from('links')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .ilike('name', newLink.name.trim())
+
+      if (checkError) {
+        console.error('❌ Erro ao verificar projetos existentes:', checkError)
+        setErrorMessage('Erro interno. Tente novamente.')
+        setShowErrorModal(true)
+        return
+      }
+
+      if (existingLinks && existingLinks.length > 0) {
+        setErrorMessage(`Já existe um projeto com o nome "${newLink.name.trim()}". Escolha um nome diferente.`)
+        setShowErrorModal(true)
+        return
+      }
+
       const { data, error } = await supabase
         .from('links')
         .insert({
@@ -322,6 +342,27 @@ export default function UserDashboard() {
 
       if (!newLink.redirect_url.trim()) {
         setErrorMessage('URL de redirecionamento é obrigatória.')
+        setShowErrorModal(true)
+        return
+      }
+
+      // Verificar se já existe outro projeto com o mesmo nome para este usuário (excluindo o atual)
+      const { data: existingLinks, error: checkError } = await supabase
+        .from('links')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .ilike('name', newLink.name.trim())
+        .neq('id', editingLink.id)
+
+      if (checkError) {
+        console.error('❌ Erro ao verificar projetos existentes:', checkError)
+        setErrorMessage('Erro interno. Tente novamente.')
+        setShowErrorModal(true)
+        return
+      }
+
+      if (existingLinks && existingLinks.length > 0) {
+        setErrorMessage(`Já existe outro projeto com o nome "${newLink.name.trim()}". Escolha um nome diferente.`)
         setShowErrorModal(true)
         return
       }
