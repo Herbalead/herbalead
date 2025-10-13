@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Mail, Lock, User, Phone, Building, GraduationCap } from 'lucide-react'
+import { ArrowLeft, Mail, Lock, User, Phone, Building, GraduationCap, Eye, EyeOff } from 'lucide-react'
 import { signUp, signIn, signOut } from '@/lib/supabase'
 // import HerbaleadLogo from '@/components/HerbaleadLogo'
 
@@ -23,6 +23,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [projectDomain, setProjectDomain] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const router = useRouter()
 
   const [formData, setFormData] = useState<FormData>({
@@ -70,7 +72,11 @@ export default function RegisterPage() {
           console.log('⚠️ Logout não necessário (usuário não estava logado)')
         }
         if (formData.password !== formData.confirmPassword) {
-          throw new Error('Senhas não coincidem')
+          throw new Error('As senhas não coincidem')
+        }
+        
+        if (formData.password.length < 6) {
+          throw new Error('A senha deve ter pelo menos 6 caracteres')
         }
 
         const profileData = {
@@ -217,14 +223,30 @@ export default function RegisterPage() {
               <div className="relative">
                 <Lock className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   placeholder="Sua senha"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
+              {formData.password && (
+                <div className="mt-1 text-xs text-gray-500">
+                  {formData.password.length < 6 ? (
+                    <span className="text-red-500">⚠️ Senha deve ter pelo menos 6 caracteres</span>
+                  ) : (
+                    <span className="text-green-500">✅ Senha válida</span>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Confirm Password (register only) */}
@@ -236,14 +258,30 @@ export default function RegisterPage() {
                 <div className="relative">
                   <Lock className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     required
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     placeholder="Confirme sua senha"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
+                {formData.confirmPassword && (
+                  <div className="mt-1 text-xs text-gray-500">
+                    {formData.password !== formData.confirmPassword ? (
+                      <span className="text-red-500">⚠️ As senhas não coincidem</span>
+                    ) : (
+                      <span className="text-green-500">✅ Senhas coincidem</span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

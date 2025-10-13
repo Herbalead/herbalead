@@ -16,11 +16,11 @@ export const metadata = {
   openGraph: {
     title: 'Herbalead - Bem-Estar Natural e Tecnologia',
     description: 'Conquiste novos clientes todos os dias com bem-estar natural e tecnologia. Ferramentas profissionais para gerar leads qualificados.',
-    url: 'https://herbalead.com',
+    url: 'https://www.herbalead.com',
     siteName: 'Herbalead',
     images: [
       {
-        url: '/logos/herbalead/herbalead-og-image.png',
+        url: 'https://www.herbalead.com/logos/herbalead/herbalead-og-image.png',
         width: 1200,
         height: 630,
         alt: 'Herbalead - Your Lead Accelerator',
@@ -33,7 +33,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Herbalead - Bem-Estar Natural e Tecnologia',
     description: 'Conquiste novos clientes todos os dias com bem-estar natural e tecnologia.',
-    images: ['/logos/herbalead/herbalead-og-image.png'],
+    images: ['https://www.herbalead.com/logos/herbalead/herbalead-og-image.png'],
     creator: '@herbalead',
   },
   robots: {
@@ -72,25 +72,42 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#10B981" />
         <meta name="msapplication-tap-highlight" content="no" />
         
-        {/* WhatsApp e redes sociais específicas */}
-        <meta property="og:image" content="https://herbalead.com/logos/herbalead/herbalead-og-image.png" />
+        {/* WhatsApp e redes sociais específicas - usando www para evitar redirecionamento */}
+        <meta property="og:image" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content="Herbalead - Your Lead Accelerator" />
         <meta property="og:image:type" content="image/png" />
         
-        {/* WhatsApp específico */}
-        <meta property="og:image:secure_url" content="https://herbalead.com/logos/herbalead/herbalead-og-image.png" />
+        {/* WhatsApp específico - múltiplas configurações para garantir compatibilidade */}
+        <meta property="og:image:secure_url" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.png" />
+        <meta property="og:image:url" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.png" />
+        
+        {/* WhatsApp Business API */}
+        <meta property="og:image" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.png" />
         
         {/* Twitter Cards */}
-        <meta name="twitter:image" content="https://herbalead.com/logos/herbalead/herbalead-og-image.png" />
+        <meta name="twitter:image" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.png" />
         <meta name="twitter:image:alt" content="Herbalead - Your Lead Accelerator" />
         
         {/* LinkedIn */}
-        <meta property="og:image:url" content="https://herbalead.com/logos/herbalead/herbalead-og-image.png" />
+        <meta property="og:image:url" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.png" />
         
         {/* Facebook */}
-        <meta property="og:image:secure_url" content="https://herbalead.com/logos/herbalead/herbalead-og-image.png" />
+        <meta property="og:image:secure_url" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.png" />
+        
+        {/* Configurações adicionais para WhatsApp */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Herbalead" />
+        <meta property="og:locale" content="pt_BR" />
+        
+        {/* Cache busting para forçar atualização */}
+        <meta property="og:image" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.png?v=2024" />
+        
+        {/* Configurações específicas para WhatsApp */}
+        <meta property="og:image:secure_url" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
       </head>
       <body className={inter.className}>
         {children}
