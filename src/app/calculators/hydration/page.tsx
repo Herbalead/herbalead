@@ -26,7 +26,7 @@ interface HydrationResults {
 }
 
 export default function HydrationCalculatorPage() {
-  const { userData, getWhatsAppUrl, getCustomMessage } = useUserData()
+  const { userData, getWhatsAppUrl, getCustomMessage, getPageTitle, getButtonText } = useUserData()
   const [formData, setFormData] = useState({
     age: '',
     weight: '',
@@ -274,7 +274,7 @@ export default function HydrationCalculatorPage() {
           {/* CTA Section */}
           <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-8 text-center shadow-2xl border-2 border-blue-200">
             <h3 className="text-3xl font-bold mb-4 text-gray-800">
-              🎯 Quer uma análise mais completa?
+              🎯 {getPageTitle()}
             </h3>
             <p className="text-gray-600 mb-8 text-lg">
               {getCustomMessage()}
@@ -289,7 +289,7 @@ export default function HydrationCalculatorPage() {
               className="px-12 py-6 bg-blue-600 text-white rounded-xl font-bold text-xl hover:bg-blue-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-blue-500"
             >
               <MessageCircle className="w-8 h-8 mr-3" />
-              Consultar Especialista
+              {getButtonText()}
             </button>
           </div>
         </main>
