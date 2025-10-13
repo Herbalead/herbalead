@@ -13,7 +13,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useUserData } from '@/lib/useUserData'
-import Link from 'next/link'
 
 
 interface QuizResults {
