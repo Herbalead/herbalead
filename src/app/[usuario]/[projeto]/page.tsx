@@ -43,7 +43,7 @@ export default function PersonalizedLinkPage() {
         // Buscar todos os profissionais e comparar com o slug normalizado
         const { data: allProfessionals, error: profError } = await supabase
           .from('professionals')
-          .select('id, name, email')
+          .select('id, name, email, phone')
         
         if (profError) {
           console.error('❌ Erro ao buscar professionals:', profError)
@@ -125,6 +125,12 @@ export default function PersonalizedLinkPage() {
             linkId: link.id,
             customMessage: link.custom_message || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!' // Mensagem personalizada do link
           }
+          
+          console.log('🔍 Debug redirecionamento:')
+          console.log('  - professional:', professional)
+          console.log('  - professional.phone:', professional?.phone)
+          console.log('  - link.custom_message:', link.custom_message)
+          console.log('  - userData:', userData)
           
           const params = new URLSearchParams({
             user: JSON.stringify(userData)

@@ -54,7 +54,14 @@ export function useUserData() {
     // Usar mensagem personalizada se disponível, senão usar a mensagem passada como parâmetro
     const finalMessage = userData?.customMessage || message || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
     
+    console.log('🔍 Debug getWhatsAppUrl:')
+    console.log('  - userData:', userData)
+    console.log('  - userPhone:', userData?.userPhone)
+    console.log('  - customMessage:', userData?.customMessage)
+    console.log('  - finalMessage:', finalMessage)
+    
     if (!userData?.userPhone) {
+      console.log('⚠️ Usando telefone fixo (fallback)')
       return `https://wa.me/5519981868000?text=${encodeURIComponent(finalMessage)}`
     }
     
@@ -62,6 +69,7 @@ export function useUserData() {
     const cleanPhone = userData.userPhone.replace(/\D/g, '')
     const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`
     
+    console.log('✅ Usando telefone do usuário:', formattedPhone)
     return `https://wa.me/${formattedPhone}?text=${encodeURIComponent(finalMessage)}`
   }
 
