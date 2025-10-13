@@ -61,6 +61,9 @@ export default function HerbaleadLogo({
         alt="HerbaLead - Your Lead Accelerator"
         className={`${responsiveClasses} w-auto`}
       />
+      {showText && variant !== 'iconOnly' && (
+        <span className="ml-2 text-gray-800 font-semibold">HerbaLead</span>
+      )}
     </div>
   )
 }

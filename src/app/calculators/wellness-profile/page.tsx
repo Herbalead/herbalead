@@ -12,7 +12,6 @@ import {
   Heart,
   Target
 } from 'lucide-react'
-import Link from 'next/link'
 import { useUserData } from '@/lib/useUserData'
 
 interface WellnessResults {

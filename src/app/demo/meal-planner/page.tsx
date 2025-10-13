@@ -372,12 +372,12 @@ export default function MealPlannerDemoPage() {
               🎯 Quer um plano mais detalhado?
             </h3>
             <p className="text-gray-600 mb-8 text-lg">
-              Consulte um especialista para um plano alimentar personalizado
+              Esta é uma demonstração! Na versão real, este botão redirecionaria para o WhatsApp do especialista com uma mensagem personalizada.
             </p>
             <button 
               onClick={() => {
-                const whatsappUrl = 'https://wa.me/5519981868000?text=Olá! Gostaria de consultar um especialista sobre meu plano de refeições.'
-                window.open(whatsappUrl, '_blank')
+                
+                
               }}
               className="px-12 py-6 bg-orange-600 text-white rounded-xl font-bold text-xl hover:bg-orange-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-orange-500"
             >

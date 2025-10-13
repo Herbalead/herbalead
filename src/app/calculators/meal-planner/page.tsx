@@ -13,7 +13,6 @@ import {
   Activity,
   Target
 } from 'lucide-react'
-import Link from 'next/link'
 import { useUserData } from '@/lib/useUserData'
 
 interface MealPlanResults {

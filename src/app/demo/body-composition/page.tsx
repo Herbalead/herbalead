@@ -372,12 +372,12 @@ export default function BodyCompositionDemoPage() {
               🎯 Quer uma análise mais completa?
             </h3>
             <p className="text-gray-600 mb-8 text-lg">
-              Consulte um especialista para um plano de composição corporal personalizado
+              Esta é uma demonstração! Na versão real, este botão redirecionaria para o WhatsApp do especialista com uma mensagem personalizada.
             </p>
             <button 
               onClick={() => {
-                const whatsappUrl = 'https://wa.me/5519981868000?text=Olá! Gostaria de consultar um especialista sobre minha composição corporal.'
-                window.open(whatsappUrl, '_blank')
+                
+                
               }}
               className="px-12 py-6 bg-purple-600 text-white rounded-xl font-bold text-xl hover:bg-purple-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-purple-500"
             >

@@ -7,8 +7,7 @@ import {
   ArrowRight, 
   CheckCircle, 
   AlertTriangle, 
-  Star,
-  MessageCircle
+  Star
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -239,7 +238,7 @@ export default function BMIDemoPage() {
               <h4 className="text-lg font-semibold text-gray-800 mb-3">💡 Como funciona na prática:</h4>
               <ul className="text-left text-gray-600 space-y-2">
                 <li>• Cliente preenche os dados e vê o resultado</li>
-                <li>• Clica no botão "Consultar Especialista"</li>
+                  <li>• Clica no botão &quot;Consultar Especialista&quot;</li>
                 <li>• É redirecionado automaticamente para seu WhatsApp</li>
                 <li>• Mensagem personalizada já vem pronta</li>
                 <li>• Você recebe o lead qualificado!</li>
