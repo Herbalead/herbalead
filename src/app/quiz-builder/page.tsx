@@ -42,12 +42,15 @@ interface Question {
   id?: string
   quiz_id?: string
   question_text: string
-  question_type: 'multiple' | 'essay'
+  question_type: 'multiple' | 'essay' | 'multiple_select'
   order: number
   options?: string[]
-  correct_answer?: number | string
+  correct_answer?: number | string | number[] // Suporta múltiplas respostas corretas
   points?: number
   button_text?: string
+  allow_multiple?: boolean // Nova propriedade para permitir múltiplas escolhas
+  min_options?: number // Número mínimo de alternativas
+  max_options?: number // Número máximo de alternativas
 }
 
 export default function QuizBuilder() {
@@ -358,20 +361,63 @@ export default function QuizBuilder() {
     }
   }
 
-  const addQuestion = (type: 'multiple' | 'essay') => {
+  const addQuestion = (type: 'multiple' | 'essay' | 'multiple_select') => {
     const isLastQuestion = quiz.questions.length === 0
     const newQuestion: Question = {
       id: `question-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // ID único
       question_text: '',
       question_type: type,
       order: quiz.questions.length,
-      options: type === 'multiple' ? ['', '', '', ''] : [],
-      correct_answer: type === 'multiple' ? 0 : '',
+      options: type === 'multiple' || type === 'multiple_select' ? ['', '', '', ''] : [],
+      correct_answer: type === 'multiple' ? 0 : type === 'multiple_select' ? [] : '',
       points: 1,
-      button_text: isLastQuestion ? 'Finalizar Quiz' : 'Próxima Questão'
+      button_text: isLastQuestion ? 'Finalizar Quiz' : 'Próxima Questão',
+      allow_multiple: type === 'multiple_select',
+      min_options: type === 'multiple' || type === 'multiple_select' ? 2 : undefined,
+      max_options: type === 'multiple' || type === 'multiple_select' ? 8 : undefined
     }
     setQuiz({...quiz, questions: [...quiz.questions, newQuestion]})
     setPreviewQuestion(quiz.questions.length)
+  }
+
+  const addOption = (questionIndex: number) => {
+    const question = quiz.questions[questionIndex]
+    if (question.options && question.options.length < (question.max_options || 8)) {
+      const newOptions = [...question.options, '']
+      updateQuestion(questionIndex, 'options', newOptions)
+    }
+  }
+
+  const removeOption = (questionIndex: number, optionIndex: number) => {
+    const question = quiz.questions[questionIndex]
+    if (question.options && question.options.length > (question.min_options || 2)) {
+      const newOptions = question.options.filter((_, index) => index !== optionIndex)
+      updateQuestion(questionIndex, 'options', newOptions)
+      
+      // Ajustar resposta correta se necessário
+      if (question.question_type === 'multiple') {
+        const currentCorrect = question.correct_answer as number
+        if (currentCorrect >= optionIndex) {
+          const newCorrect = currentCorrect > optionIndex ? currentCorrect - 1 : 0
+          updateQuestion(questionIndex, 'correct_answer', newCorrect)
+        }
+      } else if (question.question_type === 'multiple_select') {
+        const currentCorrect = question.correct_answer as number[]
+        const newCorrect = currentCorrect
+          .filter(index => index !== optionIndex)
+          .map(index => index > optionIndex ? index - 1 : index)
+        updateQuestion(questionIndex, 'correct_answer', newCorrect)
+      }
+    }
+  }
+
+  const updateOption = (questionIndex: number, optionIndex: number, value: string) => {
+    const question = quiz.questions[questionIndex]
+    if (question.options) {
+      const newOptions = [...question.options]
+      newOptions[optionIndex] = value
+      updateQuestion(questionIndex, 'options', newOptions)
+    }
   }
 
   const updateQuestion = (id: number, field: string, value: string | number | string[]) => {
@@ -747,25 +793,36 @@ export default function QuizBuilder() {
             </h3>
 
             {/* Opções de Resposta */}
-            {question.question_type === 'multiple' ? (
+            {(question.question_type === 'multiple' || question.question_type === 'multiple_select') ? (
               <div className="space-y-3 mb-6">
                 {question.options?.map((option, index) => (
                   <button
                     key={index}
                     onClick={() => {
-                      setPreviewAnswers(prev => ({
-                        ...prev,
-                        [currentPreviewQuestion]: index
-                      }))
+                      if (question.question_type === 'multiple') {
+                        setPreviewAnswers(prev => ({
+                          ...prev,
+                          [currentPreviewQuestion]: index
+                        }))
+                      } else {
+                        const currentAnswers = previewAnswers[currentPreviewQuestion] as number[] || []
+                        const newAnswers = currentAnswers.includes(index)
+                          ? currentAnswers.filter(i => i !== index)
+                          : [...currentAnswers, index]
+                        setPreviewAnswers(prev => ({
+                          ...prev,
+                          [currentPreviewQuestion]: newAnswers
+                        }))
+                      }
                     }}
                     className="w-full p-4 rounded-lg border-2 text-left transition-all hover:scale-105"
                     style={{
-                      borderColor: previewAnswers[currentPreviewQuestion] === index 
-                        ? quiz.colors.primary 
-                        : '#e5e7eb',
-                      backgroundColor: previewAnswers[currentPreviewQuestion] === index 
-                        ? quiz.colors.primary + '10' 
-                        : 'white',
+                      borderColor: question.question_type === 'multiple'
+                        ? (previewAnswers[currentPreviewQuestion] === index ? quiz.colors.primary : '#e5e7eb')
+                        : ((previewAnswers[currentPreviewQuestion] as number[])?.includes(index) ? quiz.colors.primary : '#e5e7eb'),
+                      backgroundColor: question.question_type === 'multiple'
+                        ? (previewAnswers[currentPreviewQuestion] === index ? quiz.colors.primary + '10' : 'white')
+                        : ((previewAnswers[currentPreviewQuestion] as number[])?.includes(index) ? quiz.colors.primary + '10' : 'white'),
                       color: quiz.colors.text
                     }}
                   >
@@ -773,17 +830,25 @@ export default function QuizBuilder() {
                       <div 
                         className="w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center"
                         style={{
-                          borderColor: previewAnswers[currentPreviewQuestion] === index 
-                            ? quiz.colors.primary 
-                            : '#d1d5db'
+                          borderColor: question.question_type === 'multiple'
+                            ? (previewAnswers[currentPreviewQuestion] === index ? quiz.colors.primary : '#d1d5db')
+                            : ((previewAnswers[currentPreviewQuestion] as number[])?.includes(index) ? quiz.colors.primary : '#d1d5db')
                         }}
                       >
-                        {previewAnswers[currentPreviewQuestion] === index && (
-                          <div 
-                            className="w-2 h-2 rounded-full"
-                            style={{backgroundColor: quiz.colors.primary}}
-                          />
-                        )}
+                        {question.question_type === 'multiple' 
+                          ? (previewAnswers[currentPreviewQuestion] === index && (
+                              <div 
+                                className="w-2 h-2 rounded-full"
+                                style={{backgroundColor: quiz.colors.primary}}
+                              />
+                            ))
+                          : ((previewAnswers[currentPreviewQuestion] as number[])?.includes(index) && (
+                              <div 
+                                className="w-2 h-2 rounded-full"
+                                style={{backgroundColor: quiz.colors.primary}}
+                              />
+                            ))
+                        }
                       </div>
                       {option || `Opção ${index + 1}`}
                     </div>
@@ -1111,7 +1176,14 @@ export default function QuizBuilder() {
                       className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-2 hover:bg-blue-600 text-sm"
                     >
                       <Plus size={16} />
-                      Múltipla Escolha
+                      Escolha Única
+                    </button>
+                    <button
+                      onClick={() => addQuestion('multiple_select')}
+                      className="px-4 py-2 bg-purple-500 text-white rounded-lg flex items-center gap-2 hover:bg-purple-600 text-sm"
+                    >
+                      <Plus size={16} />
+                      Múltiplas Escolhas
                     </button>
                     <button
                       onClick={() => addQuestion('essay')}
@@ -1160,7 +1232,9 @@ export default function QuizBuilder() {
                       
                       <span className="text-sm font-semibold text-gray-600">
                         Questão {qIndex + 1} - {
-                          question.question_type === 'multiple' ? '✓ Múltipla Escolha' : '✍️ Dissertativa'
+                          question.question_type === 'multiple' ? '✓ Escolha Única' : 
+                          question.question_type === 'multiple_select' ? '☑️ Múltiplas Escolhas' : 
+                          '✍️ Dissertativa'
                         }
                       </span>
                     </div>
@@ -1185,18 +1259,56 @@ export default function QuizBuilder() {
                     onClick={(e) => e.stopPropagation()}
                   />
 
-                  {question.question_type === 'multiple' && (
+                  {(question.question_type === 'multiple' || question.question_type === 'multiple_select') && (
                     <div className="space-y-2 mb-3">
-                      <p className="text-xs font-medium text-gray-500 mb-2">
-                        Opções (selecione a correta):
-                      </p>
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="text-xs font-medium text-gray-500">
+                          {question.question_type === 'multiple' ? 'Opções (selecione a correta):' : 'Opções (selecione as corretas):'}
+                        </p>
+                        <div className="flex gap-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              addOption(qIndex)
+                            }}
+                            disabled={question.options && question.options.length >= (question.max_options || 8)}
+                            className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                          >
+                            + Adicionar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              updateQuestion(qIndex, 'question_type', question.question_type === 'multiple' ? 'multiple_select' : 'multiple')
+                            }}
+                            className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                          >
+                            {question.question_type === 'multiple' ? 'Múltiplas' : 'Única'}
+                          </button>
+                        </div>
+                      </div>
                       {question.options?.map((option, oIndex) => (
                         <div key={oIndex} className="flex gap-2 items-center">
                           <input
-                            type="radio"
+                            type={question.question_type === 'multiple' ? 'radio' : 'checkbox'}
                             name={`correct-${qIndex}`}
-                            checked={question.correct_answer === oIndex}
-                            onChange={() => updateQuestion(qIndex, 'correct_answer', oIndex)}
+                            checked={question.question_type === 'multiple' 
+                              ? question.correct_answer === oIndex
+                              : (question.correct_answer as number[])?.includes(oIndex)
+                            }
+                            onChange={() => {
+                              if (question.question_type === 'multiple') {
+                                updateQuestion(qIndex, 'correct_answer', oIndex)
+                              } else {
+                                const currentCorrect = question.correct_answer as number[] || []
+                                const newCorrect = currentCorrect.includes(oIndex)
+                                  ? currentCorrect.filter(i => i !== oIndex)
+                                  : [...currentCorrect, oIndex]
+                                updateQuestion(qIndex, 'correct_answer', newCorrect)
+                              }
+                            }}
                             className="w-4 h-4"
                             onClick={(e) => e.stopPropagation()}
                           />
@@ -1208,6 +1320,18 @@ export default function QuizBuilder() {
                             className="flex-1 px-3 py-2 border rounded text-sm"
                             onClick={(e) => e.stopPropagation()}
                           />
+                          {question.options && question.options.length > (question.min_options || 2) && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                removeOption(qIndex, oIndex)
+                              }}
+                              className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
+                            >
+                              ×
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>
