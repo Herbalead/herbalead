@@ -60,18 +60,18 @@ export default function UserDashboard() {
   // Função para gerar mensagem personalizada por ferramenta
   const getCustomMessageByTool = (toolName: string): string => {
     const messages = {
-      'bmi': 'Olá! Vi que você tem interesse em calcular seu IMC. Posso te ajudar com orientações personalizadas sobre seu bem-estar e estilo de vida. Vamos conversar?',
-      'protein': 'Oi! Notei seu interesse em calcular suas necessidades de proteína. Tenho algumas dicas valiosas sobre nutrição e bem-estar que podem te interessar. Que tal conversarmos?',
-      'hydration': 'Olá! Vi que você quer saber mais sobre hidratação. Tenho informações importantes sobre como manter seu corpo hidratado e saudável. Vamos trocar uma ideia?',
-      'body-composition': 'Oi! Percebi seu interesse em composição corporal. Posso compartilhar conhecimentos sobre saúde e bem-estar que podem te ajudar. Que tal conversarmos?',
-      'meal-planner': 'Olá! Vi que você tem interesse em planejamento de refeições. Tenho dicas valiosas sobre nutrição e estilo de vida saudável. Vamos conversar?',
-      'nutrition-assessment': 'Oi! Notei seu interesse em avaliação nutricional. Posso te ajudar com orientações personalizadas sobre alimentação e bem-estar. Que tal conversarmos?',
-      'daily-wellness': 'Olá! Vi que você quer saber mais sobre bem-estar diário. Tenho informações importantes sobre como manter uma rotina saudável. Vamos trocar uma ideia?',
-      'healthy-eating': 'Oi! Percebi seu interesse em alimentação saudável. Posso compartilhar conhecimentos sobre nutrição e bem-estar que podem te ajudar. Que tal conversarmos?',
-      'wellness-profile': 'Olá! Vi que você tem interesse em perfil de bem-estar. Tenho dicas valiosas sobre saúde e estilo de vida que podem te interessar. Vamos conversar?'
+      'bmi': 'Olá! Calculei meu IMC e gostaria de saber mais sobre orientações personalizadas para meu bem-estar. Podemos conversar?',
+      'protein': 'Oi! Calculei minhas necessidades de proteína e tenho interesse em orientações sobre nutrição. Que tal conversarmos?',
+      'hydration': 'Olá! Quero saber mais sobre hidratação e como manter meu corpo saudável. Podemos trocar uma ideia?',
+      'body-composition': 'Oi! Calculei minha composição corporal e gostaria de orientações sobre saúde e bem-estar. Que tal conversarmos?',
+      'meal-planner': 'Olá! Tenho interesse em planejamento de refeições e orientações sobre alimentação saudável. Podemos conversar?',
+      'nutrition-assessment': 'Oi! Fiz uma avaliação nutricional e gostaria de orientações personalizadas. Que tal conversarmos?',
+      'daily-wellness': 'Olá! Quero saber mais sobre bem-estar diário e como manter uma rotina saudável. Podemos trocar uma ideia?',
+      'healthy-eating': 'Oi! Tenho interesse em alimentação saudável e orientações sobre nutrição. Que tal conversarmos?',
+      'wellness-profile': 'Olá! Calculei meu perfil de bem-estar e gostaria de orientações sobre saúde. Podemos conversar?'
     }
     
-    return messages[toolName as keyof typeof messages] || 'Olá! Vi que você tem interesse em bem-estar e saúde. Posso te ajudar com orientações personalizadas. Vamos conversar?'
+    return messages[toolName as keyof typeof messages] || 'Olá! Tenho interesse em bem-estar e saúde. Gostaria de orientações personalizadas. Podemos conversar?'
   }
 
   useEffect(() => {
@@ -241,15 +241,17 @@ export default function UserDashboard() {
   }
 
   const openCreateLinkModal = () => {
-    // Pré-preencher URL com WhatsApp do usuário
-    const fullPhone = `${countryCode}${userProfile.phone.replace(/\D/g, '')}`
+    // Pré-preencher URL com WhatsApp do usuário usando o código do país correto
+    const cleanPhone = userProfile.phone.replace(/\D/g, '')
+    const fullPhone = `${countryCode}${cleanPhone}`
     const whatsappUrl = userProfile.phone 
       ? `https://wa.me/${fullPhone}`
       : 'https://wa.me/5511999999999'
     
     console.log('📱 Pré-preenchimento WhatsApp:', whatsappUrl)
     console.log('👤 Telefone do usuário:', userProfile.phone)
-    console.log('🌍 Código do país:', countryCode)
+    console.log('🌍 Código do país selecionado:', countryCode)
+    console.log('📞 Telefone completo:', fullPhone)
     
     setNewLink({
       ...newLink,
@@ -649,13 +651,14 @@ export default function UserDashboard() {
         .from('professionals')
         .update({
           name: editedProfile.name.trim(),
-          phone: `${countryCode}${editedProfile.phone.trim()}`,
+          phone: `${countryCode}${editedProfile.phone.replace(/\D/g, '')}`,
           specialty: editedProfile.specialty.trim(),
           company: editedProfile.company.trim()
         })
         .eq('email', user.email)
 
       console.log('📊 Resultado da atualização:', error)
+      console.log('📞 Telefone salvo:', `${countryCode}${editedProfile.phone.replace(/\D/g, '')}`)
 
       if (error) {
         console.error('❌ Erro ao salvar perfil:', error)
