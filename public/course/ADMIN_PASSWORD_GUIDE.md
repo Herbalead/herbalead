@@ -257,3 +257,4 @@ SELECT set_admin_password('seu-email@exemplo.com', 'sua-senha-admin');
 **Agora você tem um sistema de senha administrativa seguro e funcional!** 🎯✨
 
 
+

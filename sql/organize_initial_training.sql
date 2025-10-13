@@ -32,3 +32,4 @@ WHERE c.title = 'Treinamento Inicial - HerbaLead'
 ORDER BY cm.order_index;
 
 
+

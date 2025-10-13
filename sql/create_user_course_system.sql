@@ -150,3 +150,4 @@ AND table_name IN ('user_course_progress', 'course_enrollments', 'course_certifi
 ORDER BY table_name, ordinal_position;
 
 
+

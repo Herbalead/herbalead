@@ -25,3 +25,4 @@ FROM professionals
 WHERE is_admin = true;
 
 
+

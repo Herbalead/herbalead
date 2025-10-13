@@ -106,3 +106,4 @@ WHERE email = 'faulaandre@gmail.com';
 **Execute o SQL e teste o login com a nova senha!** 🎯✨
 
 
+

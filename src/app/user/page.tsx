@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Link as LinkIcon, Users, TrendingUp, Settings, BookOpen } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
+import HelpButton from '@/components/HelpButton'
 
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -1548,6 +1549,9 @@ export default function UserDashboard() {
           </div>
         </div>
       )}
+      
+      {/* Botão de Ajuda */}
+      <HelpButton />
     </div>
   )
 }

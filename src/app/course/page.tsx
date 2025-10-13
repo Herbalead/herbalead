@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Download, Play, CheckCircle, Lock, BookOpen, Clock, Star } from 'lucide-react'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
+import HelpButton from '@/components/HelpButton'
 
 interface Course {
   id: string
@@ -758,6 +759,9 @@ export default function CoursePage() {
           })}
         </div>
       </main>
+      
+      {/* Botão de Ajuda */}
+      <HelpButton />
     </div>
   )
 }

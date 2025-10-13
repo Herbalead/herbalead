@@ -169,3 +169,4 @@ console.log('✅ Materiais carregados:', materialsData?.length || 0)
 **As melhorias estão implementadas! Teste agora e me informe o resultado.** 🔍✨
 
 
+

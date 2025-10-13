@@ -188,3 +188,4 @@ O sistema agora está:
 **Execute o script de melhoria e comece a criar cursos multimídia completos!** 🎯✨
 
 
+

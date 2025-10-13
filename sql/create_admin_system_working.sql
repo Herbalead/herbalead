@@ -120,3 +120,4 @@ INSERT INTO courses (title, description, modules) VALUES (
 SELECT 'Tabelas criadas com sucesso!' as status;
 
 
+

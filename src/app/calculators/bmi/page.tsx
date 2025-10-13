@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useUserData } from '@/lib/useUserData'
+import HelpButton from '@/components/HelpButton'
 
 interface BMIResults {
   bmi: string
@@ -441,6 +442,9 @@ export default function BMICalculatorPage() {
           </div>
         </div>
       </main>
+      
+      {/* Botão de Ajuda */}
+      <HelpButton />
     </div>
   )
 }

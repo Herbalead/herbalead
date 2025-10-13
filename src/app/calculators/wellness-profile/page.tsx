@@ -13,6 +13,7 @@ import {
   Target
 } from 'lucide-react'
 import { useUserData } from '@/lib/useUserData'
+import HelpButton from '@/components/HelpButton'
 
 interface WellnessResults {
   score: string
@@ -507,6 +508,9 @@ export default function WellnessProfileCalculatorPage() {
           </div>
         </div>
       </main>
+      
+      {/* Botão de Ajuda */}
+      <HelpButton />
     </div>
   )
 }

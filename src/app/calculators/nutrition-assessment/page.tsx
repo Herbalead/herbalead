@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useUserData } from '@/lib/useUserData'
+import HelpButton from '@/components/HelpButton'
 
 interface NutritionAssessmentResults {
   overallScore: string
@@ -772,6 +773,9 @@ export default function NutritionAssessmentPage() {
           </div>
         </div>
       </main>
+      
+      {/* Botão de Ajuda */}
+      <HelpButton />
     </div>
   )
 }

@@ -74,3 +74,4 @@ checkEnvironmentVariables();
 // testSupabaseConnection(); // Descomente quando tiver as credenciais
 
 
+

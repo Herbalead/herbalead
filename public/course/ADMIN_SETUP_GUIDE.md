@@ -201,3 +201,4 @@ SELECT make_user_admin('seu-email@exemplo.com');
 **Agora é só executar o comando SQL e fazer login!** 🎯✨
 
 
+

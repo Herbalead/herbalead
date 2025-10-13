@@ -126,3 +126,4 @@ SELECT 'Tabelas criadas com sucesso!' as status;
 SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('courses', 'course_modules', 'course_materials') ORDER BY table_name;
 
 
+

@@ -54,3 +54,4 @@ SELECT 'Tabela professional_links criada com sucesso!' as resultado;
 
 
 
+

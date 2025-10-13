@@ -90,3 +90,4 @@ Agora todos os scripts usam a nomenclatura correta:
 **Execute o script e o curso funcionará perfeitamente!** 🎯✨
 
 
+

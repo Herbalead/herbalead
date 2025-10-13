@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { MessageSquare, ExternalLink, Copy, CheckCircle } from 'lucide-react'
+import HelpButton from '@/components/HelpButton'
 
 interface LinkData {
   id: string
@@ -325,6 +326,9 @@ export default function ToolPage() {
           </div>
         </div>
       </main>
+      
+      {/* Botão de Ajuda */}
+      <HelpButton />
     </div>
   )
 }

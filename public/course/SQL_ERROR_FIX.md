@@ -111,3 +111,4 @@ O sistema agora usa a estrutura correta da tabela `professionals` e deve funcion
 **Próximo passo:** Execute o script SQL corrigido no Supabase Dashboard. 🎯✨
 
 
+

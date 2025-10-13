@@ -131,3 +131,4 @@ ON CONFLICT DO NOTHING;
 SELECT 'Tabelas criadas com sucesso!' as status;
 
 
+

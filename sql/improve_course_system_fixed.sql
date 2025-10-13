@@ -84,3 +84,4 @@ AND table_name IN ('courses', 'course_modules', 'course_materials', 'material_ca
 ORDER BY table_name;
 
 
+

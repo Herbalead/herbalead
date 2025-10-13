@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import HelpButton from '@/components/HelpButton'
 
 export default function PersonalizedLinkPage() {
   const params = useParams()
@@ -235,6 +236,9 @@ export default function PersonalizedLinkPage() {
           </div>
         </div>
       </div>
+      
+      {/* Botão de Ajuda */}
+      <HelpButton />
     </div>
   )
 }

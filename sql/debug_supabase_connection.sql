@@ -117,3 +117,4 @@ AND tablename IN ('courses', 'course_modules', 'course_materials', 'professional
 ORDER BY tablename, policyname;
 
 
+
