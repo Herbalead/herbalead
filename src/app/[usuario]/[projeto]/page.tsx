@@ -117,8 +117,23 @@ export default function PersonalizedLinkPage() {
           const toolUrl = toolUrls[link.tool_name] || '/calculators/bmi'
           console.log('🎯 URL da ferramenta:', toolUrl)
           
+          // Passar dados do usuário via URL para a calculadora
+          const userData = {
+            userId: link.user_id,
+            userName: link.name,
+            userPhone: professional?.phone || '5519981868000', // Usar telefone do profissional ou fallback
+            linkId: link.id
+          }
+          
+          const params = new URLSearchParams({
+            user: JSON.stringify(userData)
+          })
+          
+          const finalUrl = `${toolUrl}?${params.toString()}`
+          console.log('🚀 Redirecionando para:', finalUrl)
+          
           // REDIRECIONAMENTO DIRETO - sem tela intermediária
-          window.location.replace(toolUrl)
+          window.location.replace(finalUrl)
           return
         }
       } catch (error) {

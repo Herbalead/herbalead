@@ -12,6 +12,8 @@ import {
   Heart,
   Target
 } from 'lucide-react'
+import Link from 'next/link'
+import { useUserData } from '@/lib/useUserData'
 
 interface WellnessResults {
   score: string
@@ -24,6 +26,7 @@ interface WellnessResults {
 }
 
 export default function WellnessProfileCalculatorPage() {
+  const { userData, getWhatsAppUrl } = useUserData()
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<{ [key: number]: number }>({})
   const [showResults, setShowResults] = useState(false)
@@ -342,7 +345,9 @@ export default function WellnessProfileCalculatorPage() {
             </p>
             <button 
               onClick={() => {
-                const whatsappUrl = 'https://wa.me/5519981868000?text=Olá! Gostaria de consultar um especialista sobre meu perfil de bem-estar.'
+                const message = `Olá! Gostaria de consultar um especialista sobre meu perfil de bem-estar.`
+                const whatsappUrl = getWhatsAppUrl(message)
+                console.log('📱 Abrindo WhatsApp:', whatsappUrl)
                 window.open(whatsappUrl, '_blank')
               }}
               className="px-12 py-6 bg-indigo-600 text-white rounded-xl font-bold text-xl hover:bg-indigo-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-indigo-500"

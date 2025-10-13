@@ -14,6 +14,7 @@ import {
   MessageCircle
 } from 'lucide-react'
 import Link from 'next/link'
+import { useUserData } from '@/lib/useUserData'
 
 interface BMIResults {
   bmi: string
@@ -28,6 +29,7 @@ interface BMIResults {
 }
 
 export default function BMICalculatorPage() {
+  const { userData, getWhatsAppUrl } = useUserData()
   const [formData, setFormData] = useState({
     age: '',
     weight: '',
@@ -241,12 +243,9 @@ export default function BMICalculatorPage() {
             </p>
             <button 
               onClick={() => {
-                // Buscar WhatsApp do distribuidor que criou o link
-                // const urlParams = new URLSearchParams(window.location.search)
-                // const referral = urlParams.get('ref') || 'andre-faula'
-                
-                // Por enquanto usar número fixo, depois conectar ao banco
-                const whatsappUrl = 'https://wa.me/5519981868000?text=Olá! Gostaria de consultar um especialista baseado no meu resultado de IMC.'
+                const message = `Olá! Gostaria de consultar um especialista baseado no meu resultado de IMC.`
+                const whatsappUrl = getWhatsAppUrl(message)
+                console.log('📱 Abrindo WhatsApp:', whatsappUrl)
                 window.open(whatsappUrl, '_blank')
               }}
               className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-emerald-500"

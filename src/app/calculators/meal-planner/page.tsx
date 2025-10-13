@@ -13,6 +13,8 @@ import {
   Activity,
   Target
 } from 'lucide-react'
+import Link from 'next/link'
+import { useUserData } from '@/lib/useUserData'
 
 interface MealPlanResults {
   dailyCalories: string
@@ -33,6 +35,7 @@ interface MealPlanResults {
 }
 
 export default function MealPlannerCalculatorPage() {
+  const { userData, getWhatsAppUrl } = useUserData()
   const [formData, setFormData] = useState({
     age: '',
     weight: '',
@@ -377,7 +380,9 @@ export default function MealPlannerCalculatorPage() {
             </p>
             <button 
               onClick={() => {
-                const whatsappUrl = 'https://wa.me/5519981868000?text=Olá! Gostaria de consultar um especialista sobre meu plano de refeições.'
+                const message = `Olá! Gostaria de consultar um especialista sobre meu plano de refeições.`
+                const whatsappUrl = getWhatsAppUrl(message)
+                console.log('📱 Abrindo WhatsApp:', whatsappUrl)
                 window.open(whatsappUrl, '_blank')
               }}
               className="px-12 py-6 bg-orange-600 text-white rounded-xl font-bold text-xl hover:bg-orange-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-orange-500"

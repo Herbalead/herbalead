@@ -13,6 +13,8 @@ import {
   Activity,
   Target
 } from 'lucide-react'
+import Link from 'next/link'
+import { useUserData } from '@/lib/useUserData'
 
 interface HydrationResults {
   dailyWater: string
@@ -25,6 +27,7 @@ interface HydrationResults {
 }
 
 export default function HydrationCalculatorPage() {
+  const { userData, getWhatsAppUrl } = useUserData()
   const [formData, setFormData] = useState({
     age: '',
     weight: '',
@@ -279,7 +282,9 @@ export default function HydrationCalculatorPage() {
             </p>
             <button 
               onClick={() => {
-                const whatsappUrl = 'https://wa.me/5519981868000?text=Olá! Gostaria de consultar um especialista sobre minha necessidade de hidratação.'
+                const message = `Olá! Gostaria de consultar um especialista sobre minha necessidade de hidratação.`
+                const whatsappUrl = getWhatsAppUrl(message)
+                console.log('📱 Abrindo WhatsApp:', whatsappUrl)
                 window.open(whatsappUrl, '_blank')
               }}
               className="px-12 py-6 bg-blue-600 text-white rounded-xl font-bold text-xl hover:bg-blue-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-blue-500"

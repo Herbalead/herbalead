@@ -13,6 +13,8 @@ import {
   Activity,
   Target
 } from 'lucide-react'
+import Link from 'next/link'
+import { useUserData } from '@/lib/useUserData'
 
 interface WellnessEntry {
   date: string
@@ -37,6 +39,7 @@ interface WellnessResults {
 }
 
 export default function DailyWellnessCalculatorPage() {
+  const { userData, getWhatsAppUrl } = useUserData()
   const [wellnessEntry, setWellnessEntry] = useState<WellnessEntry>({
     date: new Date().toISOString().split('T')[0],
     sleep: 0,
@@ -300,7 +303,9 @@ export default function DailyWellnessCalculatorPage() {
             </p>
             <button 
               onClick={() => {
-                const whatsappUrl = 'https://wa.me/5519981868000?text=Olá! Gostaria de consultar um especialista sobre meu bem-estar diário.'
+                const message = `Olá! Gostaria de consultar um especialista sobre meu bem-estar diário.`
+                const whatsappUrl = getWhatsAppUrl(message)
+                console.log('📱 Abrindo WhatsApp:', whatsappUrl)
                 window.open(whatsappUrl, '_blank')
               }}
               className="px-12 py-6 bg-teal-600 text-white rounded-xl font-bold text-xl hover:bg-teal-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-teal-500"
