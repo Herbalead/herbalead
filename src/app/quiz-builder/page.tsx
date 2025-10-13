@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { Plus, Trash2, Save, Info, Copy, ChevronDown, ChevronRight, ArrowLeft } from 'lucide-react'
+import { Plus, Trash2, Save, Info, Copy, ChevronDown, ChevronRight, ArrowLeft, GripVertical } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 import { getProjectConfig } from '@/lib/project-config'
 import { useRouter } from 'next/navigation'
@@ -100,6 +100,7 @@ export default function QuizBuilder() {
   const [saved, setSaved] = useState(false)
   const [user, setUser] = useState<{ id: string } | null>(null)
   const [userProfile, setUserProfile] = useState<{ name: string; email: string; phone?: string } | null>(null)
+  const [showInfo, setShowInfo] = useState(true) // Sempre expandido por padrão
   const [showColors, setShowColors] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showQuestions, setShowQuestions] = useState(false)
@@ -158,6 +159,71 @@ export default function QuizBuilder() {
     }
     getUser()
   }, [])
+
+  // Atualizar WhatsApp automaticamente quando o perfil do usuário for carregado
+  useEffect(() => {
+    if (userProfile?.phone) {
+      const cleanPhone = userProfile.phone.replace(/\D/g, '') // Remove caracteres não numéricos
+      const whatsappUrl = `https://wa.me/${cleanPhone}?text=Olá! Gostaria de consultar um profissional de bem-estar baseado no meu resultado do quiz.`
+      
+      console.log('📱 Atualizando WhatsApp automaticamente:', {
+        telefoneOriginal: userProfile.phone,
+        telefoneLimpo: cleanPhone,
+        urlWhatsApp: whatsappUrl
+      })
+      
+      setQuiz(prev => ({
+        ...prev,
+        settings: {
+          ...prev.settings,
+          specialistRedirectUrl: whatsappUrl
+        }
+      }))
+    }
+  }, [userProfile])
+
+  // Função para reordenar perguntas
+  const reorderQuestions = (draggedQuestionId: string, newOrder: number) => {
+    console.log('🔄 Reordenando perguntas:', { draggedQuestionId, newOrder })
+    
+    const currentQuestions = [...quiz.questions]
+    
+    // Encontrar a pergunta pelo ID ou índice
+    let draggedQuestion
+    let draggedIndex = -1
+    
+    if (draggedQuestionId.match(/^\d+$/)) {
+      // Se é um número, usar como índice
+      draggedIndex = parseInt(draggedQuestionId)
+      draggedQuestion = currentQuestions[draggedIndex]
+    } else {
+      // Se é um ID, encontrar pelo ID
+      draggedIndex = currentQuestions.findIndex(q => q.id === draggedQuestionId)
+      draggedQuestion = currentQuestions[draggedIndex]
+    }
+    
+    if (!draggedQuestion || draggedIndex === -1) {
+      console.warn('⚠️ Pergunta não encontrada para reordenação:', draggedQuestionId)
+      return
+    }
+    
+    // Remover a pergunta da posição atual
+    const filteredQuestions = currentQuestions.filter((_, index) => index !== draggedIndex)
+    
+    // Inserir na nova posição
+    const reorderedQuestions = [
+      ...filteredQuestions.slice(0, newOrder),
+      draggedQuestion,
+      ...filteredQuestions.slice(newOrder)
+    ]
+    
+    console.log('📋 Nova ordem das perguntas:', reorderedQuestions.map((q, i) => `${i + 1}. ${q.question_text.substring(0, 30)}...`))
+    
+    setQuiz(prev => ({
+      ...prev,
+      questions: reorderedQuestions
+    }))
+  }
 
   const colorExplanations = {
     primary: {
@@ -295,6 +361,7 @@ export default function QuizBuilder() {
   const addQuestion = (type: 'multiple' | 'essay') => {
     const isLastQuestion = quiz.questions.length === 0
     const newQuestion: Question = {
+      id: `question-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // ID único
       question_text: '',
       question_type: type,
       order: quiz.questions.length,
@@ -891,9 +958,18 @@ export default function QuizBuilder() {
           </div>
 
           {/* Informações do Quiz */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold mb-4">📋 Informações do Quiz</h2>
-            <div className="space-y-4">
+          <div className="bg-white rounded-lg shadow">
+            <button
+              onClick={() => setShowInfo(!showInfo)}
+              className="w-full p-6 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <h2 className="text-xl font-bold">📋 Informações do Quiz</h2>
+              {showInfo ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+            </button>
+            
+            {showInfo && (
+              <div className="px-6 pb-6">
+                <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Título <span className="text-red-500">*</span>
@@ -949,7 +1025,9 @@ export default function QuizBuilder() {
                   placeholder="Breve descrição do seu quiz"
                 />
               </div>
-            </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Personalização de Cores */}
@@ -1048,20 +1126,45 @@ export default function QuizBuilder() {
                 <div className="space-y-4">
               {quiz.questions.map((question, qIndex) => (
                 <div 
-                  key={qIndex} 
-                  className={`border-2 rounded-lg p-4 transition-all cursor-pointer ${
+                  key={question.id || qIndex} 
+                  className={`border-2 rounded-lg p-4 transition-all cursor-pointer group hover:shadow-md ${
                     previewQuestion === qIndex 
                       ? 'border-emerald-500 bg-emerald-50' 
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('text/plain', question.id || qIndex.toString())
+                    e.dataTransfer.effectAllowed = 'move'
+                    console.log('🔄 Iniciando drag da pergunta:', qIndex + 1)
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    e.dataTransfer.dropEffect = 'move'
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    const draggedQuestionId = e.dataTransfer.getData('text/plain')
+                    if (draggedQuestionId !== (question.id || qIndex.toString())) {
+                      reorderQuestions(draggedQuestionId, qIndex)
+                    }
+                  }}
                   onClick={() => setPreviewQuestion(qIndex)}
                 >
                   <div className="flex justify-between items-start mb-3">
-                    <span className="text-sm font-semibold text-gray-600">
-                      Questão {qIndex + 1} - {
-                        question.question_type === 'multiple' ? '✓ Múltipla Escolha' : '✍️ Dissertativa'
-                      }
-                    </span>
+                    <div className="flex items-center space-x-3">
+                      {/* Handle de arrastar */}
+                      <div className="flex items-center justify-center w-6 h-6 text-gray-400 hover:text-gray-600 cursor-move opacity-0 group-hover:opacity-100 transition-opacity">
+                        <GripVertical className="w-4 h-4" />
+                      </div>
+                      
+                      <span className="text-sm font-semibold text-gray-600">
+                        Questão {qIndex + 1} - {
+                          question.question_type === 'multiple' ? '✓ Múltipla Escolha' : '✍️ Dissertativa'
+                        }
+                      </span>
+                    </div>
+                    
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
