@@ -1,14 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { 
-  ArrowLeft, 
-  ArrowRight, 
-  AlertTriangle, 
-  ClipboardList
-} from 'lucide-react'
+import { ArrowLeft, ArrowRight, ClipboardList, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
-
 
 export default function HealthyEatingDemoPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)
@@ -18,154 +12,13 @@ export default function HealthyEatingDemoPage() {
     {
       question: "Com que frequência você consome frutas e vegetais?",
       options: [
-        "Todos os dias, em todas as refeições",
-        "Maioria dos dias, em algumas refeições",
-        "Alguns dias da semana",
+        "Todos os dias, várias porções",
+        "Quase todos os dias",
+        "Algumas vezes por semana",
         "Raramente ou nunca"
-      ]
-    },
-    {
-      question: "Como você descreve sua ingestão de água?",
-      options: [
-        "Bebo 3L+ de água por dia",
-        "Bebo 2-3L de água por dia",
-        "Bebo 1-2L de água por dia",
-        "Bebo menos de 1L por dia"
-      ]
-    },
-    {
-      question: "Qual é sua relação com alimentos processados?",
-      options: [
-        "Evito completamente",
-        "Consumo raramente",
-        "Consumo ocasionalmente",
-        "Consumo frequentemente"
-      ]
-    },
-    {
-      question: "Como você organiza suas refeições?",
-      options: [
-        "Planejo todas as refeições com antecedência",
-        "Planejo a maioria das refeições",
-        "Planejo algumas refeições",
-        "Não planejo, como quando tenho fome"
-      ]
-    },
-    {
-      question: "Qual é sua relação com o açúcar?",
-      options: [
-        "Evito açúcares adicionados",
-        "Consumo ocasionalmente",
-        "Consumo regularmente",
-        "Consumo em excesso"
-      ]
-    },
-    {
-      question: "Como você consome proteínas?",
-      options: [
-        "Proteínas magras em todas as refeições",
-        "Proteínas na maioria das refeições",
-        "Proteínas em algumas refeições",
-        "Poucas proteínas na dieta"
-      ]
-    },
-    {
-      question: "Qual é sua relação com gorduras saudáveis?",
-      options: [
-        "Consumo gorduras saudáveis regularmente",
-        "Consumo ocasionalmente",
-        "Consumo raramente",
-        "Evito gorduras"
-      ]
-    },
-    {
-      question: "Como você lida com a fome entre refeições?",
-      options: [
-        "Como lanches saudáveis",
-        "Bebo água ou chá",
-        "Como o que estiver disponível",
-        "Não como nada até a próxima refeição"
       ]
     }
   ]
-
-  // const calculateResults = () => {
-    const totalScore = answers.reduce((sum, answer) => sum + (answer + 1), 0)
-    const maxScore = questions.length * 4
-    const percentage = (totalScore / maxScore) * 100
-
-    let category = ''
-    let color = ''
-    let recommendations = []
-    let improvements = []
-
-    if (percentage >= 80) {
-      category = 'Excelente Alimentação'
-      color = 'text-green-600'
-      recommendations = [
-        'Continue mantendo seus hábitos alimentares saudáveis',
-        'Monitore regularmente sua composição corporal',
-        'Considere otimizações específicas para seus objetivos',
-        'Mantenha a consistência na hidratação'
-      ]
-      improvements = [
-        'Manter excelente qualidade nutricional',
-        'Otimizar ainda mais sua alimentação',
-        'Prevenir possíveis desequilíbrios futuros'
-      ]
-    } else if (percentage >= 60) {
-      category = 'Boa Alimentação'
-      color = 'text-blue-600'
-      recommendations = [
-        'Melhore gradualmente a qualidade da sua alimentação',
-        'Aumente o consumo de frutas e vegetais',
-        'Mantenha hidratação adequada',
-        'Considere suplementação específica se necessário'
-      ]
-      improvements = [
-        'Melhorar qualidade alimentar',
-        'Otimizar hidratação',
-        'Aumentar consumo de alimentos integrais'
-      ]
-    } else if (percentage >= 40) {
-      category = 'Alimentação Regular'
-      color = 'text-yellow-600'
-      recommendations = [
-        'Foque em melhorar a qualidade da alimentação',
-        'Estabeleça uma rotina regular de refeições',
-        'Aumente a ingestão de água',
-        'Considere buscar orientação nutricional profissional'
-      ]
-      improvements = [
-        'Melhorar qualidade alimentar',
-        'Estabelecer rotina alimentar',
-        'Otimizar hidratação'
-      ]
-    } else {
-      category = 'Alimentação Precisa Atenção'
-      color = 'text-red-600'
-      recommendations = [
-        'Busque orientação nutricional profissional urgente',
-        'Implemente mudanças graduais na alimentação',
-        'Priorize hidratação adequada',
-        'Considere avaliação médica completa',
-        'Foque em alimentos integrais e nutritivos'
-      ]
-      improvements = [
-        'Melhorar saúde nutricional',
-        'Reduzir riscos à saúde',
-        'Estabelecer hábitos alimentares saudáveis'
-      ]
-    }
-
-    return {
-      score: totalScore.toString(),
-      category,
-      color,
-      recommendations,
-      improvements
-    }
-  }
 
   const handleAnswer = (answerIndex: number) => {
     const newAnswers = [...answers]
@@ -177,8 +30,7 @@ export default function HealthyEatingDemoPage() {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1)
     } else {
-      // Demo não mostra resultados, apenas simula o processo
-      alert('Demo: Esta é uma simulação! Na versão real, você veria seus resultados aqui.')
+      alert('Demo: Quiz finalizado! Na versão real, você veria seus resultados aqui.')
     }
   }
 
@@ -225,41 +77,6 @@ export default function HealthyEatingDemoPage() {
             <p className="text-sm">
               💡 Esta é uma versão de demonstração. Quando você adquirir o acesso, poderá personalizar o botão, mensagem e link de destino (WhatsApp, formulário ou site).
             </p>
-          </div>
-        </div>
-
-        {/* How It Works */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            🚀 Como funciona esta ferramenta para gerar leads
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-green-600">1️⃣</span>
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Cliente responde quiz</h4>
-              <p className="text-sm text-gray-600">Perguntas sobre hábitos alimentares e estilo de vida</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-green-600">2️⃣</span>
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Sistema analisa respostas</h4>
-              <p className="text-sm text-gray-600">Calcula score e fornece recomendações personalizadas</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-green-600">3️⃣</span>
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Cliente entra em contato</h4>
-              <p className="text-sm text-gray-600">Clica no botão e conversa com você automaticamente</p>
-            </div>
-          </div>
-          <div className="text-center mt-6">
-            <p className="text-green-600 font-semibold">💬 Você escolhe o texto e o link do botão!</p>
           </div>
         </div>
 
@@ -345,9 +162,9 @@ export default function HealthyEatingDemoPage() {
           <h3 className="text-3xl font-bold mb-4 text-gray-800">
             💼 Pronto para ter esta ferramenta com seu nome e link personalizado?
           </h3>
-            <p className="text-gray-600 mb-8 text-lg">
-              Clique em &quot;Assinar Agora&quot; e comece a gerar seus próprios leads com o Herbalead.
-            </p>
+          <p className="text-gray-600 mb-8 text-lg">
+            Clique em &quot;Assinar Agora&quot; e comece a gerar seus próprios leads com o Herbalead.
+          </p>
           <button className="px-12 py-6 bg-green-600 text-white rounded-xl font-bold text-xl hover:bg-green-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl">
             Assinar Agora
           </button>
