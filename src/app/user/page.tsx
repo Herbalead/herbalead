@@ -21,6 +21,7 @@ export default function UserDashboard() {
     material_description: ''
   })
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [editingLink, setEditingLink] = useState<Record<string, unknown> | null>(null)
@@ -420,13 +421,24 @@ export default function UserDashboard() {
   }
 
   const deleteLink = async (linkId: string) => {
+    // Encontrar o link para mostrar o nome na confirmação
+    const linkToDelete = userLinks.find(link => link.id === linkId)
+    const linkName = linkToDelete?.name || 'este link'
+    
+    // Confirmação antes de deletar
+    if (!confirm(`Tem certeza que deseja deletar "${linkName}"?\n\nEsta ação não pode ser desfeita.`)) {
+      return
+    }
+
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         setErrorMessage('Usuário não está logado. Faça login novamente.')
         setShowErrorModal(true)
-      return
-    }
+        return
+      }
+
+      console.log('🗑️ Deletando link:', linkName, '(ID:', linkId, ')')
 
       const { error } = await supabase
         .from('links')
@@ -451,9 +463,11 @@ export default function UserDashboard() {
         setErrorMessage(userFriendlyMessage)
         setShowErrorModal(true)
       } else {
-        console.log('✅ Link deletado com sucesso')
+        console.log('✅ Link deletado com sucesso:', linkName)
         setUserLinks(userLinks.filter(link => link.id !== linkId))
-        setShowSuccessModal(true)
+        
+        // Mostrar mensagem de sucesso específica para deleção
+        setShowDeleteSuccessModal(true)
       }
     } catch (error) {
       console.error('❌ Erro inesperado ao deletar link:', error)
@@ -776,7 +790,10 @@ export default function UserDashboard() {
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Meus Quizzes</h3>
             <div className="text-center py-8">
               <p className="text-gray-500">Nenhum quiz criado ainda</p>
-              <button className="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+              <button 
+                onClick={() => window.location.href = '/quiz-builder'}
+                className="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+              >
                   Criar Primeiro Quiz
               </button>
               </div>
@@ -1008,6 +1025,27 @@ export default function UserDashboard() {
                     </button>
                   </div>
                 </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Sucesso para Deleção */}
+      {showDeleteSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
+              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Link Deletado!</h3>
+            <p className="text-gray-600 text-center mb-4">O link foi removido com sucesso.</p>
+            <button
+              onClick={() => setShowDeleteSuccessModal(false)}
+              className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700"
+            >
+              OK
+            </button>
           </div>
         </div>
       )}
