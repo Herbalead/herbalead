@@ -23,86 +23,71 @@ export default function PersonalizedLinkPage() {
   const usuario = params.usuario as string
   const projeto = params.projeto as string
 
+  // Função para normalizar texto removendo acentos e caracteres especiais
+  const normalizeText = (text: string): string => {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/\s+/g, '-') // Substitui espaços por hífens
+      .replace(/[^a-z0-9-]/g, '') // Remove caracteres especiais
+      .replace(/-+/g, '-') // Remove hífens duplicados
+      .replace(/^-|-$/g, '') // Remove hífens do início e fim
+  }
+
   useEffect(() => {
     const loadLinkData = async () => {
       try {
         console.log('🔍 Buscando link para:', { usuario, projeto })
         
-        // Buscar o usuário pelo slug (busca exata primeiro, depois aproximada)
-        let { data: professionals, error: profError } = await supabase
+        // Buscar todos os profissionais e comparar com o slug normalizado
+        const { data: allProfessionals, error: profError } = await supabase
           .from('professionals')
           .select('id, name, email')
-          .ilike('name', usuario.replace(/-/g, ' '))
-        
-        // Se não encontrou exato, tentar busca aproximada
-        if (!professionals || professionals.length === 0) {
-          const { data: profApprox, error: profApproxError } = await supabase
-            .from('professionals')
-            .select('id, name, email')
-            .ilike('name', `%${usuario.replace(/-/g, ' ')}%`)
-          
-          if (profApproxError) {
-            console.error('❌ Erro ao buscar professional (aproximado):', profApproxError)
-            setError('Usuário não encontrado')
-            return
-          }
-          
-          professionals = profApprox
-        }
         
         if (profError) {
-          console.error('❌ Erro ao buscar professional:', profError)
+          console.error('❌ Erro ao buscar professionals:', profError)
+          setError('Erro interno do servidor')
+          return
+        }
+        
+        // Encontrar o profissional cujo nome normalizado corresponde ao slug
+        const professional = allProfessionals?.find(prof => 
+          normalizeText(prof.name) === usuario
+        )
+        
+        if (!professional) {
+          console.log('❌ Nenhum profissional encontrado para slug:', usuario)
           setError('Usuário não encontrado')
           return
         }
+        
+        console.log('✅ Professional encontrado:', professional.name)
 
-        if (!professionals || professionals.length === 0) {
-          console.log('❌ Nenhum professional encontrado para:', usuario)
-          setError('Usuário não encontrado')
-          return
-        }
-
-        const professional = professionals[0]
-        console.log('👤 Professional encontrado:', professional)
-
-        // Buscar o link pelo nome do projeto e user_id (busca exata primeiro)
-        let { data: links, error: linksError } = await supabase
+        // Buscar todos os links do usuário e comparar com o slug normalizado
+        const { data: allLinks, error: linksError } = await supabase
           .from('links')
           .select('*')
           .eq('user_id', professional.id)
-          .ilike('name', projeto.replace(/-/g, ' '))
-        
-        // Se não encontrou exato, tentar busca aproximada
-        if (!links || links.length === 0) {
-          const { data: linksApprox, error: linksApproxError } = await supabase
-            .from('links')
-            .select('*')
-            .eq('user_id', professional.id)
-            .ilike('name', `%${projeto.replace(/-/g, ' ')}%`)
-          
-          if (linksApproxError) {
-            console.error('❌ Erro ao buscar links (aproximado):', linksApproxError)
-            setError('Link não encontrado')
-            return
-          }
-          
-          links = linksApprox
-        }
         
         if (linksError) {
           console.error('❌ Erro ao buscar links:', linksError)
+          setError('Erro interno do servidor')
+          return
+        }
+        
+        // Encontrar o link cujo nome normalizado corresponde ao slug do projeto
+        const link = allLinks?.find(linkItem => 
+          normalizeText(linkItem.name) === projeto
+        )
+        
+        if (!link) {
+          console.log('❌ Nenhum link encontrado para projeto:', projeto)
           setError('Link não encontrado')
           return
         }
-
-        if (!links || links.length === 0) {
-          console.log('❌ Nenhum link encontrado para:', projeto)
-          setError('Link não encontrado')
-          return
-        }
-
-        const link = links[0]
-        console.log('🔗 Link encontrado:', link)
+        
+        console.log('✅ Link encontrado:', link.name)
         
         // Incrementar cliques
         await supabase

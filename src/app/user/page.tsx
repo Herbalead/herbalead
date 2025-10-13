@@ -33,18 +33,28 @@ export default function UserDashboard() {
     email: '',
     phone: '',
     specialty: '',
-    company: '',
-    website: ''
+    company: ''
   })
   const [editingProfile, setEditingProfile] = useState(false)
   const [editedProfile, setEditedProfile] = useState({
     name: '',
     phone: '',
     specialty: '',
-    company: '',
-    website: ''
+    company: ''
   })
   const [loading, setLoading] = useState(true)
+
+  // Função para normalizar texto removendo acentos e caracteres especiais
+  const normalizeText = (text: string): string => {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/\s+/g, '-') // Substitui espaços por hífens
+      .replace(/[^a-z0-9-]/g, '') // Remove caracteres especiais
+      .replace(/-+/g, '-') // Remove hífens duplicados
+      .replace(/^-|-$/g, '') // Remove hífens do início e fim
+  }
 
   useEffect(() => {
     loadUserProfile()
@@ -75,9 +85,8 @@ export default function UserDashboard() {
             name: professional.name,
             email: professional.email,
               phone: professional.phone || '',
-              specialty: professional.specialty || '',
-              company: professional.company || '',
-            website: professional.website || ''
+            specialty: professional.specialty || '',
+            company: professional.company || ''
             })
           console.log('👤 Perfil carregado:', professional.name)
           } else {
@@ -384,9 +393,9 @@ export default function UserDashboard() {
 
   const copyLink = async (link: Record<string, unknown>) => {
     try {
-      // Gerar slug personalizado baseado no usuário e projeto
-      const userSlug = userProfile.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-      const projectSlug = String(link.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      // Gerar slug personalizado baseado no usuário e projeto usando normalização
+      const userSlug = normalizeText(userProfile.name)
+      const projectSlug = normalizeText(String(link.name || ''))
       const personalizedUrl = `${window.location.origin}/${userSlug}/${projectSlug}`
       
       // Copiar para a área de transferência
@@ -481,8 +490,7 @@ export default function UserDashboard() {
       name: userProfile.name,
       phone: userProfile.phone,
       specialty: userProfile.specialty,
-      company: userProfile.company,
-      website: userProfile.website
+      company: userProfile.company
     })
     setEditingProfile(true)
   }
@@ -493,8 +501,7 @@ export default function UserDashboard() {
       name: '',
       phone: '',
       specialty: '',
-      company: '',
-      website: ''
+      company: ''
     })
   }
 
@@ -512,8 +519,7 @@ export default function UserDashboard() {
           name: editedProfile.name,
           phone: editedProfile.phone,
           specialty: editedProfile.specialty,
-          company: editedProfile.company,
-          website: editedProfile.website
+          company: editedProfile.company
         })
         .eq('email', user.email)
 
@@ -526,8 +532,7 @@ export default function UserDashboard() {
           name: editedProfile.name,
           phone: editedProfile.phone,
           specialty: editedProfile.specialty,
-          company: editedProfile.company,
-          website: editedProfile.website
+          company: editedProfile.company
         })
         setEditingProfile(false)
         alert('Perfil atualizado com sucesso!')
@@ -709,26 +714,26 @@ export default function UserDashboard() {
               {userLinks.length > 0 ? (
               <div className="space-y-4">
                 {userLinks.map((link) => (
-                    <div key={link.id} className="border border-gray-200 rounded-lg p-4">
+                    <div key={String(link.id)} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{link.name}</h4>
-                          <p className="text-sm text-gray-500 mt-1">{link.tool_name}</p>
-                          <p className="text-sm text-gray-600 mt-2">{link.custom_message}</p>
+                        <h4 className="font-medium text-gray-900">{String(link.name)}</h4>
+                          <p className="text-sm text-gray-500 mt-1">{String(link.tool_name)}</p>
+                          <p className="text-sm text-gray-600 mt-2">{String(link.custom_message)}</p>
                           <div className="mt-2 space-y-2">
                             <div className="flex space-x-2">
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {link.id.slice(0, 8)}...
+                                {String(link.id).slice(0, 8)}...
                         </span>
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                {link.clicks || 0} cliques
+                                {String(link.clicks || 0)} cliques
                               </span>
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                {link.leads || 0} leads
+                                {String(link.leads || 0)} leads
                               </span>
                             </div>
                             <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded border">
-                              <strong>URL do Link:</strong> {window.location.origin}/{userProfile.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}/{link.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}
+                              <strong>URL do Link:</strong> {window.location.origin}/{normalizeText(userProfile.name)}/{normalizeText(String(link.name))}
                             </div>
                           </div>
                         </div>
@@ -750,7 +755,7 @@ export default function UserDashboard() {
                           Editar
                         </button>
                         <button 
-                          onClick={() => deleteLink(link.id)}
+                          onClick={() => deleteLink(String(link.id))}
                           className="text-red-600 hover:text-red-800 text-sm"
                         >
                             Deletar
@@ -886,20 +891,6 @@ export default function UserDashboard() {
                 )}
                   </div>
               
-                  <div>
-                <label className="block text-sm font-medium text-gray-700">Website</label>
-                {editingProfile ? (
-                    <input
-                      type="url"
-                    value={editedProfile.website}
-                    onChange={(e) => setEditedProfile({...editedProfile, website: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    placeholder="https://meusite.com"
-                  />
-                ) : (
-                  <p className="mt-1 text-sm text-gray-900">{userProfile.website || 'Não informado'}</p>
-                )}
-                </div>
               </div>
 
             {editingProfile && (
