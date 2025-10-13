@@ -429,17 +429,6 @@ export default function QuizBuilder() {
     })
   }
 
-  const updateOption = (questionId: number, optionIndex: number, value: string) => {
-    setQuiz({
-      ...quiz,
-      questions: quiz.questions.map((q, index) => 
-        index === questionId 
-          ? {...q, options: q.options?.map((opt, i) => i === optionIndex ? value : opt)}
-          : q
-      )
-    })
-  }
-
   const deleteQuestion = (id: number) => {
     const newQuestions = quiz.questions.filter((_, index) => index !== id)
     setQuiz({
