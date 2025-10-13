@@ -4,7 +4,6 @@ import React from 'react';
 
 interface HerbaleadLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
-  showText?: boolean
   className?: string
   variant?: 'horizontal' | 'vertical' | 'iconOnly' | 'minimal'
   responsive?: boolean
@@ -12,7 +11,6 @@ interface HerbaleadLogoProps {
 
 export default function HerbaleadLogo({ 
   size = 'md', 
-  showText = true, 
   className = '',
   variant = 'horizontal',
   responsive = false
@@ -47,7 +45,7 @@ export default function HerbaleadLogo({
   if (variant === 'iconOnly') {
     return (
       <img
-        src={logoPaths.iconOnly}
+        src={`${logoPaths.iconOnly}?v=2024`}
         alt="HerbaLead"
         className={`${iconSizeClasses[size]} ${className}`}
       />
@@ -57,13 +55,10 @@ export default function HerbaleadLogo({
   return (
     <div className={`flex items-center ${className}`}>
       <img
-        src={logoPaths[variant]}
+        src={`${logoPaths[variant]}?v=2024`}
         alt="HerbaLead - Your Lead Accelerator"
         className={`${responsiveClasses} w-auto`}
       />
-      {showText && variant !== 'iconOnly' && (
-        <span className="ml-2 text-gray-800 font-semibold">HerbaLead</span>
-      )}
     </div>
   )
 }

@@ -123,14 +123,18 @@ export default function PersonalizedLinkPage() {
             userName: link.name,
             userPhone: professional?.phone || '5519981868000', // Usar telefone do profissional ou fallback
             linkId: link.id,
-            customMessage: link.custom_message || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!' // Mensagem personalizada do link
+            customMessage: link.page_greeting || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!', // Mensagem personalizada do link (page_greeting)
+            pageTitle: link.page_title || 'Quer uma análise mais completa?', // Título personalizado
+            buttonText: link.button_text || 'Consultar Especialista' // Texto do botão personalizado
           }
           
           console.log('🔍 Debug redirecionamento:')
           console.log('  - professional:', professional)
           console.log('  - professional.phone:', professional?.phone)
           console.log('  - link.custom_message:', link.custom_message)
+          console.log('  - link.page_greeting:', link.page_greeting)
           console.log('  - userData:', userData)
+          console.log('  - customMessage sendo passado:', userData.customMessage)
           
           const params = new URLSearchParams({
             user: JSON.stringify(userData)

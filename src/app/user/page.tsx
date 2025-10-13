@@ -18,7 +18,11 @@ export default function UserDashboard() {
     custom_message: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!',
     capture_type: 'direct', // 'direct' ou 'capture'
     material_title: '',
-    material_description: ''
+    material_description: '',
+    // Novos campos para personalização
+    page_title: 'Quer uma análise mais completa?',
+    page_greeting: 'Gostaria de saber mais',
+    button_text: 'Consultar Especialista'
   })
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false)
@@ -45,6 +49,14 @@ export default function UserDashboard() {
   const [countryCode, setCountryCode] = useState('55')
   const [loading, setLoading] = useState(true)
 
+  // Função para atualizar automaticamente a URL do WhatsApp quando o texto descritivo mudar
+  const updateWhatsAppUrl = (message: string) => {
+    // REMOVIDO: Não vamos mais atualizar a URL automaticamente
+    // O distribuidor deve controlar a URL manualmente
+    console.log('📝 Texto descritivo atualizado:', message)
+    console.log('ℹ️ URL não será alterada automaticamente - controle manual pelo distribuidor')
+  }
+
   // Função para normalizar texto removendo acentos e caracteres especiais
   const normalizeText = (text: string): string => {
     return text
@@ -60,18 +72,18 @@ export default function UserDashboard() {
   // Função para gerar mensagem personalizada por ferramenta
   const getCustomMessageByTool = (toolName: string): string => {
     const messages = {
-      'bmi': 'Olá! Calculei meu IMC e gostaria de saber mais sobre orientações personalizadas para meu bem-estar. Podemos conversar?',
-      'protein': 'Oi! Calculei minhas necessidades de proteína e tenho interesse em orientações sobre nutrição. Que tal conversarmos?',
-      'hydration': 'Olá! Quero saber mais sobre hidratação e como manter meu corpo saudável. Podemos trocar uma ideia?',
-      'body-composition': 'Oi! Calculei minha composição corporal e gostaria de orientações sobre saúde e bem-estar. Que tal conversarmos?',
-      'meal-planner': 'Olá! Tenho interesse em planejamento de refeições e orientações sobre alimentação saudável. Podemos conversar?',
-      'nutrition-assessment': 'Oi! Fiz uma avaliação nutricional e gostaria de orientações personalizadas. Que tal conversarmos?',
-      'daily-wellness': 'Olá! Quero saber mais sobre bem-estar diário e como manter uma rotina saudável. Podemos trocar uma ideia?',
-      'healthy-eating': 'Oi! Tenho interesse em alimentação saudável e orientações sobre nutrição. Que tal conversarmos?',
-      'wellness-profile': 'Olá! Calculei meu perfil de bem-estar e gostaria de orientações sobre saúde. Podemos conversar?'
+      'bmi': 'Vi que você calculou seu IMC. Tenho orientações personalizadas que podem ajudar muito no seu bem-estar. Gostaria de mais informações?',
+      'protein': 'Vi que você calculou sua necessidade de proteína. Tenho orientações personalizadas para sua dieta. Posso te ajudar?',
+      'hydration': 'Vi que você calculou sua necessidade de hidratação. Tenho orientações personalizadas para seu bem-estar. Gostaria de mais informações?',
+      'body-composition': 'Vi que você calculou sua composição corporal. Tenho orientações personalizadas para seu bem-estar. Posso te ajudar?',
+      'meal-planner': 'Vi que você criou seu plano alimentar. Tenho orientações personalizadas para sua dieta. Gostaria de mais informações?',
+      'nutrition-assessment': 'Vi que você fez sua avaliação nutricional. Tenho orientações personalizadas para seu bem-estar. Posso te ajudar?',
+      'daily-wellness': 'Vi que você fez sua avaliação de bem-estar diário. Tenho orientações personalizadas. Gostaria de mais informações?',
+      'healthy-eating': 'Vi que você fez sua avaliação de alimentação saudável. Tenho orientações personalizadas. Posso te ajudar?',
+      'wellness-profile': 'Vi que você fez seu perfil de bem-estar. Tenho orientações personalizadas para sua saúde. Gostaria de mais informações?'
     }
     
-    return messages[toolName as keyof typeof messages] || 'Olá! Tenho interesse em bem-estar e saúde. Gostaria de orientações personalizadas. Podemos conversar?'
+    return messages[toolName as keyof typeof messages] || 'Tenho orientações personalizadas que podem ajudar no seu bem-estar. Posso te ajudar?'
   }
 
   useEffect(() => {
@@ -241,22 +253,33 @@ export default function UserDashboard() {
   }
 
   const openCreateLinkModal = () => {
-    // Pré-preencher URL com WhatsApp do usuário usando o código do país correto
+    // Pré-preencher apenas o telefone básico - sem mensagem automática
+    console.log('🔍 DEBUG openCreateLinkModal:')
+    console.log('  - userProfile.phone:', userProfile.phone)
+    console.log('  - countryCode atual:', countryCode)
+    
     const cleanPhone = userProfile.phone.replace(/\D/g, '')
     const fullPhone = `${countryCode}${cleanPhone}`
+    
+    // URL básica apenas com telefone - distribuidor controla a mensagem
     const whatsappUrl = userProfile.phone 
       ? `https://wa.me/${fullPhone}`
       : 'https://wa.me/5511999999999'
     
-    console.log('📱 Pré-preenchimento WhatsApp:', whatsappUrl)
+    // Mensagem padrão apenas para o preview/exibição
+    const defaultMessage = getCustomMessageByTool(newLink.tool_name)
+    
+    console.log('📱 URL básica WhatsApp (sem mensagem):', whatsappUrl)
     console.log('👤 Telefone do usuário:', userProfile.phone)
     console.log('🌍 Código do país selecionado:', countryCode)
     console.log('📞 Telefone completo:', fullPhone)
+    console.log('💬 Mensagem para preview:', defaultMessage)
     
     setNewLink({
       ...newLink,
-      redirect_url: whatsappUrl,
-      custom_message: getCustomMessageByTool(newLink.tool_name)
+      redirect_url: whatsappUrl, // Apenas telefone - distribuidor adiciona mensagem se quiser
+      custom_message: defaultMessage,
+      page_greeting: newLink.page_greeting || defaultMessage // Usar a mensagem já editada ou a padrão
     })
     setShowCreateLinkModal(true)
   }
@@ -315,10 +338,14 @@ export default function UserDashboard() {
           cta_text: newLink.cta_text,
           redirect_url: newLink.redirect_url.trim(),
           custom_url: newLink.custom_url.trim(),
-          custom_message: newLink.custom_message,
+          custom_message: newLink.page_greeting, // Usar page_greeting em vez de custom_message
           capture_type: newLink.capture_type,
           material_title: newLink.material_title || '',
           material_description: newLink.material_description || '',
+          // Novos campos
+          page_title: newLink.page_title || 'Quer uma análise mais completa?',
+          page_greeting: newLink.page_greeting || 'Gostaria de saber mais',
+          button_text: newLink.button_text || 'Consultar Especialista',
           status: 'active',
           clicks: 0,
           leads: 0
@@ -362,7 +389,11 @@ export default function UserDashboard() {
           custom_message: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!',
           capture_type: 'direct',
           material_title: '',
-          material_description: ''
+          material_description: '',
+          // Novos campos
+          page_title: 'Quer uma análise mais completa?',
+          page_greeting: 'Gostaria de saber mais',
+          button_text: 'Consultar Especialista'
         })
         setShowSuccessModal(true)
       }
@@ -375,6 +406,8 @@ export default function UserDashboard() {
 
   const editLink = (link: Record<string, unknown>) => {
     setEditingLink(link)
+    
+    // Usar apenas os valores salvos no banco - sem extrair da URL
     setNewLink({
       name: String(link.name || ''),
       tool_name: String(link.tool_name || ''),
@@ -384,7 +417,11 @@ export default function UserDashboard() {
       custom_message: String(link.custom_message || ''),
       capture_type: String(link.capture_type || ''),
       material_title: String(link.material_title || ''),
-      material_description: String(link.material_description || '')
+      material_description: String(link.material_description || ''),
+      // Novos campos
+      page_title: String(link.page_title || 'Quer uma análise mais completa?'),
+      page_greeting: String(link.page_greeting || 'Olá!'),
+      button_text: String(link.button_text || 'Consultar Especialista')
     })
     setShowEditModal(true)
   }
@@ -445,10 +482,14 @@ export default function UserDashboard() {
           cta_text: newLink.cta_text,
           redirect_url: newLink.redirect_url.trim(),
           custom_url: newLink.custom_url.trim(),
-          custom_message: newLink.custom_message,
+          custom_message: newLink.page_greeting, // Usar page_greeting em vez de custom_message
           capture_type: newLink.capture_type,
           material_title: newLink.material_title || '',
           material_description: newLink.material_description || '',
+          // Novos campos
+          page_title: newLink.page_title || 'Quer uma análise mais completa?',
+          page_greeting: newLink.page_greeting || 'Gostaria de saber mais',
+          button_text: newLink.button_text || 'Consultar Especialista',
           updated_at: new Date().toISOString()
         })
         .eq('id', editingLink.id)
@@ -491,7 +532,11 @@ export default function UserDashboard() {
         custom_message: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!',
         capture_type: 'direct',
         material_title: '',
-        material_description: ''
+        material_description: '',
+        // Novos campos
+        page_title: 'Quer uma análise mais completa?',
+        page_greeting: 'Gostaria de saber mais',
+        button_text: 'Consultar Especialista'
       })
         setShowSuccessModal(true)
       }
@@ -1094,110 +1139,175 @@ export default function UserDashboard() {
         )}
       </main>
 
-      {/* Modal para criar link */}
+      {/* Modal para criar link com preview */}
         {showCreateLinkModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div className="relative top-10 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Criar Novo Link</h3>
               
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Nome do Projeto</label>
-                  <input
-                    type="text"
-                    value={newLink.name}
-                    onChange={(e) => setNewLink({...newLink, name: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    placeholder="Ex: Consultoria Nutricional"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Ferramenta</label>
-                  <select
-                    value={newLink.tool_name}
-                    onChange={(e) => setNewLink({...newLink, tool_name: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                  >
-                    <option value="bmi">Calculadora IMC</option>
-                    <option value="protein">Calculadora de Proteína</option>
-                    <option value="hydration">Calculadora de Hidratação</option>
-                    <option value="body-composition">Composição Corporal</option>
-                    <option value="meal-planner">Planejador de Refeições</option>
-                    <option value="nutrition-assessment">Avaliação Nutricional</option>
-                    <option value="wellness-profile">Quiz: Perfil de Bem-Estar</option>
-                    <option value="daily-wellness">Tabela: Bem-Estar Diário</option>
-                    <option value="healthy-eating">Quiz: Alimentação Saudável</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Texto do Botão</label>
-                      <input
-                    type="text"
-                    value={newLink.cta_text}
-                    onChange={(e) => setNewLink({...newLink, cta_text: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    placeholder="Ex: Falar com Especialista"
-                  />
-                      </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">URL de Redirecionamento</label>
-                      <input
-                    type="url"
-                    value={newLink.redirect_url}
-                    onChange={(e) => setNewLink({...newLink, redirect_url: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    placeholder="https://wa.me/5511999999999"
-                  />
-                </div>
-                
-                      <div>
-                  <label className="block text-sm font-medium text-gray-700">Mensagem Personalizada</label>
-                  <div className="mt-1">
-                    <div className="text-xs text-gray-500 mb-2">
-                      💡 Mensagem sugerida para {newLink.tool_name}:
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 mb-2">
-                      {getCustomMessageByTool(newLink.tool_name)}
-                    </div>
-                    <textarea
-                      value={newLink.custom_message}
-                      onChange={(e) => setNewLink({...newLink, custom_message: e.target.value})}
-                      rows={3}
-                      className="block w-full border border-gray-300 rounded-md px-3 py-2"
-                      placeholder="Digite sua mensagem personalizada aqui..."
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Coluna esquerda - Formulário */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Nome do Projeto</label>
+                    <input
+                      type="text"
+                      value={newLink.name}
+                      onChange={(e) => setNewLink({...newLink, name: e.target.value})}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      placeholder="Ex: Consultoria Nutricional"
                     />
-                    <div className="mt-1">
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Ferramenta</label>
+                    <select
+                      value={newLink.tool_name}
+                      onChange={(e) => setNewLink({...newLink, tool_name: e.target.value})}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                    >
+                      <option value="bmi">Calculadora IMC</option>
+                      <option value="protein">Calculadora de Proteína</option>
+                      <option value="hydration">Calculadora de Hidratação</option>
+                      <option value="body-composition">Composição Corporal</option>
+                      <option value="meal-planner">Planejador de Refeições</option>
+                      <option value="nutrition-assessment">Avaliação Nutricional</option>
+                      <option value="wellness-profile">Quiz: Perfil de Bem-Estar</option>
+                      <option value="daily-wellness">Tabela: Bem-Estar Diário</option>
+                      <option value="healthy-eating">Quiz: Alimentação Saudável</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">🎯 Título Principal</label>
+                    <input
+                      type="text"
+                      value={newLink.page_title}
+                      onChange={(e) => setNewLink({...newLink, page_title: e.target.value})}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      placeholder="Quer uma análise mais completa?"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">💬 Texto Descritivo</label>
+                    <textarea
+                      value={newLink.page_greeting}
+                      onChange={(e) => setNewLink({...newLink, page_greeting: e.target.value})}
+                      rows={3}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      placeholder="Olá! Vi que você calculou seu IMC. Tenho orientações personalizadas que podem ajudar muito no seu bem-estar. Gostaria de mais informações?"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      💡 Esta mensagem aparece na página para estimular o cliente
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">🔗 Texto do Botão</label>
+                    <input
+                      type="text"
+                      value={newLink.button_text}
+                      onChange={(e) => setNewLink({...newLink, button_text: e.target.value})}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      placeholder="Consultar Especialista"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">📱 URL de Redirecionamento</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        value={newLink.redirect_url}
+                        onChange={(e) => setNewLink({...newLink, redirect_url: e.target.value})}
+                        className="mt-1 flex-1 border border-gray-300 rounded-md px-3 py-2"
+                        placeholder="https://wa.me/5511999999999"
+                      />
                       <button
                         type="button"
-                        onClick={() => setNewLink({...newLink, custom_message: getCustomMessageByTool(newLink.tool_name)})}
-                        className="text-xs text-emerald-600 hover:text-emerald-700"
+                        onClick={() => {
+                          const cleanPhone = userProfile.phone.replace(/\D/g, '')
+                          const fullPhone = `${countryCode}${cleanPhone}`
+                          const whatsappUrl = `https://wa.me/${fullPhone}?text=${encodeURIComponent(newLink.page_greeting)}`
+                          setNewLink({...newLink, redirect_url: whatsappUrl})
+                          console.log('📝 URL atualizada com mensagem:', whatsappUrl)
+                        }}
+                        className="mt-1 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+                        title="Adicionar mensagem do texto descritivo"
                       >
-                        ✨ Usar mensagem sugerida
+                        📝
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      💡 <strong>Controle total:</strong> Cole aqui apenas o telefone OU clique no 📝 para adicionar a mensagem automaticamente
+                    </p>
+                  </div>
+                </div>
+
+                {/* Coluna direita - Preview */}
+                <div className="space-y-4">
+                  <h4 className="text-md font-medium text-gray-700 mb-4">📱 Chamada para ação</h4>
+                  
+                  {/* Preview Card */}
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+                    <div className="text-center space-y-4">
+                      {/* Título Principal */}
+                      <h2 className="text-xl font-bold text-gray-800">
+                        🎯 {newLink.page_title || 'Quer uma análise mais completa?'}
+                      </h2>
+                      
+                      {/* Texto Descritivo */}
+                      <p className="text-gray-700 leading-relaxed">
+                        {newLink.page_greeting || 'Gostaria de saber mais'}
+                      </p>
+                      
+                      {/* Botão */}
+                      <button 
+                        className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                        onClick={() => {
+                          if (newLink.redirect_url) {
+                            window.open(newLink.redirect_url, '_blank')
+                          }
+                        }}
+                      >
+                        💬 {newLink.button_text || 'Consultar Especialista'}
                       </button>
                     </div>
                   </div>
+
+                  {/* Informações do Link */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h5 className="font-medium text-gray-700 mb-2">📋 Informações do Link</h5>
+                    <div className="space-y-2 text-sm">
+                      <div><strong>Projeto:</strong> {newLink.name || 'Nome não definido'}</div>
+                      <div><strong>Ferramenta:</strong> {newLink.tool_name}</div>
+                      <div><strong>URL:</strong> 
+                        <span className="text-blue-600 break-all">
+                          {newLink.redirect_url || 'URL não definida'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </div>
 
               <div className="flex justify-end space-x-3 mt-6">
-                    <button
+                <button
                   onClick={() => setShowCreateLinkModal(false)}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                    >
+                >
                   Cancelar
-                    </button>
-                    <button
+                </button>
+                <button
                   onClick={createLink}
                   className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                    >
+                >
                   Criar Link
-                    </button>
-                  </div>
-                </div>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1244,125 +1354,179 @@ export default function UserDashboard() {
         </div>
       )}
 
-      {/* Modal de Edição */}
+      {/* Modal de Edição com preview */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg p-6 w-11/12 max-w-6xl mx-4 max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold text-gray-900 mb-6">Editar Link</h2>
             
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nome do Projeto</label>
-                  <input
-                  type="text"
-                  value={newLink.name}
-                  onChange={(e) => setNewLink({...newLink, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Ex: Calculadora IMC"
-                />
-                </div>
-
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Coluna esquerda - Formulário */}
+              <div className="space-y-4">
                 <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Ferramenta</label>
-                <select
-                  value={newLink.tool_name}
-                  onChange={(e) => setNewLink({...newLink, tool_name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="bmi">Calculadora IMC</option>
-                  <option value="protein">Calculadora de Proteína</option>
-                  <option value="hydration">Calculadora de Hidratação</option>
-                  <option value="body-composition">Composição Corporal</option>
-                  <option value="meal-planner">Planejador de Refeições</option>
-                  <option value="nutrition-assessment">Avaliação Nutricional</option>
-                  <option value="wellness-profile">Quiz: Perfil de Bem-Estar</option>
-                  <option value="daily-wellness">Tabela: Bem-Estar Diário</option>
-                  <option value="healthy-eating">Quiz: Alimentação Saudável</option>
-                </select>
-                </div>
-                    
-                    <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Texto do Botão</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nome do Projeto</label>
                   <input
                     type="text"
-                    value={newLink.cta_text}
-                    onChange={(e) => setNewLink({...newLink, cta_text: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Ex: Falar com Especialista"
+                    value={newLink.name}
+                    onChange={(e) => setNewLink({...newLink, name: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Ex: Calculadora IMC"
                   />
                 </div>
 
                 <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">URL de Redirecionamento</label>
-                <input
-                  type="url"
-                  value={newLink.redirect_url}
-                  onChange={(e) => setNewLink({...newLink, redirect_url: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="https://wa.me/5511999999999"
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ferramenta</label>
+                  <select
+                    value={newLink.tool_name}
+                    onChange={(e) => setNewLink({...newLink, tool_name: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="bmi">Calculadora IMC</option>
+                    <option value="protein">Calculadora de Proteína</option>
+                    <option value="hydration">Calculadora de Hidratação</option>
+                    <option value="body-composition">Composição Corporal</option>
+                    <option value="meal-planner">Planejador de Refeições</option>
+                    <option value="nutrition-assessment">Avaliação Nutricional</option>
+                    <option value="wellness-profile">Quiz: Perfil de Bem-Estar</option>
+                    <option value="daily-wellness">Tabela: Bem-Estar Diário</option>
+                    <option value="healthy-eating">Quiz: Alimentação Saudável</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">🎯 Título Principal</label>
+                  <input
+                    type="text"
+                    value={newLink.page_title}
+                    onChange={(e) => setNewLink({...newLink, page_title: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Quer uma análise mais completa?"
                   />
                 </div>
-                    
-                    <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">URL Personalizada (Opcional)</label>
-                      <input
-                  type="url"
-                  value={newLink.custom_url}
-                  onChange={(e) => setNewLink({...newLink, custom_url: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="https://meusite.com/calculadora"
-                      />
-                    </div>
-                    
-                    <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Mensagem Personalizada</label>
-                <div className="mb-2">
-                  <div className="text-xs text-gray-500 mb-2">
-                    💡 Mensagem sugerida para {newLink.tool_name}:
-                  </div>
-                  <div className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 mb-2">
-                    {getCustomMessageByTool(newLink.tool_name)}
-                  </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">💬 Texto Descritivo</label>
+                  <textarea
+                    value={newLink.page_greeting}
+                    onChange={(e) => setNewLink({...newLink, page_greeting: e.target.value})}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Olá! Vi que você calculou seu IMC. Tenho orientações personalizadas que podem ajudar muito no seu bem-estar. Gostaria de mais informações?"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    💡 Esta mensagem aparece na página para estimular o cliente
+                  </p>
                 </div>
-                      <textarea
-                  value={newLink.custom_message}
-                  onChange={(e) => setNewLink({...newLink, custom_message: e.target.value})}
-                        rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Digite sua mensagem personalizada aqui..."
-                      />
-                <div className="mt-1">
-                  <button
-                    type="button"
-                    onClick={() => setNewLink({...newLink, custom_message: getCustomMessageByTool(newLink.tool_name)})}
-                    className="text-xs text-emerald-600 hover:text-emerald-700"
-                  >
-                    ✨ Usar mensagem sugerida
-                  </button>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">🔗 Texto do Botão</label>
+                  <input
+                    type="text"
+                    value={newLink.button_text}
+                    onChange={(e) => setNewLink({...newLink, button_text: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Consultar Especialista"
+                  />
                 </div>
-                    </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">📱 URL de Redirecionamento</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={newLink.redirect_url}
+                      onChange={(e) => setNewLink({...newLink, redirect_url: e.target.value})}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="https://wa.me/5511999999999"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const cleanPhone = userProfile.phone.replace(/\D/g, '')
+                        const fullPhone = `${countryCode}${cleanPhone}`
+                        const whatsappUrl = `https://wa.me/${fullPhone}?text=${encodeURIComponent(newLink.page_greeting)}`
+                        setNewLink({...newLink, redirect_url: whatsappUrl})
+                        console.log('📝 URL atualizada com mensagem:', whatsappUrl)
+                      }}
+                      className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+                      title="Adicionar mensagem do texto descritivo"
+                    >
+                      📝
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    💡 <strong>Controle total:</strong> Cole aqui apenas o telefone OU clique no 📝 para adicionar a mensagem automaticamente
+                  </p>
+                </div>
               </div>
-              
+
+              {/* Coluna direita - Preview */}
+              <div className="space-y-4">
+                <h4 className="text-md font-medium text-gray-700 mb-4">📱 Chamada para ação</h4>
+                
+                {/* Preview Card */}
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+                  <div className="text-center space-y-4">
+                    {/* Título Principal */}
+                    <h2 className="text-xl font-bold text-gray-800">
+                      🎯 {newLink.page_title || 'Quer uma análise mais completa?'}
+                    </h2>
+                    
+                    {/* Texto Descritivo */}
+                    <p className="text-gray-700 leading-relaxed">
+                      {newLink.page_greeting || 'Gostaria de saber mais'}
+                    </p>
+                    
+                    {/* Botão */}
+                    <button 
+                      className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                      onClick={() => {
+                        if (newLink.redirect_url) {
+                          window.open(newLink.redirect_url, '_blank')
+                        }
+                      }}
+                    >
+                      💬 {newLink.button_text || 'Consultar Especialista'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Informações do Link */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h5 className="font-medium text-gray-700 mb-2">📋 Informações do Link</h5>
+                  <div className="space-y-2 text-sm">
+                    <div><strong>Projeto:</strong> {newLink.name || 'Nome não definido'}</div>
+                    <div><strong>Ferramenta:</strong> {newLink.tool_name}</div>
+                    <div><strong>URL:</strong> 
+                      <span className="text-blue-600 break-all">
+                        {newLink.redirect_url || 'URL não definida'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <div className="flex justify-end space-x-3 mt-6">
-                <button
+              <button
                 onClick={() => {
                   setShowEditModal(false)
                   setEditingLink(null)
                 }}
                 className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                >
-                  Cancelar
-                </button>
-                <button
+              >
+                Cancelar
+              </button>
+              <button
                 onClick={updateLink}
                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
               >
                 Atualizar Link
-                </button>
-              </div>
-    </div>
-  </div>
-        )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Erro */}
       {showErrorModal && (

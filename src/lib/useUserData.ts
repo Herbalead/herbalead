@@ -8,6 +8,8 @@ interface UserData {
   userPhone?: string
   linkId?: string
   customMessage?: string
+  pageTitle?: string // Título personalizado
+  buttonText?: string // Texto do botão personalizado
 }
 
 export function useUserData() {
@@ -20,28 +22,35 @@ export function useUserData() {
       const urlParams = new URLSearchParams(window.location.search)
       const userParam = urlParams.get('user')
       
+      console.log('🔍 DEBUG useUserData:')
+      console.log('  - window.location.search:', window.location.search)
+      console.log('  - userParam:', userParam)
+      
       if (userParam) {
         const parsedUserData = JSON.parse(userParam)
         console.log('👤 Dados do usuário carregados:', parsedUserData)
+        console.log('  - customMessage:', parsedUserData.customMessage)
         setUserData(parsedUserData)
       } else {
         console.log('⚠️ Nenhum dado de usuário encontrado na URL')
+        console.log('⚠️ Usando fallback padrão')
         // Fallback para dados padrão
         setUserData({
           userId: 'default',
           userName: 'Especialista',
-          userPhone: '5519981868000',
+          userPhone: '19981868000', // Removido o 55 fixo
           linkId: 'default',
           customMessage: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
         })
       }
     } catch (error) {
       console.error('❌ Erro ao carregar dados do usuário:', error)
+      console.log('❌ Usando fallback de erro')
       // Fallback para dados padrão
       setUserData({
         userId: 'default',
         userName: 'Especialista',
-        userPhone: '5519981868000',
+        userPhone: '19981868000', // Removido o 55 fixo
         linkId: 'default',
         customMessage: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
       })
@@ -65,22 +74,36 @@ export function useUserData() {
       return `https://wa.me/5519981868000?text=${encodeURIComponent(finalMessage)}`
     }
     
-    // Limpar e formatar o telefone
+    // Usar o telefone exatamente como está no banco (já com código do país)
     const cleanPhone = userData.userPhone.replace(/\D/g, '')
-    const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`
     
-    console.log('✅ Usando telefone do usuário:', formattedPhone)
-    return `https://wa.me/${formattedPhone}?text=${encodeURIComponent(finalMessage)}`
+    console.log('✅ Usando telefone do usuário:', cleanPhone)
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(finalMessage)}`
   }
 
   const getCustomMessage = () => {
-    return userData?.customMessage || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
+    const message = userData?.customMessage || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
+    console.log('🔍 Debug getCustomMessage:')
+    console.log('  - userData:', userData)
+    console.log('  - customMessage:', userData?.customMessage)
+    console.log('  - final message:', message)
+    return message
+  }
+
+  const getPageTitle = () => {
+    return userData?.pageTitle || 'Quer uma análise mais completa?'
+  }
+
+  const getButtonText = () => {
+    return userData?.buttonText || 'Consultar Especialista'
   }
 
   return {
     userData,
     loading,
     getWhatsAppUrl,
-    getCustomMessage
+    getCustomMessage,
+    getPageTitle,
+    getButtonText
   }
 }
