@@ -23,24 +23,6 @@ interface NutritionData {
   symptoms: string[]
 }
 
-interface NutritionResults {
-  bmi: string
-  tdee: string
-  score: string
-  category: string
-  color: string
-  recommendations: string[]
-  improvements: string[]
-  nutritionalNeeds: {
-    calories: string
-    protein: string
-    carbs: string
-    fat: string
-    fiber: string
-    water: string
-  }
-}
-
 export default function NutritionAssessmentDemoPage() {
   const [formData, setFormData] = useState<NutritionData>({
     age: '',
@@ -74,7 +56,7 @@ export default function NutritionAssessmentDemoPage() {
     'Alterações de humor'
   ]
 
-  const calculateNutritionAssessment = () => {
+  // const calculateNutritionAssessment = () => {
     const weight = parseFloat(formData.weight)
     const height = parseFloat(formData.height) / 100
     const age = parseInt(formData.age)

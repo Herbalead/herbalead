@@ -73,7 +73,7 @@ export default function LoginPage() {
           throw new Error('Senhas não coincidem')
         }
 
-        const _profileData = {
+        // const _profileData = {
           name: formData.name,
           phone: `${formData.countryCode}${formData.phone}`,
           specialty: formData.specialty,

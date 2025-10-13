@@ -10,14 +10,6 @@ import {
 import Link from 'next/link'
 
 
-interface QuizResults {
-  score: string
-  category: string
-  color: string
-  recommendations: string[]
-  improvements: string[]
-}
-
 export default function HealthyEatingDemoPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<number[]>([])
@@ -97,7 +89,7 @@ export default function HealthyEatingDemoPage() {
     }
   ]
 
-  const calculateResults = () => {
+  // const calculateResults = () => {
     const totalScore = answers.reduce((sum, answer) => sum + (answer + 1), 0)
     const maxScore = questions.length * 4
     const percentage = (totalScore / maxScore) * 100

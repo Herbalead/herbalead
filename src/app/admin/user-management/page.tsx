@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Search, Trash2, User, Mail, Phone, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Search, Trash2, User, AlertTriangle } from 'lucide-react'
 
 interface Professional {
   id: string
@@ -270,8 +270,8 @@ export default function UserManagementPage() {
           <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-blue-800 mb-3">📋 Instruções:</h3>
             <ol className="list-decimal list-inside text-blue-700 space-y-2">
-              <li>Digite "jessica" ou o email da Jessica no campo de busca</li>
-              <li>Clique em "Buscar" para encontrar registros</li>
+              <li>Digite &quot;jessica&quot; ou o email da Jessica no campo de busca</li>
+              <li>Clique em &quot;Buscar&quot; para encontrar registros</li>
               <li>Se aparecerem registros órfãos (vermelhos), delete-os</li>
               <li>Peça para a Jessica tentar se cadastrar novamente</li>
               <li>Se ainda não funcionar, ela pode usar um email ligeiramente diferente</li>

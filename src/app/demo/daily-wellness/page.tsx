@@ -21,16 +21,6 @@ interface WellnessEntry {
   notes: string
 }
 
-interface WellnessResults {
-  totalScore: string
-  category: string
-  color: string
-  recommendations: string[]
-  improvements: string[]
-  wellnessTips: string[]
-  weeklyAverage: string
-}
-
 export default function DailyWellnessDemoPage() {
   const [wellnessEntry, setWellnessEntry] = useState<WellnessEntry>({
     date: new Date().toISOString().split('T')[0],
@@ -44,7 +34,7 @@ export default function DailyWellnessDemoPage() {
     notes: ''
   })
 
-  const calculateWellnessScore = () => {
+  // const calculateWellnessScore = () => {
     const { sleep, exercise, nutrition, hydration, mood, energy, stress } = wellnessEntry
     
     // Calculate total score (0-10 scale for each category)

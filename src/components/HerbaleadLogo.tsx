@@ -12,7 +12,7 @@ interface HerbaleadLogoProps {
 
 export default function HerbaleadLogo({ 
   size = 'md', 
-  showText: _showText = true, 
+  showText = true, 
   className = '',
   variant = 'horizontal',
   responsive = false
