@@ -73,14 +73,6 @@ export default function LoginPage() {
           throw new Error('Senhas não coincidem')
         }
 
-        // const _profileData = {
-          name: formData.name,
-          phone: `${formData.countryCode}${formData.phone}`,
-          specialty: formData.specialty,
-          company: formData.company,
-          project_id: projectDomain // Associar ao projeto detectado
-        }
-
         // Usar API route para cadastro
         const response = await fetch('/api/signup', {
           method: 'POST',
