@@ -42,6 +42,7 @@ export default function UserDashboard() {
     specialty: '',
     company: ''
   })
+  const [countryCode, setCountryCode] = useState('55')
   const [loading, setLoading] = useState(true)
 
   // Função para normalizar texto removendo acentos e caracteres especiais
@@ -81,16 +82,61 @@ export default function UserDashboard() {
           console.log('❌ Erro da busca:', error)
 
           if (professional) {
+            // Extrair código do país do telefone
+            const phone = professional.phone || ''
+            let extractedCountryCode = '55' // padrão Brasil
+            let phoneWithoutCode = phone
+            
+            if (phone.startsWith('55')) {
+              extractedCountryCode = '55'
+              phoneWithoutCode = phone.substring(2)
+            } else if (phone.startsWith('1')) {
+              extractedCountryCode = '1'
+              phoneWithoutCode = phone.substring(1)
+            } else if (phone.startsWith('44')) {
+              extractedCountryCode = '44'
+              phoneWithoutCode = phone.substring(2)
+            } else if (phone.startsWith('33')) {
+              extractedCountryCode = '33'
+              phoneWithoutCode = phone.substring(2)
+            } else if (phone.startsWith('49')) {
+              extractedCountryCode = '49'
+              phoneWithoutCode = phone.substring(2)
+            } else if (phone.startsWith('34')) {
+              extractedCountryCode = '34'
+              phoneWithoutCode = phone.substring(2)
+            } else if (phone.startsWith('39')) {
+              extractedCountryCode = '39'
+              phoneWithoutCode = phone.substring(2)
+            } else if (phone.startsWith('52')) {
+              extractedCountryCode = '52'
+              phoneWithoutCode = phone.substring(2)
+            } else if (phone.startsWith('54')) {
+              extractedCountryCode = '54'
+              phoneWithoutCode = phone.substring(2)
+            } else if (phone.startsWith('56')) {
+              extractedCountryCode = '56'
+              phoneWithoutCode = phone.substring(2)
+            } else if (phone.startsWith('57')) {
+              extractedCountryCode = '57'
+              phoneWithoutCode = phone.substring(2)
+            } else if (phone.startsWith('51')) {
+              extractedCountryCode = '51'
+              phoneWithoutCode = phone.substring(2)
+            }
+            
             const profileData = {
               name: professional.name || '',
               email: professional.email || '',
-              phone: professional.phone || '',
+              phone: phoneWithoutCode,
               specialty: professional.specialty || '',
               company: professional.company || ''
             }
             
             console.log('👤 Perfil carregado:', profileData)
+            console.log('🌍 Código do país extraído:', extractedCountryCode)
             setUserProfile(profileData)
+            setCountryCode(extractedCountryCode)
           } else {
             console.log('❌ Nenhum perfil encontrado na tabela professionals')
             window.location.href = '/login'
@@ -179,12 +225,14 @@ export default function UserDashboard() {
 
   const openCreateLinkModal = () => {
     // Pré-preencher URL com WhatsApp do usuário
+    const fullPhone = `${countryCode}${userProfile.phone.replace(/\D/g, '')}`
     const whatsappUrl = userProfile.phone 
-      ? `https://wa.me/${userProfile.phone.replace(/\D/g, '')}`
+      ? `https://wa.me/${fullPhone}`
       : 'https://wa.me/5511999999999'
     
     console.log('📱 Pré-preenchimento WhatsApp:', whatsappUrl)
     console.log('👤 Telefone do usuário:', userProfile.phone)
+    console.log('🌍 Código do país:', countryCode)
     
     setNewLink({
       ...newLink,
@@ -583,7 +631,7 @@ export default function UserDashboard() {
         .from('professionals')
         .update({
           name: editedProfile.name.trim(),
-          phone: editedProfile.phone.trim(),
+          phone: `${countryCode}${editedProfile.phone.trim()}`,
           specialty: editedProfile.specialty.trim(),
           company: editedProfile.company.trim()
         })
@@ -916,15 +964,39 @@ export default function UserDashboard() {
                   <div>
                 <label className="block text-sm font-medium text-gray-700">Telefone</label>
                 {editingProfile ? (
-                    <input
-                      type="tel"
-                    value={editedProfile.phone}
-                    onChange={(e) => setEditedProfile({...editedProfile, phone: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    placeholder="+55 11 99999-9999"
-                  />
+                  <div className="flex space-x-2">
+                    <div className="w-24">
+                      <select
+                        value={countryCode}
+                        onChange={(e) => setCountryCode(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      >
+                        <option value="55">🇧🇷 +55</option>
+                        <option value="1">🇺🇸 +1</option>
+                        <option value="44">🇬🇧 +44</option>
+                        <option value="33">🇫🇷 +33</option>
+                        <option value="49">🇩🇪 +49</option>
+                        <option value="34">🇪🇸 +34</option>
+                        <option value="39">🇮🇹 +39</option>
+                        <option value="52">🇲🇽 +52</option>
+                        <option value="54">🇦🇷 +54</option>
+                        <option value="56">🇨🇱 +56</option>
+                        <option value="57">🇨🇴 +57</option>
+                        <option value="51">🇵🇪 +51</option>
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        type="tel"
+                        value={editedProfile.phone}
+                        onChange={(e) => setEditedProfile({...editedProfile, phone: e.target.value})}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                        placeholder="11 99999-9999"
+                      />
+                    </div>
+                  </div>
                 ) : (
-                  <p className="mt-1 text-sm text-gray-900">{userProfile.phone || 'Não informado'}</p>
+                  <p className="mt-1 text-sm text-gray-900">{countryCode} {userProfile.phone || 'Não informado'}</p>
                 )}
                   </div>
               
