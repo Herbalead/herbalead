@@ -230,21 +230,29 @@ export default function BMIDemoPage() {
           {/* CTA Section */}
           <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-8 text-center shadow-2xl border-2 border-emerald-200">
             <h3 className="text-3xl font-bold mb-4 text-gray-800">
-              🎯 Quer uma análise mais completa?
+              🎯 Esta é uma demonstração!
             </h3>
-            <p className="text-gray-600 mb-8 text-lg">
-              Consulte um especialista para um plano personalizado baseado no seu IMC
+            <p className="text-gray-600 mb-6 text-lg">
+              Na versão real, este botão redirecionaria para o WhatsApp do especialista com uma mensagem personalizada.
             </p>
-            <button 
-              onClick={() => {
-                const whatsappUrl = 'https://wa.me/5519981868000?text=Olá! Gostaria de consultar um especialista baseado no meu resultado de IMC.'
-                window.open(whatsappUrl, '_blank')
-              }}
-              className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-emerald-500"
-            >
-              <MessageCircle className="w-8 h-8 mr-3" />
-              Consultar Especialista
-            </button>
+            <div className="bg-white rounded-lg p-6 mb-6 border border-emerald-200">
+              <h4 className="text-lg font-semibold text-gray-800 mb-3">💡 Como funciona na prática:</h4>
+              <ul className="text-left text-gray-600 space-y-2">
+                <li>• Cliente preenche os dados e vê o resultado</li>
+                <li>• Clica no botão "Consultar Especialista"</li>
+                <li>• É redirecionado automaticamente para seu WhatsApp</li>
+                <li>• Mensagem personalizada já vem pronta</li>
+                <li>• Você recebe o lead qualificado!</li>
+              </ul>
+            </div>
+            <div className="bg-emerald-100 rounded-lg p-4">
+              <p className="text-emerald-800 font-semibold">
+                🚀 Crie sua própria calculadora personalizada!
+              </p>
+              <p className="text-emerald-700 text-sm mt-2">
+                Configure seu telefone, mensagem personalizada e comece a gerar leads.
+              </p>
+            </div>
           </div>
         </main>
       </div>
