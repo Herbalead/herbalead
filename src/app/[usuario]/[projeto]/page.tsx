@@ -122,7 +122,8 @@ export default function PersonalizedLinkPage() {
             userId: link.user_id,
             userName: link.name,
             userPhone: professional?.phone || '5519981868000', // Usar telefone do profissional ou fallback
-            linkId: link.id
+            linkId: link.id,
+            customMessage: link.custom_message || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!' // Mensagem personalizada do link
           }
           
           const params = new URLSearchParams({

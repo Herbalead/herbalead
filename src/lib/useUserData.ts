@@ -7,6 +7,7 @@ interface UserData {
   userName?: string
   userPhone?: string
   linkId?: string
+  customMessage?: string
 }
 
 export function useUserData() {
@@ -30,7 +31,8 @@ export function useUserData() {
           userId: 'default',
           userName: 'Especialista',
           userPhone: '5519981868000',
-          linkId: 'default'
+          linkId: 'default',
+          customMessage: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
         })
       }
     } catch (error) {
@@ -40,28 +42,37 @@ export function useUserData() {
         userId: 'default',
         userName: 'Especialista',
         userPhone: '5519981868000',
-        linkId: 'default'
+        linkId: 'default',
+        customMessage: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
       })
     } finally {
       setLoading(false)
     }
   }, [])
 
-  const getWhatsAppUrl = (message: string) => {
+  const getWhatsAppUrl = (message?: string) => {
+    // Usar mensagem personalizada se disponível, senão usar a mensagem passada como parâmetro
+    const finalMessage = userData?.customMessage || message || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
+    
     if (!userData?.userPhone) {
-      return `https://wa.me/5519981868000?text=${encodeURIComponent(message)}`
+      return `https://wa.me/5519981868000?text=${encodeURIComponent(finalMessage)}`
     }
     
     // Limpar e formatar o telefone
     const cleanPhone = userData.userPhone.replace(/\D/g, '')
     const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`
     
-    return `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`
+    return `https://wa.me/${formattedPhone}?text=${encodeURIComponent(finalMessage)}`
+  }
+
+  const getCustomMessage = () => {
+    return userData?.customMessage || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
   }
 
   return {
     userData,
     loading,
-    getWhatsAppUrl
+    getWhatsAppUrl,
+    getCustomMessage
   }
 }
