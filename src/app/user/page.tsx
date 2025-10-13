@@ -63,47 +63,49 @@ export default function UserDashboard() {
 
     const loadUserProfile = async () => {
       try {
-      console.log('🔄 Carregando perfil do usuário...')
+        console.log('🔄 Carregando perfil do usuário...')
         // Buscar dados do usuário atual do Supabase
         const { data: { user } } = await supabase.auth.getUser()
-      console.log('👤 Usuário encontrado:', user?.id, user?.email)
+        console.log('👤 Usuário encontrado:', user?.id, user?.email)
         
         if (user) {
-        console.log('🔍 Buscando perfil do usuário:', user.email)
-        // Buscar perfil do usuário na tabela professionals
+          console.log('🔍 Buscando perfil do usuário:', user.email)
+          // Buscar perfil do usuário na tabela professionals
           const { data: professional, error } = await supabase
             .from('professionals')
             .select('*')
             .eq('email', user.email)
             .single()
 
-        console.log('📊 Resultado da busca:', professional)
-        console.log('❌ Erro da busca:', error)
+          console.log('📊 Resultado da busca:', professional)
+          console.log('❌ Erro da busca:', error)
 
           if (professional) {
-            setUserProfile({
-            name: professional.name,
-            email: professional.email,
+            const profileData = {
+              name: professional.name || '',
+              email: professional.email || '',
               phone: professional.phone || '',
-            specialty: professional.specialty || '',
-            company: professional.company || ''
-            })
-          console.log('👤 Perfil carregado:', professional.name)
+              specialty: professional.specialty || '',
+              company: professional.company || ''
+            }
+            
+            console.log('👤 Perfil carregado:', profileData)
+            setUserProfile(profileData)
           } else {
-          console.log('❌ Nenhum perfil encontrado na tabela professionals')
-          window.location.href = '/login'
+            console.log('❌ Nenhum perfil encontrado na tabela professionals')
+            window.location.href = '/login'
           }
         } else {
-        console.log('❌ Nenhum usuário logado, redirecionando para login...')
-        window.location.href = '/login'
+          console.log('❌ Nenhum usuário logado, redirecionando para login...')
+          window.location.href = '/login'
         }
       } catch (error) {
-      console.error('❌ Erro ao carregar perfil:', error)
-      window.location.href = '/login'
-    } finally {
-      setLoading(false)
+        console.error('❌ Erro ao carregar perfil:', error)
+        window.location.href = '/login'
+      } finally {
+        setLoading(false)
+      }
     }
-  }
 
     const loadUserLinks = async () => {
       try {
@@ -527,12 +529,23 @@ export default function UserDashboard() {
   }
 
   const startEditingProfile = () => {
+    console.log('🔄 Iniciando edição do perfil...')
+    console.log('👤 Perfil atual:', userProfile)
+    
     setEditedProfile({
-      name: userProfile.name,
-      phone: userProfile.phone,
-      specialty: userProfile.specialty,
-      company: userProfile.company
+      name: userProfile.name || '',
+      phone: userProfile.phone || '',
+      specialty: userProfile.specialty || '',
+      company: userProfile.company || ''
     })
+    
+    console.log('📝 Perfil editável configurado:', {
+      name: userProfile.name || '',
+      phone: userProfile.phone || '',
+      specialty: userProfile.specialty || '',
+      company: userProfile.company || ''
+    })
+    
     setEditingProfile(true)
   }
 
@@ -548,39 +561,57 @@ export default function UserDashboard() {
 
   const saveProfile = async () => {
     try {
+      console.log('🔄 Salvando perfil...')
+      console.log('📋 Dados do perfil editado:', editedProfile)
+      
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
+        console.error('❌ Usuário não logado')
         alert('Usuário não logado')
+        return
+      }
+
+      console.log('👤 Usuário logado:', user.email)
+
+      // Validar campos obrigatórios
+      if (!editedProfile.name.trim()) {
+        alert('Nome é obrigatório')
         return
       }
 
       const { error } = await supabase
         .from('professionals')
         .update({
-          name: editedProfile.name,
-          phone: editedProfile.phone,
-          specialty: editedProfile.specialty,
-          company: editedProfile.company
+          name: editedProfile.name.trim(),
+          phone: editedProfile.phone.trim(),
+          specialty: editedProfile.specialty.trim(),
+          company: editedProfile.company.trim()
         })
         .eq('email', user.email)
 
+      console.log('📊 Resultado da atualização:', error)
+
       if (error) {
-        console.error('Erro ao salvar perfil:', error)
+        console.error('❌ Erro ao salvar perfil:', error)
         alert('Erro ao salvar perfil: ' + error.message)
       } else {
+        console.log('✅ Perfil salvo com sucesso!')
+        
+        // Atualizar o estado local
         setUserProfile({
           ...userProfile,
-          name: editedProfile.name,
-          phone: editedProfile.phone,
-          specialty: editedProfile.specialty,
-          company: editedProfile.company
+          name: editedProfile.name.trim(),
+          phone: editedProfile.phone.trim(),
+          specialty: editedProfile.specialty.trim(),
+          company: editedProfile.company.trim()
         })
+        
         setEditingProfile(false)
         alert('Perfil atualizado com sucesso!')
       }
     } catch (error) {
-      console.error('Erro ao salvar perfil:', error)
-      alert('Erro ao salvar perfil')
+      console.error('❌ Erro inesperado ao salvar perfil:', error)
+      alert('Erro inesperado ao salvar perfil')
     }
   }
 
