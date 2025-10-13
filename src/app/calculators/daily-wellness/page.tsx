@@ -39,7 +39,7 @@ interface WellnessResults {
 }
 
 export default function DailyWellnessCalculatorPage() {
-  const { userData, getWhatsAppUrl } = useUserData()
+  const { userData, getWhatsAppUrl, getCustomMessage } = useUserData()
   const [wellnessEntry, setWellnessEntry] = useState<WellnessEntry>({
     date: new Date().toISOString().split('T')[0],
     sleep: 0,
@@ -299,13 +299,13 @@ export default function DailyWellnessCalculatorPage() {
               🎯 Quer acompanhamento personalizado?
             </h3>
             <p className="text-gray-600 mb-8 text-lg">
-              Consulte um especialista para um plano de bem-estar diário personalizado
+              {getCustomMessage()}
             </p>
             <button 
               onClick={() => {
-                const message = `Olá! Gostaria de consultar um especialista sobre meu bem-estar diário.`
-                const whatsappUrl = getWhatsAppUrl(message)
+                const whatsappUrl = getWhatsAppUrl()
                 console.log('📱 Abrindo WhatsApp:', whatsappUrl)
+                console.log('👤 Dados do usuário:', userData)
                 window.open(whatsappUrl, '_blank')
               }}
               className="px-12 py-6 bg-teal-600 text-white rounded-xl font-bold text-xl hover:bg-teal-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-teal-500"
