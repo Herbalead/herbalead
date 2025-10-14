@@ -89,9 +89,9 @@ export default function QuizBuilder() {
       showCorrectAnswers: true,
       randomizeQuestions: false,
       customButtonText: 'Próxima Questão',
-      congratulationsMessage: 'Parabéns! Você concluiu o quiz com sucesso! 🎉',
+      congratulationsMessage: 'Parabéns!',
       specialistButtonText: 'Consultar Profissional de Bem-Estar',
-      specialistRedirectUrl: 'https://wa.me/5519981868000?text=Olá! Gostaria de consultar um profissional de bem-estar baseado no meu resultado do quiz.'
+      specialistRedirectUrl: 'https://wa.me/5519981868000?text=Olá! Gostaria de mais informações.'
     },
     questions: [],
     is_active: true
@@ -167,7 +167,7 @@ export default function QuizBuilder() {
   useEffect(() => {
     if (userProfile?.phone) {
       const cleanPhone = userProfile.phone.replace(/\D/g, '') // Remove caracteres não numéricos
-      const whatsappUrl = `https://wa.me/${cleanPhone}?text=Olá! Gostaria de consultar um profissional de bem-estar baseado no meu resultado do quiz.`
+      const whatsappUrl = `https://wa.me/${cleanPhone}?text=Olá! Gostaria de mais informações.`
       
       console.log('📱 Atualizando WhatsApp automaticamente:', {
         telefoneOriginal: userProfile.phone,
@@ -716,15 +716,11 @@ export default function QuizBuilder() {
                 className="text-xl font-bold mb-4"
                 style={{color: quiz.colors.text}}
               >
-                {quiz.settings.congratulationsMessage || 'Parabéns! Você concluiu o quiz com sucesso! 🎉'}
+                {quiz.settings.congratulationsMessage || 'Parabéns!'}
               </h3>
               
               <p className="text-gray-600 mb-6">
                 Sua pontuação: <strong>8/10</strong>
-              </p>
-              
-              <p className="text-sm text-gray-500 mb-6">
-                Baseado nas suas respostas, recomendamos focar em exercícios de força e uma alimentação balanceada.
               </p>
               
               <button
@@ -1421,13 +1417,13 @@ export default function QuizBuilder() {
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-800">Mensagem de Parabéns</label>
                     <textarea
-                      value={quiz.settings.congratulationsMessage || 'Parabéns! Você concluiu o quiz com sucesso! 🎉'}
+                      value={quiz.settings.congratulationsMessage || 'Parabéns!'}
                       onChange={(e) => setQuiz({
                         ...quiz, 
                         settings: {...quiz.settings, congratulationsMessage: e.target.value}
                       })}
                       className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                      placeholder="Ex: Parabéns! Você concluiu o quiz com sucesso! 🎉"
+                      placeholder="Ex: Parabéns!"
                       rows={3}
                     />
                     <p className="text-xs text-gray-500">
