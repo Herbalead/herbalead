@@ -269,6 +269,47 @@ export default function UserDashboard() {
     }
   }
 
+  const deleteQuiz = async (quizId: string) => {
+    try {
+      console.log('🗑️ Apagando quiz:', quizId)
+      
+      // Primeiro apagar as perguntas relacionadas
+      const { error: questionsError } = await supabase
+        .from('questions')
+        .delete()
+        .eq('quiz_id', quizId)
+      
+      if (questionsError) {
+        console.error('❌ Erro ao apagar perguntas:', questionsError)
+        alert('Erro ao apagar perguntas do quiz. Tente novamente.')
+        return
+      }
+      
+      // Depois apagar o quiz
+      const { error: quizError } = await supabase
+        .from('quizzes')
+        .delete()
+        .eq('id', quizId)
+      
+      if (quizError) {
+        console.error('❌ Erro ao apagar quiz:', quizError)
+        alert('Erro ao apagar quiz. Tente novamente.')
+        return
+      }
+      
+      console.log('✅ Quiz apagado com sucesso!')
+      
+      // Recarregar a lista de quizzes
+      await loadUserQuizzes()
+      
+      alert('Quiz apagado com sucesso!')
+      
+    } catch (error) {
+      console.error('❌ Erro ao apagar quiz:', error)
+      alert('Erro ao apagar quiz. Tente novamente.')
+    }
+  }
+
   const openCreateLinkModal = () => {
     // Pré-preencher apenas o telefone básico - sem mensagem automática
     console.log('🔍 DEBUG openCreateLinkModal:')
@@ -1036,6 +1077,19 @@ export default function UserDashboard() {
                           className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200"
                         >
                           Editar
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(`Tem certeza que deseja apagar o quiz "${quiz.title}"? Esta ação não pode ser desfeita.`)) {
+                              deleteQuiz(quiz.id)
+                            }
+                          }}
+                          className="px-2 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200 flex items-center"
+                          title="Apagar quiz"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
                         </button>
                       </div>
                     </div>
