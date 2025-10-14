@@ -58,7 +58,7 @@ BEGIN
     END IF;
 END $$;
 
--- Verificar estrutura das tabelas
+-- Verificar estrutura da tabela quizzes
 SELECT 
     'quizzes' as table_name,
     column_name, 
@@ -67,10 +67,9 @@ SELECT
     column_default
 FROM information_schema.columns 
 WHERE table_name = 'quizzes' 
-ORDER BY ordinal_position
+ORDER BY ordinal_position;
 
-UNION ALL
-
+-- Verificar estrutura da tabela questions
 SELECT 
     'questions' as table_name,
     column_name, 
