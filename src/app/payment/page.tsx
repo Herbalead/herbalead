@@ -11,9 +11,9 @@ export default function PaymentPage() {
 
   const plans = {
     monthly: {
-      price: 'R$ 97',
+      price: 'R$ 60',
       period: '/mês',
-      total: 'R$ 97',
+      total: 'R$ 60',
       description: 'Acesso completo por 30 dias',
       features: [
         'Todas as 9 ferramentas',
@@ -25,10 +25,10 @@ export default function PaymentPage() {
       ]
     },
     yearly: {
-      price: 'R$ 67',
+      price: 'R$ 47,50',
       period: '/mês',
-      total: 'R$ 804',
-      description: 'Economize 30% pagando anualmente',
+      total: 'R$ 570',
+      description: 'Economize 20% pagando anualmente',
       features: [
         'Todas as 9 ferramentas',
         'Links personalizados ilimitados',
@@ -47,7 +47,7 @@ export default function PaymentPage() {
     setLoading(true)
     
     try {
-      const response = await fetch('/api/create-payment', {
+      const response = await fetch('/api/create-subscription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,16 +56,16 @@ export default function PaymentPage() {
       })
       
       if (!response.ok) {
-        throw new Error('Erro ao criar pagamento')
+        throw new Error('Erro ao criar assinatura')
       }
       
-      const { init_point } = await response.json()
+      const { url } = await response.json()
       
-      // Redirect to Mercado Pago checkout
-      window.location.href = init_point
+      // Redirect to Stripe checkout
+      window.location.href = url
     } catch (error) {
-      console.error('Payment error:', error)
-      alert('Erro ao processar pagamento. Tente novamente.')
+      console.error('Subscription error:', error)
+      alert('Erro ao processar assinatura. Tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -202,7 +202,7 @@ export default function PaymentPage() {
                 ) : (
                   <>
                     <Zap className="w-6 h-6" />
-                    <span>Pagar com Mercado Pago</span>
+                    <span>Assinar com Stripe</span>
                     <ArrowRight className="w-6 h-6" />
                   </>
                 )}
@@ -211,9 +211,9 @@ export default function PaymentPage() {
                 7 dias para cancelar • Sem questionamentos • Sem compromisso
               </p>
               <div className="mt-4 text-sm text-gray-600">
-                <p>✅ PIX instantâneo</p>
-                <p>✅ Cartão parcelado até 12x</p>
-                <p>✅ Boleto bancário</p>
+                <p>✅ Cobrança automática</p>
+                <p>✅ Cartão de crédito</p>
+                <p>✅ Cancele quando quiser</p>
               </div>
             </div>
           </div>
