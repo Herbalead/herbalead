@@ -72,118 +72,123 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-100">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white/80 backdrop-blur-sm shadow-lg border-b border-emerald-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+          <div className="flex justify-between items-center py-6">
             <Link href="/user" className="flex items-center space-x-3">
               <Image
                 src="/logos/herbalead/herbalead-logo-horizontal.png"
                 alt="Herbalead"
-                width={120}
-                height={40}
-                className="h-10 w-auto"
+                width={140}
+                height={45}
+                className="h-12 w-auto"
               />
             </Link>
-            <div className="text-sm text-gray-600">
-              7 dias para cancelar sem questionamentos
+            <div className="bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full text-sm font-medium">
+              🛡️ 7 dias para cancelar sem questionamentos
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Escolha seu Plano Herbalead
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
+            🚀 Plataforma de Leads Profissionais
+          </div>
+          <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
+            Escolha seu Plano<br />
+            <span className="text-emerald-600">Herbalead</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Comece a gerar leads profissionais hoje mesmo
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Transforme sua estratégia de vendas com ferramentas profissionais de geração de leads
           </p>
         </div>
 
         {/* Plan Selection */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Escolha seu plano</h2>
+        <div className="bg-white rounded-3xl shadow-2xl p-12 mb-12 border border-emerald-100">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">Escolha seu plano</h2>
             
             {/* Plan Toggle */}
-            <div className="flex justify-center mb-8">
-              <div className="bg-gray-100 rounded-lg p-1 flex">
+            <div className="flex justify-center mb-12">
+              <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-2 flex shadow-inner">
                 <button
                   onClick={() => setSelectedPlan('monthly')}
-                  className={`px-6 py-3 rounded-md font-medium transition-colors ${
+                  className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 ${
                     selectedPlan === 'monthly'
-                      ? 'bg-white text-emerald-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-white text-emerald-600 shadow-lg transform scale-105'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                   }`}
                 >
                   Mensal
                 </button>
                 <button
                   onClick={() => setSelectedPlan('yearly')}
-                  className={`px-6 py-3 rounded-md font-medium transition-colors ${
+                  className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 ${
                     selectedPlan === 'yearly'
-                      ? 'bg-white text-emerald-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-white text-emerald-600 shadow-lg transform scale-105'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                   }`}
                 >
                   Anual
-                  <span className="ml-2 px-2 py-1 bg-emerald-100 text-emerald-600 text-xs rounded-full">
-                    -30%
-                  </span>
                 </button>
               </div>
             </div>
 
             {/* Plan Details */}
-            <div className="text-center mb-8">
-              <div className="text-5xl font-bold text-emerald-600 mb-2">
-                {currentPlan.price}
-              </div>
-              <div className="text-lg text-gray-600 mb-2">
-                {currentPlan.period}
-              </div>
-              <div className="text-sm text-gray-500">
-                {currentPlan.description}
-              </div>
-              {selectedPlan === 'yearly' && (
-                <div className="text-sm text-emerald-600 font-medium mt-2">
-                  Total anual: {currentPlan.total}
+            <div className="text-center mb-12">
+              <div className="relative">
+                <div className="text-7xl font-bold text-emerald-600 mb-4">
+                  {currentPlan.price}
                 </div>
-              )}
+                <div className="text-2xl text-gray-600 mb-4 font-medium">
+                  {currentPlan.period}
+                </div>
+                <div className="text-lg text-gray-500 mb-6">
+                  {currentPlan.description}
+                </div>
+                {selectedPlan === 'yearly' && (
+                  <div className="bg-emerald-50 text-emerald-700 px-6 py-3 rounded-xl font-semibold inline-block">
+                    Total anual: {currentPlan.total}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Features */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             {currentPlan.features.map((feature, index) => (
-              <div key={index} className="flex items-center space-x-3">
-                <Check className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                <span className="text-gray-700">{feature}</span>
+              <div key={index} className="flex items-center space-x-4 p-4 bg-emerald-50 rounded-xl">
+                <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Check className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-gray-800 font-medium text-lg">{feature}</span>
               </div>
             ))}
           </div>
 
           {/* Payment Methods */}
-          <div className="border-t pt-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-              Formas de Pagamento
+          <div className="border-t border-gray-200 pt-12">
+            <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+              Formas de Pagamento Aceitas
             </h3>
-            <div className="flex justify-center space-x-4 mb-8">
-              <div className="flex items-center space-x-2 px-4 py-2 bg-gray-50 rounded-lg">
-                <CreditCard className="w-5 h-5 text-gray-600" />
-                <span className="text-sm text-gray-600">Cartão</span>
+            <div className="flex justify-center space-x-6 mb-12">
+              <div className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                <CreditCard className="w-6 h-6 text-blue-600" />
+                <span className="text-blue-800 font-semibold">Cartão</span>
               </div>
-              <div className="flex items-center space-x-2 px-4 py-2 bg-gray-50 rounded-lg">
-                <Smartphone className="w-5 h-5 text-gray-600" />
-                <span className="text-sm text-gray-600">PIX</span>
+              <div className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+                <Smartphone className="w-6 h-6 text-purple-600" />
+                <span className="text-purple-800 font-semibold">PIX</span>
               </div>
-              <div className="flex items-center space-x-2 px-4 py-2 bg-gray-50 rounded-lg">
-                <Globe className="w-5 h-5 text-gray-600" />
-                <span className="text-sm text-gray-600">Boleto</span>
+              <div className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200">
+                <Globe className="w-6 h-6 text-green-600" />
+                <span className="text-green-800 font-semibold">Boleto</span>
               </div>
             </div>
 
@@ -192,40 +197,51 @@ export default function PaymentPage() {
               <button 
                 onClick={handlePayment}
                 disabled={loading}
-                className="bg-emerald-600 text-white px-12 py-4 rounded-xl font-semibold text-lg hover:bg-emerald-700 transition-colors flex items-center space-x-3 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-16 py-6 rounded-2xl font-bold text-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 flex items-center space-x-4 mx-auto disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl hover:shadow-emerald-500/25 transform hover:scale-105"
               >
                 {loading ? (
                   <>
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
                     <span>Processando...</span>
                   </>
                 ) : (
                   <>
-                    <Zap className="w-6 h-6" />
-                    <span>Assinar com Stripe</span>
-                    <ArrowRight className="w-6 h-6" />
+                    <Zap className="w-8 h-8" />
+                    <span>Quero meus links agora</span>
+                    <ArrowRight className="w-8 h-8" />
                   </>
                 )}
               </button>
-              <p className="text-sm text-gray-500 mt-4">
-                7 dias para cancelar • Sem questionamentos • Sem compromisso
+              <p className="text-lg text-gray-600 mt-6 font-medium">
+                🛡️ 7 dias para cancelar • Sem questionamentos • Sem compromisso
               </p>
-              <div className="mt-4 text-sm text-gray-600">
-                <p>✅ Cobrança automática</p>
-                <p>✅ Cartão de crédito</p>
-                <p>✅ Cancele quando quiser</p>
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                  <span>Cobrança automática</span>
+                </div>
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                  <span>Cartão de crédito</span>
+                </div>
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                  <span>Cancele quando quiser</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Guarantee */}
-        <div className="bg-emerald-50 rounded-xl p-6 text-center">
-          <Shield className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl p-8 text-center border border-emerald-200 shadow-lg">
+          <div className="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Shield className="w-8 h-8 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">
             Garantia de 7 dias
           </h3>
-          <p className="text-gray-600">
+          <p className="text-lg text-gray-700 max-w-2xl mx-auto">
             Cancele em até 7 dias sem questionamentos. Reembolso total garantido.
           </p>
         </div>
