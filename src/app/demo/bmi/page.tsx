@@ -7,7 +7,8 @@ import {
   ArrowRight, 
   CheckCircle, 
   AlertTriangle, 
-  Star
+  Star,
+  MessageCircle
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -224,34 +225,36 @@ export default function BMIDemoPage() {
               </ul>
             </div>
 
+            {/* CTA Button - Consultar Especialista */}
+            <div className="text-center mt-8">
+              <button 
+                onClick={() => window.location.href = '/payment'}
+                className="px-8 py-4 bg-purple-600 text-white rounded-xl font-bold text-lg hover:bg-purple-700 transition-all duration-300 shadow-lg transform hover:scale-105 flex items-center justify-center mx-auto"
+              >
+                <MessageCircle className="w-6 h-6 mr-3" />
+                Consultar Especialista
+              </button>
+              <p className="text-sm text-gray-500 mt-3">
+                💡 Esta é uma demonstração! Na versão real, este botão redirecionaria para o WhatsApp do especialista.
+              </p>
+            </div>
+
           </div>
 
-          {/* CTA Section */}
-          <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-8 text-center shadow-2xl border-2 border-emerald-200">
+          {/* CTA Section - Simples após resultado */}
+          <div className="bg-white rounded-xl p-8 text-center shadow-lg border border-gray-200 mt-8">
             <h3 className="text-3xl font-bold mb-4 text-gray-800">
-              🎯 Esta é uma demonstração!
+              💼 Pronto para gerar seus próprios links com seu nome pessoal?
             </h3>
-            <p className="text-gray-600 mb-6 text-lg">
-              Na versão real, este botão redirecionaria para o WhatsApp do especialista com uma mensagem personalizada.
+            <p className="text-gray-600 mb-8 text-lg">
+              Clique em "Quero gerar meus links" e comece a gerar seus próprios leads com o Herbalead.
             </p>
-            <div className="bg-white rounded-lg p-6 mb-6 border border-emerald-200">
-              <h4 className="text-lg font-semibold text-gray-800 mb-3">💡 Como funciona na prática:</h4>
-              <ul className="text-left text-gray-600 space-y-2">
-                <li>• Cliente preenche os dados e vê o resultado</li>
-                  <li>• Clica no botão &quot;Consultar Especialista&quot;</li>
-                <li>• É redirecionado automaticamente para seu WhatsApp</li>
-                <li>• Mensagem personalizada já vem pronta</li>
-                <li>• Você recebe o lead qualificado!</li>
-              </ul>
-            </div>
-            <div className="bg-emerald-100 rounded-lg p-4">
-              <p className="text-emerald-800 font-semibold">
-                🚀 Crie sua própria calculadora personalizada!
-              </p>
-              <p className="text-emerald-700 text-sm mt-2">
-                Configure seu telefone, mensagem personalizada e comece a gerar leads.
-              </p>
-            </div>
+            <button 
+              onClick={() => window.location.href = '/payment'}
+              className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl"
+            >
+              Clique abaixo e começa a gerar seus leads agora
+            </button>
           </div>
         </main>
       </div>
@@ -448,8 +451,11 @@ export default function BMIDemoPage() {
             <p className="text-gray-600 mb-8 text-lg">
               Clique em &quot;Assinar Agora&quot; e comece a gerar seus próprios leads com o Herbalead.
             </p>
-          <button className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl">
-            Assinar Agora
+          <button 
+            onClick={() => window.location.href = '/payment'}
+            className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl"
+          >
+            Quero começar agora
           </button>
         </div>
 

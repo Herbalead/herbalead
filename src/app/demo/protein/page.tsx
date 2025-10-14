@@ -8,7 +8,8 @@ import {
   CheckCircle, 
   AlertTriangle, 
   Star,
-  Heart
+  Heart,
+  MessageCircle
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -257,39 +258,36 @@ export default function ProteinDemoPage() {
               </ul>
             </div>
 
+            {/* CTA Button - Consultar Especialista */}
+            <div className="text-center mt-8">
+              <button 
+                onClick={() => window.location.href = '/payment'}
+                className="px-8 py-4 bg-purple-600 text-white rounded-xl font-bold text-lg hover:bg-purple-700 transition-all duration-300 shadow-lg transform hover:scale-105 flex items-center justify-center mx-auto"
+              >
+                <MessageCircle className="w-6 h-6 mr-3" />
+                Consultar Especialista
+              </button>
+              <p className="text-sm text-gray-500 mt-3">
+                💡 Esta é uma demonstração! Na versão real, este botão redirecionaria para o WhatsApp do especialista.
+              </p>
+            </div>
+
           </div>
 
-          {/* CTA Section */}
-          <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-8 text-center shadow-2xl border-2 border-emerald-200">
+          {/* CTA Section - Simples após resultado */}
+          <div className="bg-white rounded-xl p-8 text-center shadow-lg border border-gray-200 mt-8">
             <h3 className="text-3xl font-bold mb-4 text-gray-800">
-              🎯 Quer uma análise mais completa?
+              💼 Pronto para gerar seus próprios links com seu nome pessoal?
             </h3>
-            <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-8 text-center shadow-2xl border-2 border-emerald-200">
-              <h3 className="text-3xl font-bold mb-4 text-gray-800">
-                🎯 Esta é uma demonstração!
-              </h3>
-              <p className="text-gray-600 mb-6 text-lg">
-                Na versão real, este botão redirecionaria para o WhatsApp do especialista com uma mensagem personalizada.
-              </p>
-              <div className="bg-white rounded-lg p-6 mb-6 border border-emerald-200">
-                <h4 className="text-lg font-semibold text-gray-800 mb-3">💡 Como funciona na prática:</h4>
-                <ul className="text-left text-gray-600 space-y-2">
-                  <li>• Cliente preenche os dados e vê o resultado</li>
-                  <li>• Clica no botão &quot;Consultar Especialista&quot;</li>
-                  <li>• É redirecionado automaticamente para seu WhatsApp</li>
-                  <li>• Mensagem personalizada já vem pronta</li>
-                  <li>• Você recebe o lead qualificado!</li>
-                </ul>
-              </div>
-              <div className="bg-emerald-100 rounded-lg p-4">
-                <p className="text-emerald-800 font-semibold">
-                  🚀 Crie sua própria calculadora personalizada!
-                </p>
-                <p className="text-emerald-700 text-sm mt-2">
-                  Configure seu telefone, mensagem personalizada e comece a gerar leads.
-                </p>
-              </div>
-            </div>
+            <p className="text-gray-600 mb-8 text-lg">
+              Clique em "Quero gerar meus links" e comece a gerar seus próprios leads com o Herbalead.
+            </p>
+            <button 
+              onClick={() => window.location.href = '/payment'}
+              className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl"
+            >
+              Clique abaixo e começa a gerar seus leads agora
+            </button>
           </div>
         </main>
       </div>
@@ -496,17 +494,95 @@ export default function ProteinDemoPage() {
           </form>
         </div>
 
-        {/* Final CTA */}
-        <div className="bg-gray-50 rounded-xl p-8 text-center shadow-lg border border-gray-200">
-          <h3 className="text-3xl font-bold mb-4 text-gray-800">
-            💼 Pronto para ter esta ferramenta com seu nome e link personalizado?
+        {/* CTA Section - Persuasiva */}
+        <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl p-8 text-center shadow-2xl border-2 border-emerald-400">
+          <h3 className="text-3xl md:text-4xl font-bold mb-6 text-white">
+            🚀 Pronto para começar a gerar seus próprios leads?
           </h3>
-            <p className="text-gray-600 mb-8 text-lg">
-              Clique em &quot;Assinar Agora&quot; e comece a gerar seus próprios leads com o Herbalead.
+          <p className="text-xl text-emerald-100 mb-8 max-w-3xl mx-auto">
+            Você acabou de ver como funciona! Agora imagine ter esta ferramenta com <strong>seu nome</strong>, <strong>seu link</strong> e <strong>sua mensagem personalizada</strong>.
+          </p>
+          
+          <div className="bg-white/20 rounded-xl p-6 mb-8 backdrop-blur-sm">
+            <h4 className="text-2xl font-bold text-white mb-4">✨ O que você vai receber:</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+              <div className="flex items-center space-x-3">
+                <div className="w-2 h-2 bg-white rounded-full"></div>
+                <span className="text-emerald-100">Calculadora personalizada com seu nome</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-2 h-2 bg-white rounded-full"></div>
+                <span className="text-emerald-100">Link único para compartilhar</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-2 h-2 bg-white rounded-full"></div>
+                <span className="text-emerald-100">Mensagem personalizada para WhatsApp</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-2 h-2 bg-white rounded-full"></div>
+                <span className="text-emerald-100">Todas as 9 ferramentas disponíveis</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 mb-8">
+            <h4 className="text-2xl font-bold text-gray-800 mb-4">💡 Como funciona na prática:</h4>
+            <ul className="text-left text-gray-600 space-y-3 text-lg">
+              <li className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <span className="text-emerald-600 font-bold text-sm">1</span>
+                </div>
+                <span>Cliente preenche os dados e vê o resultado</span>
+              </li>
+              <li className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <span className="text-emerald-600 font-bold text-sm">2</span>
+                </div>
+                <span>Clica no botão "Consultar Especialista"</span>
+              </li>
+              <li className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <span className="text-emerald-600 font-bold text-sm">3</span>
+                </div>
+                <span>É redirecionado automaticamente para seu WhatsApp</span>
+              </li>
+              <li className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <span className="text-emerald-600 font-bold text-sm">4</span>
+                </div>
+                <span>Mensagem personalizada já vem pronta</span>
+              </li>
+              <li className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <span className="text-emerald-600 font-bold text-sm">5</span>
+                </div>
+                <span><strong>Você recebe o lead qualificado!</strong></span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-xl p-6 mb-8">
+            <h4 className="text-2xl font-bold text-white mb-3">🔥 Oferta Especial!</h4>
+            <p className="text-white text-lg mb-4">
+              Comece hoje mesmo e tenha acesso a <strong>todas as 9 ferramentas</strong> por apenas <strong>R$ 60/mês</strong>
             </p>
-          <button className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl">
-            Assinar Agora
+            <p className="text-white/90 text-sm">
+              ✅ 7 dias para cancelar sem questionamentos ✅ Suporte prioritário ✅ Sem taxa de setup
+            </p>
+          </div>
+
+          <button 
+            onClick={() => window.location.href = '/payment'}
+            className="px-16 py-6 bg-white text-emerald-600 rounded-2xl font-bold text-2xl hover:bg-gray-50 transition-all duration-300 shadow-2xl transform hover:scale-105 hover:shadow-white/25 flex items-center justify-center mx-auto"
+          >
+            <Star className="w-8 h-8 mr-4" />
+            Quero começar a gerar leads agora!
+            <ArrowRight className="w-8 h-8 ml-4" />
           </button>
+          
+          <p className="text-emerald-200 text-sm mt-4">
+            💳 Pagamento seguro • 🔒 Sem compromisso • ⚡ Ativação imediata
+          </p>
         </div>
 
         {/* Disclaimer */}

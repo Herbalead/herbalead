@@ -22,10 +22,11 @@ Este documento estabelece os padrões obrigatórios para todas as funcionalidade
 ### 📱 BOTÃO CTA (CALL TO ACTION)
 - ✅ **Fundo:** Verde escuro (bg-emerald-600)
 - ✅ **Texto:** Branco
-- ✅ **Conteúdo:** Texto personalizado criado no link (cta_text)
+- ✅ **Conteúdo:** "Clique abaixo e começa a gerar seus leads agora"
 - ✅ **Ícone:** Apenas WhatsApp (sem outros ícones)
 - ✅ **Efeitos:** Hover, scale, sombra (SEM animate-pulse)
 - ✅ **Tamanho:** Grande e destacado (px-12 py-6)
+- ✅ **Posicionamento:** Após exibição dos resultados da calculadora
 
 ### 🔗 INTEGRAÇÃO WHATSAPP
 - ✅ **Redirecionamento:** Para WhatsApp do distribuidor que criou o link
@@ -154,6 +155,44 @@ Este documento estabelece os padrões obrigatórios para todas as funcionalidade
 
 ---
 
+## 🎬 PÁGINAS DE DEMONSTRAÇÃO
+
+### 📍 ESTRUTURA OBRIGATÓRIA
+Todas as páginas de demonstração (`/demo/*`) devem seguir esta estrutura:
+
+1. **Formulário de teste** - Campos específicos da funcionalidade
+2. **Exibição de resultados** - Cálculo e recomendações
+3. **Botão "Consultar Especialista"** - Roxo, após resultados
+4. **Seção CTA simples** - Fundo branco, após botão consultar
+
+### 🎯 SEÇÃO CTA APÓS DEMONSTRAÇÃO
+```html
+<div className="bg-white rounded-xl p-8 text-center shadow-lg border border-gray-200 mt-8">
+  <h3 className="text-3xl font-bold mb-4 text-gray-800">
+    💼 Pronto para gerar seus próprios links com seu nome pessoal?
+  </h3>
+  <p className="text-gray-600 mb-8 text-lg">
+    Clique em "Quero gerar meus links" e comece a gerar seus próprios leads com o Herbalead.
+  </p>
+  <button 
+    onClick={() => window.location.href = '/payment'}
+    className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl"
+  >
+    Clique abaixo e começa a gerar seus leads agora
+  </button>
+</div>
+```
+
+### 🚫 REGRAS PARA DEMONSTRAÇÕES
+- ❌ **NUNCA incluir:** Seções complexas com múltiplas informações
+- ❌ **NUNCA incluir:** Listas de benefícios extensas
+- ❌ **NUNCA incluir:** Ofertas especiais detalhadas
+- ✅ **SEMPRE incluir:** Apenas o essencial: título, descrição e botão
+- ✅ **SEMPRE incluir:** Botão "Consultar Especialista" após resultados
+- ✅ **SEMPRE incluir:** Seção CTA simples após demonstração
+
+---
+
 ## 🎨 PADRÕES VISUAIS
 
 ### 🎯 SEÇÃO CTA (CALL TO ACTION)
@@ -221,6 +260,9 @@ window.open(whatsappUrl, '_blank')
 - [ ] Conectar ao sistema de links
 - [ ] Testar responsividade
 - [ ] Validar cálculos
+- [ ] **NOVO:** Adicionar botão "Consultar Especialista" após resultados
+- [ ] **NOVO:** Implementar seção CTA simples após demonstração
+- [ ] **NOVO:** Usar texto padrão "Clique abaixo e começa a gerar seus leads agora"
 
 ### ✅ APÓS A IMPLEMENTAÇÃO
 - [ ] Testar fluxo completo
@@ -239,6 +281,8 @@ window.open(whatsappUrl, '_blank')
 - Adicionar ícones além do WhatsApp
 - Usar animate-pulse no botão CTA
 - Criar intermediários entre link e calculadora
+- **NOVO:** Incluir seções complexas nas demonstrações
+- **NOVO:** Usar textos diferentes do padrão estabelecido
 
 ### ✅ SEMPRE FAZER
 - Usar texto personalizado do link no botão CTA
@@ -246,6 +290,9 @@ window.open(whatsappUrl, '_blank')
 - Manter consistência visual
 - Validar todos os campos obrigatórios
 - Fornecer recomendações baseadas em evidências
+- **NOVO:** Usar texto "Clique abaixo e começa a gerar seus leads agora"
+- **NOVO:** Manter demonstrações simples e diretas
+- **NOVO:** Incluir botão "Consultar Especialista" após resultados
 
 ---
 
@@ -258,6 +305,7 @@ window.open(whatsappUrl, '_blank')
 
 ---
 
-**📅 Última atualização:** Dezembro 2024  
-**🔄 Versão:** 1.0  
-**👥 Aplicável a:** Todas as funcionalidades da plataforma Herbalead
+**📅 Última atualização:** Janeiro 2025  
+**🔄 Versão:** 2.0  
+**👥 Aplicável a:** Todas as funcionalidades da plataforma Herbalead  
+**🆕 Novidades v2.0:** Padrões atualizados para páginas de demonstração, texto CTA padronizado, estrutura simplificada

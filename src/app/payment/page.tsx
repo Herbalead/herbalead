@@ -12,7 +12,7 @@ export default function PaymentPage() {
   const plans = {
         monthly: {
           price: 'R$ 60',
-          period: '/mês',
+          period: '',
           total: 'R$ 60',
           description: 'Acesso completo por 30 dias',
           features: [
@@ -25,8 +25,8 @@ export default function PaymentPage() {
           ]
         },
         yearly: {
-          price: 'R$ 47,50',
-          period: '/mês',
+          price: 'R$ 570',
+          period: '',
           total: 'R$ 570',
           description: 'Economize 20% pagando anualmente',
           features: [
@@ -95,21 +95,17 @@ export default function PaymentPage() {
           <div className="inline-flex items-center bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-full text-sm font-bold mb-8 shadow-lg">
             💡 Ferramenta oficial para gerar leads com alto potencial de conversão
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">
-            Transforme curiosos em<br />
-            <span className="text-emerald-600">clientes todos os dias</span><br />
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
+            Transforme seu negócio em uma<br />
+            <span className="text-emerald-600">máquina de gerar contatos</span><br />
             com o Herbalead 🚀
           </h1>
-          <p className="text-2xl text-gray-700 mb-8 max-w-3xl mx-auto font-medium">
-            O Herbalead cria, organiza e multiplica seus contatos automaticamente — 
-            <span className="text-emerald-600 font-bold"> enquanto você foca em vender mais.</span>
-          </p>
         </div>
 
         {/* Plan Selection */}
         <div className="bg-white rounded-3xl shadow-2xl p-12 mb-12 border-2 border-emerald-200">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">Escolha seu plano</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">Escolha seu plano</h2>
             
             {/* Plan Toggle */}
             <div className="flex justify-center mb-12">
@@ -143,13 +139,13 @@ export default function PaymentPage() {
             {/* Plan Details */}
             <div className="text-center mb-12">
               <div className="relative">
-                <div className="text-7xl font-bold text-emerald-600 mb-4">
+                <div className="text-4xl md:text-5xl font-bold text-emerald-600 mb-4">
                   {currentPlan.price}
+                  <span className="text-sm md:text-base text-gray-500 ml-2 font-normal">
+                    {selectedPlan === 'monthly' ? '/mês' : '/ano'}
+                  </span>
                 </div>
-                <div className="text-2xl text-gray-600 mb-4 font-medium">
-                  {currentPlan.period}
-                </div>
-                <div className="text-lg text-gray-500 mb-6">
+                <div className="text-base md:text-lg text-gray-500 mb-6">
                   {currentPlan.description}
                 </div>
                 {selectedPlan === 'yearly' && (
@@ -166,14 +162,14 @@ export default function PaymentPage() {
             {currentPlan.features.map((feature, index) => (
               <div key={index} className="flex items-start space-x-4 p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200 hover:shadow-lg transition-all duration-300">
                 <div className="text-2xl flex-shrink-0">{feature.split(' ')[0]}</div>
-                <span className="text-gray-800 font-semibold text-lg leading-relaxed">{feature.substring(feature.indexOf(' ') + 1)}</span>
+                <span className="text-gray-800 font-semibold text-base md:text-lg leading-relaxed">{feature.substring(feature.indexOf(' ') + 1)}</span>
               </div>
             ))}
           </div>
 
           {/* Payment Methods */}
           <div className="border-t border-gray-200 pt-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+            <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-8 text-center">
               Formas de Pagamento Aceitas
             </h3>
             <div className="flex justify-center space-x-6 mb-12">
@@ -196,7 +192,7 @@ export default function PaymentPage() {
               <button 
                 onClick={handlePayment}
                 disabled={loading}
-                className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-16 py-6 rounded-2xl font-bold text-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 flex items-center space-x-4 mx-auto disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl hover:shadow-emerald-500/25 transform hover:scale-105"
+                className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-12 md:px-16 py-4 md:py-6 rounded-2xl font-bold text-lg md:text-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 flex items-center space-x-4 mx-auto disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl hover:shadow-emerald-500/25 transform hover:scale-105"
               >
                 {loading ? (
                   <>
@@ -211,7 +207,7 @@ export default function PaymentPage() {
                   </>
                 )}
               </button>
-              <p className="text-lg text-gray-600 mt-6 font-medium">
+              <p className="text-base md:text-lg text-gray-600 mt-6 font-medium">
                 🔒 Sem risco. Você testa por 7 dias e cancela quando quiser.
               </p>
               <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
@@ -304,10 +300,10 @@ export default function PaymentPage() {
           <div className="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h3 className="text-3xl font-bold text-gray-900 mb-4">
+          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
             💚 7 dias grátis. Cancele quando quiser.
           </h3>
-          <p className="text-xl text-gray-700 max-w-2xl mx-auto font-medium">
+          <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-medium">
             🚀 Comece agora e veja o primeiro resultado ainda hoje.
           </p>
         </div>

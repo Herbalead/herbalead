@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, ArrowRight, Calendar, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Calendar, AlertTriangle, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 
 interface WellnessEntry {
@@ -29,9 +29,31 @@ export default function DailyWellnessDemoPage() {
     notes: ''
   })
 
+  const [showResults, setShowResults] = useState(false)
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    alert('Demo: Esta é uma simulação! Na versão real, você veria seus resultados aqui.')
+    setShowResults(true)
+  }
+
+  const calculateWellnessScore = () => {
+    const scores = [
+      wellnessEntry.sleep,
+      wellnessEntry.exercise,
+      wellnessEntry.nutrition,
+      wellnessEntry.hydration,
+      wellnessEntry.mood,
+      wellnessEntry.energy,
+      10 - wellnessEntry.stress // Invert stress score
+    ]
+    return Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length)
+  }
+
+  const getWellnessLevel = (score: number) => {
+    if (score >= 8) return { level: 'Excelente', color: 'text-green-600', bg: 'bg-green-100' }
+    if (score >= 6) return { level: 'Bom', color: 'text-blue-600', bg: 'bg-blue-100' }
+    if (score >= 4) return { level: 'Regular', color: 'text-yellow-600', bg: 'bg-yellow-100' }
+    return { level: 'Precisa Melhorar', color: 'text-red-600', bg: 'bg-red-100' }
   }
 
   const handleInputChange = (field: keyof WellnessEntry, value: string | number) => {
@@ -81,17 +103,136 @@ export default function DailyWellnessDemoPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Registre seu Bem-Estar Diário</h2>
           
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Date */}
+            {/* Sleep */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Data *
+                Qualidade do Sono (0-10) *
               </label>
               <input
-                type="date"
+                type="number"
+                min="0"
+                max="10"
                 required
-                value={wellnessEntry.date}
-                onChange={(e) => handleInputChange('date', e.target.value)}
+                value={wellnessEntry.sleep}
+                onChange={(e) => handleInputChange('sleep', parseInt(e.target.value) || 0)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="0 = muito ruim, 10 = excelente"
+              />
+            </div>
+
+            {/* Exercise */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Exercício Físico (0-10) *
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="10"
+                required
+                value={wellnessEntry.exercise}
+                onChange={(e) => handleInputChange('exercise', parseInt(e.target.value) || 0)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="0 = nenhum, 10 = muito intenso"
+              />
+            </div>
+
+            {/* Nutrition */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Alimentação (0-10) *
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="10"
+                required
+                value={wellnessEntry.nutrition}
+                onChange={(e) => handleInputChange('nutrition', parseInt(e.target.value) || 0)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="0 = muito ruim, 10 = excelente"
+              />
+            </div>
+
+            {/* Hydration */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Hidratação (0-10) *
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="10"
+                required
+                value={wellnessEntry.hydration}
+                onChange={(e) => handleInputChange('hydration', parseInt(e.target.value) || 0)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="0 = muito pouca, 10 = excelente"
+              />
+            </div>
+
+            {/* Mood */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Humor (0-10) *
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="10"
+                required
+                value={wellnessEntry.mood}
+                onChange={(e) => handleInputChange('mood', parseInt(e.target.value) || 0)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="0 = muito ruim, 10 = excelente"
+              />
+            </div>
+
+            {/* Energy */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nível de Energia (0-10) *
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="10"
+                required
+                value={wellnessEntry.energy}
+                onChange={(e) => handleInputChange('energy', parseInt(e.target.value) || 0)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="0 = muito baixo, 10 = muito alto"
+              />
+            </div>
+
+            {/* Stress */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nível de Estresse (0-10) *
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="10"
+                required
+                value={wellnessEntry.stress}
+                onChange={(e) => handleInputChange('stress', parseInt(e.target.value) || 0)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="0 = sem estresse, 10 = muito estressado"
+              />
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Observações (opcional)
+              </label>
+              <textarea
+                value={wellnessEntry.notes}
+                onChange={(e) => handleInputChange('notes', e.target.value)}
+                rows={4}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+                placeholder="Como foi seu dia? O que funcionou bem? O que pode melhorar?"
               />
             </div>
 
@@ -108,6 +249,90 @@ export default function DailyWellnessDemoPage() {
           </form>
         </div>
 
+        {/* Results Section */}
+        {showResults && (
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Seu Score de Bem-Estar</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Overall Score */}
+              <div className="text-center">
+                <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full text-3xl font-bold ${getWellnessLevel(calculateWellnessScore()).bg} ${getWellnessLevel(calculateWellnessScore()).color}`}>
+                  {calculateWellnessScore()}
+                </div>
+                <h3 className="text-xl font-semibold mt-4 text-gray-800">Score Geral</h3>
+                <p className={`text-lg font-medium ${getWellnessLevel(calculateWellnessScore()).color}`}>
+                  {getWellnessLevel(calculateWellnessScore()).level}
+                </p>
+              </div>
+
+              {/* Individual Scores */}
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Detalhamento:</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Sono:</span>
+                    <span className="font-semibold">{wellnessEntry.sleep}/10</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Exercício:</span>
+                    <span className="font-semibold">{wellnessEntry.exercise}/10</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Alimentação:</span>
+                    <span className="font-semibold">{wellnessEntry.nutrition}/10</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Hidratação:</span>
+                    <span className="font-semibold">{wellnessEntry.hydration}/10</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Humor:</span>
+                    <span className="font-semibold">{wellnessEntry.mood}/10</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Energia:</span>
+                    <span className="font-semibold">{wellnessEntry.energy}/10</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Estresse:</span>
+                    <span className="font-semibold">{wellnessEntry.stress}/10</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recommendations */}
+            <div className="mt-8 p-6 bg-teal-50 rounded-lg">
+              <h3 className="text-lg font-semibold text-teal-800 mb-3">💡 Recomendações:</h3>
+              <ul className="text-teal-700 space-y-2">
+                {wellnessEntry.sleep < 6 && <li>• Melhore a qualidade do seu sono com uma rotina consistente</li>}
+                {wellnessEntry.exercise < 5 && <li>• Incorpore mais atividade física na sua rotina</li>}
+                {wellnessEntry.nutrition < 6 && <li>• Foque em uma alimentação mais equilibrada</li>}
+                {wellnessEntry.hydration < 6 && <li>• Aumente sua ingestão de água durante o dia</li>}
+                {wellnessEntry.mood < 6 && <li>• Pratique atividades que melhorem seu humor</li>}
+                {wellnessEntry.energy < 6 && <li>• Revise seus hábitos para aumentar a energia</li>}
+                {wellnessEntry.stress > 6 && <li>• Pratique técnicas de relaxamento e gestão de estresse</li>}
+                {calculateWellnessScore() >= 7 && <li>• Continue mantendo esses excelentes hábitos!</li>}
+              </ul>
+            </div>
+
+            {/* CTA Button - Consultar Especialista */}
+            <div className="text-center mt-8">
+              <button 
+                onClick={() => window.location.href = '/payment'}
+                className="px-8 py-4 bg-purple-600 text-white rounded-xl font-bold text-lg hover:bg-purple-700 transition-all duration-300 shadow-lg transform hover:scale-105 flex items-center justify-center mx-auto"
+              >
+                <MessageCircle className="w-6 h-6 mr-3" />
+                Consultar Especialista
+              </button>
+              <p className="text-sm text-gray-500 mt-3">
+                💡 Esta é uma demonstração! Na versão real, este botão redirecionaria para o WhatsApp do especialista.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Final CTA */}
         <div className="bg-gray-50 rounded-xl p-8 text-center shadow-lg border border-gray-200">
           <h3 className="text-3xl font-bold mb-4 text-gray-800">
@@ -116,9 +341,12 @@ export default function DailyWellnessDemoPage() {
           <p className="text-gray-600 mb-8 text-lg">
             Clique em &quot;Assinar Agora&quot; e comece a gerar seus próprios leads com o Herbalead.
           </p>
-          <button className="px-12 py-6 bg-teal-600 text-white rounded-xl font-bold text-xl hover:bg-teal-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl">
-            Assinar Agora
-          </button>
+            <button 
+              onClick={() => window.location.href = '/payment'}
+              className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl"
+            >
+              Clique abaixo e começa a gerar seus leads agora
+            </button>
         </div>
 
         {/* Disclaimer */}

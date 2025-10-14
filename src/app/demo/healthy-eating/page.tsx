@@ -165,9 +165,12 @@ export default function HealthyEatingDemoPage() {
           <p className="text-gray-600 mb-8 text-lg">
             Clique em &quot;Assinar Agora&quot; e comece a gerar seus próprios leads com o Herbalead.
           </p>
-          <button className="px-12 py-6 bg-green-600 text-white rounded-xl font-bold text-xl hover:bg-green-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl">
-            Assinar Agora
-          </button>
+            <button 
+              onClick={() => window.location.href = '/payment'}
+              className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl"
+            >
+              Clique abaixo e começa a gerar seus leads agora
+            </button>
         </div>
 
         {/* Disclaimer */}

@@ -171,3 +171,4 @@ console.log('✅ Materiais carregados:', materialsData?.length || 0)
 
 
 
+

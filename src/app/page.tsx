@@ -190,11 +190,11 @@ export default function HerbaleadLandingPage() {
                 <span className="sm:hidden">Contato</span>
               </button>
               <button 
-                onClick={() => router.push('/login')}
+                onClick={() => router.push('/payment')}
                 className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm sm:text-base"
               >
-                <span className="hidden sm:inline">Começar Agora</span>
-                <span className="sm:hidden">Entrar</span>
+                <span className="hidden sm:inline">Quero começar agora</span>
+                <span className="sm:hidden">Começar</span>
               </button>
             </div>
           </div>
@@ -204,14 +204,12 @@ export default function HerbaleadLandingPage() {
       {/* Hero Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            A ferramenta que ajuda distribuidores de bem-estar a 
-            <span className="text-emerald-600"> conquistar novos clientes todos os dias.</span>
+          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+            Transforme seu negócio em uma<br />
+            <span className="text-emerald-600">máquina de gerar contatos</span><br />
+            com o Herbalead 🚀
           </h1>
           
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Automatize suas captações, fortaleça sua presença digital e transforme seu Espaço Vida Saudável em uma máquina de resultados.
-          </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
@@ -219,14 +217,14 @@ export default function HerbaleadLandingPage() {
               className="px-8 py-4 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center"
             >
               <Play className="w-5 h-5 mr-2" />
-              Ver como funciona
+              Ver demonstrações
               <ArrowRight className="w-5 h-5 ml-2" />
             </button>
             <button
-              onClick={() => router.push('/register')}
+              onClick={() => router.push('/payment')}
               className="px-8 py-4 bg-white text-emerald-600 border border-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors"
             >
-              Começar
+              Quero começar agora
             </button>
           </div>
         </div>
@@ -328,9 +326,20 @@ export default function HerbaleadLandingPage() {
                 <p className="text-gray-600 mb-4">
                   {demo.description}
                 </p>
-                <div className="flex items-center text-emerald-600 font-medium">
-                  <Play className="w-4 h-4 mr-2" />
-                  Testar Demo
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center text-emerald-600 font-medium">
+                    <Play className="w-4 h-4 mr-2" />
+                    Testar Demo
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      router.push('/payment')
+                    }}
+                    className="px-3 py-1 bg-emerald-600 text-white text-xs rounded-lg hover:bg-emerald-700 transition-colors"
+                  >
+                    Começar
+                  </button>
                 </div>
                 </div>
             ))}
@@ -349,11 +358,11 @@ export default function HerbaleadLandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => router.push('/login')}
+              onClick={() => router.push('/payment')}
               className="px-8 py-4 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center"
             >
               <Play className="w-5 h-5 mr-2" />
-              Começar Agora
+              Quero começar agora
               <ArrowRight className="w-5 h-5 ml-2" />
             </button>
           </div>
