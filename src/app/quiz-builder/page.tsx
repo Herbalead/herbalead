@@ -463,18 +463,31 @@ export default function QuizBuilder() {
   }
 
   const saveQuiz = async () => {
+    console.log('🔍 Iniciando salvamento do quiz...')
+    console.log('👤 Usuário:', user)
+    
     if (!user) {
+      console.error('❌ Usuário não encontrado')
       alert('Usuário não encontrado')
       return
     }
 
+    console.log('📝 Dados do quiz:', {
+      title: quiz.title,
+      project_name: quiz.project_name,
+      questions_count: quiz.questions.length,
+      professional_id: quiz.professional_id
+    })
+
     // Validar campos obrigatórios
     if (!quiz.title.trim()) {
+      console.error('❌ Título vazio')
       alert('⚠️ O título do quiz é obrigatório!')
       return
     }
 
     if (!quiz.project_name.trim()) {
+      console.error('❌ Nome do projeto vazio')
       alert('⚠️ O nome do projeto é obrigatório!\n\nEste nome será usado para criar a URL personalizada do seu quiz.')
       return
     }
@@ -540,6 +553,8 @@ export default function QuizBuilder() {
 
     setLoading(true)
     try {
+      console.log('💾 Salvando quiz no banco de dados...')
+      
       // Salvar quiz
       const { data: quizData, error: quizError } = await supabase
         .from('quizzes')
@@ -556,15 +571,26 @@ export default function QuizBuilder() {
         .select()
         .single()
 
-      if (quizError) throw quizError
+      console.log('📊 Resultado do salvamento:', { quizData, quizError })
+
+      if (quizError) {
+        console.error('❌ Erro ao salvar quiz:', quizError)
+        throw quizError
+      }
 
       // Salvar perguntas
       if (quizData) {
+        console.log('📝 Salvando perguntas...', quiz.questions.length, 'perguntas')
+        
         // Deletar perguntas antigas
-        await supabase
+        const { error: deleteError } = await supabase
           .from('questions')
           .delete()
           .eq('quiz_id', quizData.id)
+        
+        if (deleteError) {
+          console.error('❌ Erro ao deletar perguntas antigas:', deleteError)
+        }
 
         // Inserir novas perguntas
         const questionsToInsert = quiz.questions.map((q, index) => ({
@@ -578,12 +604,18 @@ export default function QuizBuilder() {
           button_text: q.button_text
         }))
 
+        console.log('📋 Perguntas para inserir:', questionsToInsert)
+
         const { error: questionsError } = await supabase
           .from('questions')
           .insert(questionsToInsert)
 
-        if (questionsError) throw questionsError
+        if (questionsError) {
+          console.error('❌ Erro ao salvar perguntas:', questionsError)
+          throw questionsError
+        }
 
+        console.log('✅ Quiz salvo com sucesso!', quizData.id)
         setQuiz({...quiz, id: quizData.id})
         setSavedQuizId(quizData.id)
         setShowSuccessModal(true)
