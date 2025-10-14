@@ -496,6 +496,33 @@ export default function QuizBuilder() {
       return
     }
 
+    // Validar opções das perguntas de múltipla escolha
+    const invalidQuestions = quiz.questions.some(q => {
+      if (q.question_type === 'multiple' || q.question_type === 'multiple_select') {
+        // Verificar se tem pelo menos 2 opções
+        if (!q.options || q.options.length < 2) {
+          return true
+        }
+        // Verificar se todas as opções têm texto
+        if (q.options.some(option => !option.trim())) {
+          return true
+        }
+        // Verificar se tem pelo menos uma resposta correta
+        if (q.question_type === 'multiple' && (q.correct_answer === null || q.correct_answer === undefined)) {
+          return true
+        }
+        if (q.question_type === 'multiple_select' && (!q.correct_answer || (q.correct_answer as number[]).length === 0)) {
+          return true
+        }
+      }
+      return false
+    })
+
+    if (invalidQuestions) {
+      alert('⚠️ Todas as perguntas de múltipla escolha devem ter:\n\n• Pelo menos 2 opções\n• Todas as opções preenchidas\n• Pelo menos uma resposta correta selecionada')
+      return
+    }
+
     setLoading(true)
     try {
       // Salvar quiz
