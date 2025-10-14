@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Check, Star, Zap, Shield, ArrowRight, CreditCard, Smartphone, Globe } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function PaymentPage() {
   const [selectedPlan, setSelectedPlan] = useState('monthly')
@@ -77,16 +78,16 @@ export default function PaymentPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <Link href="/user" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
-                <ArrowRight className="w-6 h-6 text-white rotate-180" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Herbalead</h1>
-                <p className="text-sm text-gray-600">Área do Profissional</p>
-              </div>
+              <Image
+                src="/logos/herbalead/herbalead-logo-horizontal.png"
+                alt="Herbalead"
+                width={120}
+                height={40}
+                className="h-10 w-auto"
+              />
             </Link>
             <div className="text-sm text-gray-600">
-              Teste grátis por 7 dias
+              7 dias para cancelar sem questionamentos
             </div>
           </div>
         </div>
@@ -101,19 +102,6 @@ export default function PaymentPage() {
           <p className="text-xl text-gray-600 mb-8">
             Comece a gerar leads profissionais hoje mesmo
           </p>
-          
-          {/* Testimonial */}
-          <div className="bg-white rounded-xl shadow-lg p-6 max-w-2xl mx-auto mb-8">
-            <div className="flex items-center justify-center mb-4">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-              ))}
-            </div>
-            <p className="text-gray-700 italic mb-4">
-              &ldquo;Em 2 semanas já gerei mais leads do que em 3 meses usando métodos tradicionais. O Herbalead é revolucionário!&rdquo;
-            </p>
-            <p className="text-sm text-gray-500">- Maria Silva, Nutricionista</p>
-          </div>
         </div>
 
         {/* Plan Selection */}
@@ -220,7 +208,7 @@ export default function PaymentPage() {
                 )}
               </button>
               <p className="text-sm text-gray-500 mt-4">
-                7 dias grátis • Cancele quando quiser • Sem compromisso
+                7 dias para cancelar • Sem questionamentos • Sem compromisso
               </p>
               <div className="mt-4 text-sm text-gray-600">
                 <p>✅ PIX instantâneo</p>
@@ -238,7 +226,7 @@ export default function PaymentPage() {
             Garantia de 7 dias
           </h3>
           <p className="text-gray-600">
-            Se não ficar satisfeito, devolvemos seu dinheiro. Sem perguntas.
+            Cancele em até 7 dias sem questionamentos. Reembolso total garantido.
           </p>
         </div>
       </main>
