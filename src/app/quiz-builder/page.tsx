@@ -389,8 +389,16 @@ export default function QuizBuilder() {
   }
 
   const removeOption = (questionIndex: number, optionIndex: number) => {
+    console.log('🔍 removeOption chamada:', { questionIndex, optionIndex })
     const question = quiz.questions[questionIndex]
+    console.log('📊 Questão atual:', { 
+      questionType: question.question_type, 
+      optionsLength: question.options?.length, 
+      minOptions: question.min_options 
+    })
+    
     if (question.options && question.options.length > (question.min_options || 2)) {
+      console.log('✅ Condição atendida, removendo opção')
       const newOptions = question.options.filter((_, index) => index !== optionIndex)
       updateQuestion(questionIndex, 'options', newOptions)
       
@@ -408,6 +416,13 @@ export default function QuizBuilder() {
           .map(index => index > optionIndex ? index - 1 : index)
         updateQuestion(questionIndex, 'correct_answer', newCorrect)
       }
+    } else {
+      console.log('❌ Condição não atendida:', {
+        hasOptions: !!question.options,
+        optionsLength: question.options?.length,
+        minOptions: question.min_options || 2,
+        condition: question.options && question.options.length > (question.min_options || 2)
+      })
     }
   }
 
