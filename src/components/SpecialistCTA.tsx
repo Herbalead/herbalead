@@ -46,6 +46,18 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
+  // Função para normalizar texto removendo acentos e caracteres especiais
+  const normalizeText = (text: string): string => {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/\s+/g, '-') // Substitui espaços por hífens
+      .replace(/[^a-z0-9-]/g, '') // Remove caracteres especiais
+      .replace(/-+/g, '-') // Remove hífens duplicados
+      .replace(/^-|-$/g, '') // Remove hífens do início e fim
+  }
+
   useEffect(() => {
     const fetchLinkData = async () => {
       // Evitar múltiplas execuções
@@ -73,22 +85,30 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
           console.log('👤 Usuário extraído:', usuario)
           console.log('📋 Projeto extraído:', projeto)
           
-          // Buscar o usuário pelo nome
-          const { data: userData, error: userError } = await supabase
+          // Buscar todos os profissionais e comparar com o slug normalizado
+          const { data: allProfessionals, error: profError } = await supabase
             .from('professionals')
             .select('id, name, email')
-            .ilike('name', `%${usuario.replace(/-/g, ' ')}%`)
-            .single()
-
-          if (userError || !userData) {
-            console.error('❌ Usuário não encontrado:', userError)
+          
+          if (profError) {
+            console.error('❌ Erro ao buscar professionals:', profError)
+            return
+          }
+          
+          // Encontrar o profissional cujo nome normalizado corresponde ao slug
+          const userData = allProfessionals?.find(prof => 
+            normalizeText(prof.name) === usuario
+          )
+          
+          if (!userData) {
+            console.error('❌ Usuário não encontrado:', usuario)
             return
           }
 
           console.log('👤 Usuário encontrado:', userData)
 
-          // Buscar o projeto do usuário na tabela links
-          const { data, error } = await supabase
+          // Buscar todos os links do usuário e comparar com o slug normalizado
+          const { data: allLinks, error: linksError } = await supabase
             .from('links')
             .select(`
               id,
@@ -99,16 +119,25 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
               capture_type,
               material_title,
               material_description,
-              user_id
+              user_id,
+              name
             `)
             .eq('user_id', userData.id)
-            .ilike('name', `%${projeto.replace(/-/g, ' ')}%`)
             .eq('status', 'active')
-            .single()
           
-          console.log('📊 Dados encontrados:', { data, error })
+          if (linksError) {
+            console.error('❌ Erro ao buscar links:', linksError)
+            return
+          }
           
-          if (!error && data) {
+          // Encontrar o link cujo nome normalizado corresponde ao slug do projeto
+          const data = allLinks?.find(linkItem => 
+            normalizeText(linkItem.name) === projeto
+          )
+          
+          console.log('📊 Dados encontrados:', { data, linksError })
+          
+          if (data) {
             console.log('✅ Dados carregados com sucesso:', data)
             
             // Buscar dados do profissional
