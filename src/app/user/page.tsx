@@ -22,7 +22,7 @@ export default function UserDashboard() {
     material_description: '',
     // Novos campos para personalização
     page_title: 'Quer uma análise mais completa?',
-    page_greeting: 'Gostaria de saber mais',
+    page_greeting: '',
     button_text: 'Consultar Especialista'
   })
   const [showSuccessModal, setShowSuccessModal] = useState(false)
@@ -72,19 +72,7 @@ export default function UserDashboard() {
 
   // Função para gerar mensagem personalizada por ferramenta
   const getCustomMessageByTool = (toolName: string): string => {
-    const messages = {
-      'bmi': 'Vi que você calculou seu IMC. Tenho orientações personalizadas que podem ajudar muito no seu bem-estar. Gostaria de mais informações?',
-      'protein': 'Vi que você calculou sua necessidade de proteína. Tenho orientações personalizadas para sua dieta. Posso te ajudar?',
-      'hydration': 'Vi que você calculou sua necessidade de hidratação. Tenho orientações personalizadas para seu bem-estar. Gostaria de mais informações?',
-      'body-composition': 'Vi que você calculou sua composição corporal. Tenho orientações personalizadas para seu bem-estar. Posso te ajudar?',
-      'meal-planner': 'Vi que você criou seu plano alimentar. Tenho orientações personalizadas para sua dieta. Gostaria de mais informações?',
-      'nutrition-assessment': 'Vi que você fez sua avaliação nutricional. Tenho orientações personalizadas para seu bem-estar. Posso te ajudar?',
-      'daily-wellness': 'Vi que você fez sua avaliação de bem-estar diário. Tenho orientações personalizadas. Gostaria de mais informações?',
-      'healthy-eating': 'Vi que você fez sua avaliação de alimentação saudável. Tenho orientações personalizadas. Posso te ajudar?',
-      'wellness-profile': 'Vi que você fez seu perfil de bem-estar. Tenho orientações personalizadas para sua saúde. Gostaria de mais informações?'
-    }
-    
-    return messages[toolName as keyof typeof messages] || 'Tenho orientações personalizadas que podem ajudar no seu bem-estar. Posso te ajudar?'
+    return 'Quer uma análise mais completa?'
   }
 
   useEffect(() => {
@@ -1198,7 +1186,7 @@ export default function UserDashboard() {
                       onChange={(e) => setNewLink({...newLink, page_greeting: e.target.value})}
                       rows={3}
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                      placeholder="Olá! Vi que você calculou seu IMC. Tenho orientações personalizadas que podem ajudar muito no seu bem-estar. Gostaria de mais informações?"
+                      placeholder="Adicione aqui sua mensagem personalizada..."
                     />
                     <p className="text-xs text-gray-500 mt-1">
                       💡 Esta mensagem aparece na página para estimular o cliente
@@ -1261,7 +1249,7 @@ export default function UserDashboard() {
                       
                       {/* Texto Descritivo */}
                       <p className="text-gray-700 leading-relaxed">
-                        {newLink.page_greeting || 'Gostaria de saber mais'}
+                        {newLink.page_greeting || 'Adicione aqui sua mensagem personalizada...'}
                       </p>
                       
                       {/* Botão */}
