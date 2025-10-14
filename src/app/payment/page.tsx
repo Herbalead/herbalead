@@ -10,35 +10,34 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(false)
 
   const plans = {
-    monthly: {
-      price: 'R$ 60',
-      period: '/mês',
-      total: 'R$ 60',
-      description: 'Acesso completo por 30 dias',
-      features: [
-        'Todas as 9 ferramentas',
-        'Links personalizados ilimitados',
-        'Dashboard completo',
-        'Suporte por WhatsApp',
-        'Relatórios de leads',
-        'Sem taxa de setup'
-      ]
-    },
-    yearly: {
-      price: 'R$ 47,50',
-      period: '/mês',
-      total: 'R$ 570',
-      description: 'Economize 20% pagando anualmente',
-      features: [
-        'Todas as 9 ferramentas',
-        'Links personalizados ilimitados',
-        'Dashboard completo',
-        'Suporte prioritário',
-        'Relatórios avançados',
-        '2 meses grátis',
-        'Sem taxa de setup'
-      ]
-    }
+        monthly: {
+          price: 'R$ 60',
+          period: '/mês',
+          total: 'R$ 60',
+          description: 'Acesso completo por 30 dias',
+          features: [
+            '🚀 Gere contatos novos todos os dias, sem depender de anúncios',
+            '🔗 Crie links inteligentes que atraem e convertem',
+            '📊 Veja tudo em um painel simples e visual',
+            '❤️ Suporte humano e rápido — sem enrolação',
+            '🧠 Descubra quais campanhas realmente trazem resultado',
+            '🎓 Cursos completos ensinando como pensar e argumentar melhor'
+          ]
+        },
+        yearly: {
+          price: 'R$ 47,50',
+          period: '/mês',
+          total: 'R$ 570',
+          description: 'Economize 20% pagando anualmente',
+          features: [
+            '🚀 Gere contatos novos todos os dias, sem depender de anúncios',
+            '🔗 Crie links inteligentes que atraem e convertem',
+            '📊 Veja tudo em um painel simples e visual',
+            '❤️ Suporte prioritário e rápido — sem enrolação',
+            '🧠 Descubra quais campanhas realmente trazem resultado',
+            '🎓 Cursos completos ensinando como pensar e argumentar melhor'
+          ]
+        }
   }
 
   const currentPlan = plans[selectedPlan as keyof typeof plans]
@@ -72,9 +71,9 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-100">
+    <div className="min-h-screen bg-gradient-to-br from-white via-emerald-50 to-green-100">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-lg border-b border-emerald-100">
+      <header className="bg-white shadow-xl border-b-2 border-emerald-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <Link href="/user" className="flex items-center space-x-3">
@@ -86,9 +85,6 @@ export default function PaymentPage() {
                 className="h-12 w-auto"
               />
             </Link>
-            <div className="bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full text-sm font-medium">
-              🛡️ 7 dias para cancelar sem questionamentos
-            </div>
           </div>
         </div>
       </header>
@@ -96,20 +92,22 @@ export default function PaymentPage() {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
-            🚀 Plataforma de Leads Profissionais
+          <div className="inline-flex items-center bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-full text-sm font-bold mb-8 shadow-lg">
+            💡 Ferramenta oficial para gerar leads com alto potencial de conversão
           </div>
-          <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-            Escolha seu Plano<br />
-            <span className="text-emerald-600">Herbalead</span>
+          <h1 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">
+            Transforme curiosos em<br />
+            <span className="text-emerald-600">clientes todos os dias</span><br />
+            com o Herbalead 🚀
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Transforme sua estratégia de vendas com ferramentas profissionais de geração de leads
+          <p className="text-2xl text-gray-700 mb-8 max-w-3xl mx-auto font-medium">
+            O Herbalead cria, organiza e multiplica seus contatos automaticamente — 
+            <span className="text-emerald-600 font-bold"> enquanto você foca em vender mais.</span>
           </p>
         </div>
 
         {/* Plan Selection */}
-        <div className="bg-white rounded-3xl shadow-2xl p-12 mb-12 border border-emerald-100">
+        <div className="bg-white rounded-3xl shadow-2xl p-12 mb-12 border-2 border-emerald-200">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">Escolha seu plano</h2>
             
@@ -135,6 +133,9 @@ export default function PaymentPage() {
                   }`}
                 >
                   Anual
+                  <span className="ml-3 px-3 py-1 bg-emerald-500 text-white text-sm rounded-full font-bold">
+                    -20%
+                  </span>
                 </button>
               </div>
             </div>
@@ -152,8 +153,8 @@ export default function PaymentPage() {
                   {currentPlan.description}
                 </div>
                 {selectedPlan === 'yearly' && (
-                  <div className="bg-emerald-50 text-emerald-700 px-6 py-3 rounded-xl font-semibold inline-block">
-                    Total anual: {currentPlan.total}
+                  <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg inline-block shadow-lg">
+                    💰 Economize R$ 150 por ano!
                   </div>
                 )}
               </div>
@@ -161,13 +162,11 @@ export default function PaymentPage() {
           </div>
 
           {/* Features */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          <div className="grid grid-cols-1 gap-6 mb-12">
             {currentPlan.features.map((feature, index) => (
-              <div key={index} className="flex items-center space-x-4 p-4 bg-emerald-50 rounded-xl">
-                <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Check className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-gray-800 font-medium text-lg">{feature}</span>
+              <div key={index} className="flex items-start space-x-4 p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200 hover:shadow-lg transition-all duration-300">
+                <div className="text-2xl flex-shrink-0">{feature.split(' ')[0]}</div>
+                <span className="text-gray-800 font-semibold text-lg leading-relaxed">{feature.substring(feature.indexOf(' ') + 1)}</span>
               </div>
             ))}
           </div>
@@ -207,13 +206,13 @@ export default function PaymentPage() {
                 ) : (
                   <>
                     <Zap className="w-8 h-8" />
-                    <span>Quero meus links agora</span>
+                    <span>Ativar minha geração de leads agora</span>
                     <ArrowRight className="w-8 h-8" />
                   </>
                 )}
               </button>
               <p className="text-lg text-gray-600 mt-6 font-medium">
-                🛡️ 7 dias para cancelar • Sem questionamentos • Sem compromisso
+                🔒 Sem risco. Você testa por 7 dias e cancela quando quiser.
               </p>
               <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
                 <div className="flex items-center justify-center space-x-2">
@@ -233,16 +232,83 @@ export default function PaymentPage() {
           </div>
         </div>
 
+        {/* Comparison Section */}
+        <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl p-8 mb-12 border-2 border-red-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-red-600 mb-6">❌ Sem o Herbalead:</h3>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3 text-gray-700">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <span>Você fica sem norte, sem ferramentas para fazer o cliente chegar até você</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-700">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <span>Não sabe como argumentar e convencer seus prospects</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-700">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <span>Fica travado na geração de contatos e vendas</span>
+                </div>
+              </div>
+            </div>
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-emerald-600 mb-6">✅ Com o Herbalead:</h3>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3 text-gray-700">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                  <span>Cursos completos ensinando como pensar e argumentar melhor</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-700">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                  <span>Novas ferramentas constantemente implantadas</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-700">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                  <span>Seus links fazem o trabalho de atrair e converter</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Target Audience */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 mb-12 border-2 border-blue-200">
+          <h3 className="text-3xl font-bold text-gray-900 mb-6 text-center">
+            💡 Ideal para quem:
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center p-4">
+              <div className="text-4xl mb-3">🎯</div>
+              <p className="text-gray-700 font-medium">
+                Quer aprender a argumentar melhor e convencer prospects
+              </p>
+            </div>
+            <div className="text-center p-4">
+              <div className="text-4xl mb-3">📚</div>
+              <p className="text-gray-700 font-medium">
+                Precisa de cursos práticos para melhorar suas vendas
+              </p>
+            </div>
+            <div className="text-center p-4">
+              <div className="text-4xl mb-3">⚡</div>
+              <p className="text-gray-700 font-medium">
+                Deseja ter acesso a ferramentas sempre atualizadas
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Guarantee */}
         <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl p-8 text-center border border-emerald-200 shadow-lg">
           <div className="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">
-            Garantia de 7 dias
+          <h3 className="text-3xl font-bold text-gray-900 mb-4">
+            💚 7 dias grátis. Cancele quando quiser.
           </h3>
-          <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-            Cancele em até 7 dias sem questionamentos. Reembolso total garantido.
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto font-medium">
+            🚀 Comece agora e veja o primeiro resultado ainda hoje.
           </p>
         </div>
       </main>
