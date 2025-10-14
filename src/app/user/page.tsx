@@ -51,14 +51,6 @@ export default function UserDashboard() {
   const [countryCode, setCountryCode] = useState('55')
   const [loading, setLoading] = useState(true)
 
-  // Função para atualizar automaticamente a URL do WhatsApp quando o texto descritivo mudar
-  const updateWhatsAppUrl = (message: string) => {
-    // REMOVIDO: Não vamos mais atualizar a URL automaticamente
-    // O distribuidor deve controlar a URL manualmente
-    console.log('📝 Texto descritivo atualizado:', message)
-    console.log('ℹ️ URL não será alterada automaticamente - controle manual pelo distribuidor')
-  }
-
   // Função para normalizar texto removendo acentos e caracteres especiais
   const normalizeText = (text: string): string => {
     return text
@@ -72,7 +64,7 @@ export default function UserDashboard() {
   }
 
   // Função para gerar mensagem personalizada por ferramenta
-  const getCustomMessageByTool = (toolName: string): string => {
+  const getCustomMessageByTool = (): string => {
     return 'Quer uma análise mais completa?'
   }
 
@@ -325,7 +317,7 @@ export default function UserDashboard() {
       : 'https://wa.me/5511999999999'
     
     // Mensagem padrão apenas para o preview/exibição
-    const defaultMessage = getCustomMessageByTool(newLink.tool_name)
+    const defaultMessage = getCustomMessageByTool()
     
     console.log('📱 URL básica WhatsApp (sem mensagem):', whatsappUrl)
     console.log('👤 Telefone do usuário:', userProfile.phone)
@@ -1050,7 +1042,7 @@ export default function UserDashboard() {
               </div>
             ) : (
               <div className="space-y-4">
-                {userQuizzes.map((quiz: any) => (
+                {userQuizzes.map((quiz: Record<string, unknown>) => (
                   <div key={quiz.id} className="border rounded-lg p-4 hover:bg-gray-50">
                     <div className="flex justify-between items-start">
                       <div>
