@@ -240,10 +240,6 @@ export default function QuizPage({ params }: { params: Promise<{ usuario: string
               {quiz.settings.congratulationsMessage || 'Parabéns! Você concluiu o quiz com sucesso! 🎉'}
             </h1>
             
-            <p className="text-gray-600 mb-8">
-              Obrigado por participar! Suas respostas foram registradas com sucesso.
-            </p>
-            
             <button 
               onClick={() => {
                 if (quiz.settings.specialistRedirectUrl) {

@@ -123,9 +123,6 @@ export default function QuizCompletedPage({ params }: { params: Promise<{ id: st
           <p className="text-gray-700 text-lg mb-2">
             {quiz.settings.congratulationsMessage || 'Parabéns! Você concluiu o quiz com sucesso! 🎉'}
           </p>
-          <p className="text-gray-600 text-sm">
-            Obrigado por participar do quiz &quot;{quiz.title}&quot;
-          </p>
         </div>
 
         {/* Botão do especialista */}
@@ -153,7 +150,6 @@ export default function QuizCompletedPage({ params }: { params: Promise<{ id: st
 
         {/* Informações adicionais */}
         <div className="mt-6 text-xs text-gray-500">
-          <p>Seus resultados foram registrados com sucesso.</p>
           <p>O especialista entrará em contato em breve.</p>
         </div>
       </div>
