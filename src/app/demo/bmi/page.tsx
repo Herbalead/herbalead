@@ -247,7 +247,7 @@ export default function BMIDemoPage() {
               💼 Pronto para gerar seus próprios links com seu nome pessoal?
             </h3>
             <p className="text-gray-600 mb-8 text-lg">
-              Clique em "Quero gerar meus links" e comece a gerar seus próprios leads com o Herbalead.
+              Clique em &quot;Quero gerar meus links&quot; e comece a gerar seus próprios leads com o Herbalead.
             </p>
             <button 
               onClick={() => window.location.href = '/payment'}

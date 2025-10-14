@@ -386,7 +386,7 @@ export default function MealPlannerDemoPage() {
               💼 Pronto para gerar seus próprios links com seu nome pessoal?
             </h3>
             <p className="text-gray-600 mb-8 text-lg">
-              Clique em "Quero gerar meus links" e comece a gerar seus próprios leads com o Herbalead.
+              Clique em &quot;Quero gerar meus links&quot; e comece a gerar seus próprios leads com o Herbalead.
             </p>
             <button 
               onClick={() => window.location.href = '/payment'}
@@ -644,7 +644,7 @@ export default function MealPlannerDemoPage() {
                 <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
                   <span className="text-emerald-600 font-bold text-sm">2</span>
                 </div>
-                <span>Clica no botão "Consultar Especialista"</span>
+                <span>Clica no botão &quot;Consultar Especialista&quot;</span>
               </li>
               <li className="flex items-center space-x-3">
                 <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">

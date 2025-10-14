@@ -1,6 +1,6 @@
 'use client'
 
-import { Clock, ArrowLeft } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import Link from 'next/link'
 
 export default function PendingPage() {

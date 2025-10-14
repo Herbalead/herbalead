@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, Star, Zap, Shield, ArrowRight, CreditCard, Smartphone, Globe } from 'lucide-react'
+import { Zap, Shield, ArrowRight, CreditCard, Smartphone, Globe } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
