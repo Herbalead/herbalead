@@ -33,6 +33,7 @@ export default function UserDashboard() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null)
   const [userLinks, setUserLinks] = useState<Record<string, unknown>[]>([])
+  const [userQuizzes, setUserQuizzes] = useState<Record<string, unknown>[]>([])
   const [userProfile, setUserProfile] = useState({
     name: '',
     email: '',
@@ -78,6 +79,7 @@ export default function UserDashboard() {
   useEffect(() => {
     loadUserProfile()
     loadUserLinks()
+    loadUserQuizzes()
   }, [])
 
     const loadUserProfile = async () => {
@@ -238,6 +240,32 @@ export default function UserDashboard() {
         }
       } catch (error) {
       console.error('❌ Erro ao carregar links:', error)
+    }
+  }
+
+  const loadUserQuizzes = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        console.log('🔍 Carregando quizzes para usuário:', user.id)
+        
+        const { data: quizzes, error } = await supabase
+          .from('quizzes')
+          .select('*')
+          .eq('professional_id', user.id)
+          .order('created_at', { ascending: false })
+
+        console.log('📊 Quizzes do usuário:', quizzes)
+        console.log('❌ Erro ao buscar quizzes:', error)
+
+        if (error) {
+          console.error('❌ Erro ao carregar quizzes:', error)
+        } else {
+          setUserQuizzes(quizzes || [])
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar quizzes:', error)
     }
   }
 
@@ -968,16 +996,54 @@ export default function UserDashboard() {
         {activeTab === 'quizzes' && (
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Meus Quizzes</h3>
-            <div className="text-center py-8">
-              <p className="text-gray-500">Nenhum quiz criado ainda</p>
-              <button 
-                onClick={() => window.location.href = '/quiz-builder'}
-                className="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
-              >
+            
+            {userQuizzes.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Nenhum quiz criado ainda</p>
+                <button 
+                  onClick={() => window.location.href = '/quiz-builder'}
+                  className="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+                >
                   Criar Primeiro Quiz
-              </button>
+                </button>
               </div>
+            ) : (
+              <div className="space-y-4">
+                {userQuizzes.map((quiz: any) => (
+                  <div key={quiz.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{quiz.title}</h4>
+                        <p className="text-sm text-gray-600 mt-1">{quiz.description}</p>
+                        <p className="text-xs text-gray-500 mt-2">
+                          Projeto: {quiz.project_name} | 
+                          Criado em: {new Date(quiz.created_at).toLocaleDateString('pt-BR')}
+                        </p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => {
+                            const url = `${window.location.origin}/${userProfile.name?.toLowerCase().replace(/\s+/g, '-') || 'usuario'}/quiz/${quiz.project_name}`
+                            navigator.clipboard.writeText(url)
+                            alert('Link copiado!')
+                          }}
+                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
+                        >
+                          Copiar Link
+                        </button>
+                        <button
+                          onClick={() => window.open(`/quiz-builder?id=${quiz.id}`, '_blank')}
+                          className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200"
+                        >
+                          Editar
+                        </button>
+                      </div>
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         {activeTab === 'profile' && (
