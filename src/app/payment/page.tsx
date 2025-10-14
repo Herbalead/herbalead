@@ -6,6 +6,7 @@ import Link from 'next/link'
 
 export default function PaymentPage() {
   const [selectedPlan, setSelectedPlan] = useState('monthly')
+  const [loading, setLoading] = useState(false)
 
   const plans = {
     monthly: {
@@ -40,6 +41,34 @@ export default function PaymentPage() {
   }
 
   const currentPlan = plans[selectedPlan as keyof typeof plans]
+
+  const handlePayment = async () => {
+    setLoading(true)
+    
+    try {
+      const response = await fetch('/api/create-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ planType: selectedPlan })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Erro ao criar pagamento')
+      }
+      
+      const { init_point } = await response.json()
+      
+      // Redirect to Mercado Pago checkout
+      window.location.href = init_point
+    } catch (error) {
+      console.error('Payment error:', error)
+      alert('Erro ao processar pagamento. Tente novamente.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100">
@@ -172,14 +201,32 @@ export default function PaymentPage() {
 
             {/* CTA Button */}
             <div className="text-center">
-              <button className="bg-emerald-600 text-white px-12 py-4 rounded-xl font-semibold text-lg hover:bg-emerald-700 transition-colors flex items-center space-x-3 mx-auto">
-                <Zap className="w-6 h-6" />
-                <span>Começar Agora</span>
-                <ArrowRight className="w-6 h-6" />
+              <button 
+                onClick={handlePayment}
+                disabled={loading}
+                className="bg-emerald-600 text-white px-12 py-4 rounded-xl font-semibold text-lg hover:bg-emerald-700 transition-colors flex items-center space-x-3 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                    <span>Processando...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-6 h-6" />
+                    <span>Pagar com Mercado Pago</span>
+                    <ArrowRight className="w-6 h-6" />
+                  </>
+                )}
               </button>
               <p className="text-sm text-gray-500 mt-4">
                 7 dias grátis • Cancele quando quiser • Sem compromisso
               </p>
+              <div className="mt-4 text-sm text-gray-600">
+                <p>✅ PIX instantâneo</p>
+                <p>✅ Cartão parcelado até 12x</p>
+                <p>✅ Boleto bancário</p>
+              </div>
             </div>
           </div>
         </div>
