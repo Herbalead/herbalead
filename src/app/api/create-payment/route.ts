@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { preference, paymentConfig, plans } from '../../../lib/mercadopago'
+import { preference, paymentConfig, plans } from '../../../../lib/mercadopago'
 
 export async function POST(request: NextRequest) {
   try {
