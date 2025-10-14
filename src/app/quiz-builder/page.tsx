@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Plus, Trash2, Save, Info, Copy, ChevronDown, ChevronRight, ArrowLeft, GripVertical } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 import { getProjectConfig } from '@/lib/project-config'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -55,6 +55,7 @@ interface Question {
 
 export default function QuizBuilder() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [projectDomain] = useState('herbalead')
   const [projectConfig] = useState<ReturnType<typeof getProjectConfig>>(getProjectConfig('fitness'))
   
@@ -120,6 +121,58 @@ export default function QuizBuilder() {
     }))
   }, [getDefaultColors])
 
+  // Função para carregar quiz existente
+  const loadExistingQuiz = async (quizId: string) => {
+    try {
+      console.log('🔍 Carregando quiz existente:', quizId)
+      
+      // Carregar dados do quiz
+      const { data: quizData, error: quizError } = await supabase
+        .from('quizzes')
+        .select('*')
+        .eq('id', quizId)
+        .single()
+      
+      if (quizError) {
+        console.error('❌ Erro ao carregar quiz:', quizError)
+        return
+      }
+      
+      console.log('📊 Quiz carregado:', quizData)
+      
+      // Carregar perguntas do quiz
+      const { data: questionsData, error: questionsError } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('quiz_id', quizId)
+        .order('order_number', { ascending: true })
+      
+      if (questionsError) {
+        console.error('❌ Erro ao carregar perguntas:', questionsError)
+      } else {
+        console.log('📝 Perguntas carregadas:', questionsData)
+      }
+      
+      // Atualizar estado do quiz com os dados carregados
+      setQuiz({
+        id: quizData.id,
+        professional_id: quizData.professional_id,
+        title: quizData.title,
+        description: quizData.description,
+        project_name: quizData.project_name,
+        colors: quizData.colors,
+        settings: quizData.settings,
+        questions: questionsData || [],
+        is_active: quizData.is_active
+      })
+      
+      console.log('✅ Quiz carregado com sucesso!')
+      
+    } catch (error) {
+      console.error('❌ Erro ao carregar quiz existente:', error)
+    }
+  }
+
   // Buscar usuário logado e perfil
   useEffect(() => {
     const getUser = async () => {
@@ -144,6 +197,14 @@ export default function QuizBuilder() {
             // Se não encontrar perfil, criar um temporário
             setUserProfile({ name: 'Usuário', email: user.email || 'usuario@exemplo.com' })
           }
+          
+          // Verificar se há ID na URL para carregar quiz existente
+          const quizId = searchParams.get('id')
+          if (quizId) {
+            console.log('🔄 ID do quiz encontrado na URL:', quizId)
+            await loadExistingQuiz(quizId)
+          }
+          
         } else {
           // Se não há usuário logado, usar um ID temporário para desenvolvimento
           const tempUser = { id: 'temp-user-' + Date.now() }
@@ -161,7 +222,7 @@ export default function QuizBuilder() {
       }
     }
     getUser()
-  }, [])
+  }, [searchParams])
 
   // Atualizar WhatsApp automaticamente quando o perfil do usuário for carregado
   useEffect(() => {
