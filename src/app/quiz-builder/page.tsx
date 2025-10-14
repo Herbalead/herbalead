@@ -494,7 +494,9 @@ export default function QuizBuilder() {
 
     // Validar se o nome do projeto já existe para este usuário
     try {
-      const { data: existingQuiz } = await supabase
+      console.log('🔍 Verificando se nome do projeto já existe...', quiz.project_name.trim())
+      
+      const { data: existingQuiz, error: checkError } = await supabase
         .from('quizzes')
         .select('id, title')
         .eq('professional_id', user.id)
@@ -502,13 +504,16 @@ export default function QuizBuilder() {
         .neq('id', quiz.id || '') // Excluir o próprio quiz se estiver editando
         .single()
 
+      console.log('📊 Resultado da verificação:', { existingQuiz, checkError })
+
       if (existingQuiz) {
+        console.error('❌ Nome do projeto já existe:', existingQuiz)
         alert(`⚠️ Já existe um quiz com o nome de projeto "${quiz.project_name}"!\n\nTítulo do quiz existente: "${existingQuiz.title}"\n\nEscolha um nome diferente para evitar conflitos.`)
         return
       }
-    } catch {
+    } catch (error) {
       // Se não encontrar nenhum quiz com esse nome, continua normalmente
-      console.log('Nome do projeto disponível:', quiz.project_name)
+      console.log('✅ Nome do projeto disponível:', quiz.project_name, error)
     }
 
     // Validar se há pelo menos uma pergunta
@@ -1595,7 +1600,17 @@ export default function QuizBuilder() {
       {/* Modal de Sucesso */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 relative">
+            {/* Botão X para fechar */}
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
+            >
+              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
             <div className="text-center">
               <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
