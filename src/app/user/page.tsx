@@ -263,13 +263,31 @@ export default function UserDashboard() {
 
   const deleteQuiz = async (quizId: string) => {
     try {
-      console.log('🗑️ Apagando quiz:', quizId)
+      console.log('🗑️ Iniciando exclusão do quiz:', quizId)
+      
+      // Verificar se o quiz existe antes de tentar apagar
+      const { data: existingQuiz, error: checkError } = await supabase
+        .from('quizzes')
+        .select('id, title, project_name')
+        .eq('id', quizId)
+        .single()
+      
+      if (checkError || !existingQuiz) {
+        console.error('❌ Quiz não encontrado:', checkError)
+        alert('Quiz não encontrado ou já foi excluído.')
+        return
+      }
+      
+      console.log('📊 Quiz encontrado para exclusão:', existingQuiz)
       
       // Primeiro apagar as perguntas relacionadas
-      const { error: questionsError } = await supabase
+      console.log('🗑️ Apagando perguntas do quiz...')
+      const { error: questionsError, count: questionsDeleted } = await supabase
         .from('questions')
-        .delete()
+        .delete({ count: 'exact' })
         .eq('quiz_id', quizId)
+      
+      console.log('📊 Perguntas apagadas:', questionsDeleted)
       
       if (questionsError) {
         console.error('❌ Erro ao apagar perguntas:', questionsError)
@@ -278,10 +296,13 @@ export default function UserDashboard() {
       }
       
       // Depois apagar o quiz
-      const { error: quizError } = await supabase
+      console.log('🗑️ Apagando quiz principal...')
+      const { error: quizError, count: quizDeleted } = await supabase
         .from('quizzes')
-        .delete()
+        .delete({ count: 'exact' })
         .eq('id', quizId)
+      
+      console.log('📊 Quiz apagado:', quizDeleted)
       
       if (quizError) {
         console.error('❌ Erro ao apagar quiz:', quizError)
@@ -289,9 +310,16 @@ export default function UserDashboard() {
         return
       }
       
-      console.log('✅ Quiz apagado com sucesso!')
+      if (quizDeleted === 0) {
+        console.warn('⚠️ Nenhum quiz foi apagado - pode já ter sido excluído')
+        alert('Quiz não encontrado ou já foi excluído.')
+        return
+      }
+      
+      console.log('✅ Quiz e perguntas apagados com sucesso!')
       
       // Recarregar a lista de quizzes
+      console.log('🔄 Recarregando lista de quizzes...')
       await loadUserQuizzes()
       
       alert('Quiz apagado com sucesso!')
