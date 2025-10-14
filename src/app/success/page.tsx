@@ -1,18 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { CheckCircle, XCircle, Clock, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
-export default function SuccessPage() {
+function SuccessContent() {
   const [paymentStatus, setPaymentStatus] = useState<'loading' | 'success' | 'pending' | 'error'>('loading')
   const searchParams = useSearchParams()
   
   useEffect(() => {
     // Get payment status from URL parameters
     const status = searchParams.get('status')
-    const paymentId = searchParams.get('payment_id')
     
     if (status === 'approved') {
       setPaymentStatus('success')
@@ -140,5 +139,22 @@ export default function SuccessPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100 flex items-center justify-center p-4">
+        <div className="max-w-2xl w-full">
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600 mx-auto mb-6"></div>
+            <p className="text-lg text-gray-600">Carregando...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <SuccessContent />
+    </Suspense>
   )
 }
