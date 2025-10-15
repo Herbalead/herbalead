@@ -39,7 +39,8 @@ export default function UserDashboard() {
     email: '',
     phone: '',
     specialty: '',
-    company: ''
+    company: '',
+    subscription_status: ''
   })
   const [editingProfile, setEditingProfile] = useState(false)
   const [editedProfile, setEditedProfile] = useState({
@@ -86,7 +87,7 @@ export default function UserDashboard() {
           // Buscar perfil do usuário na tabela professionals
           const { data: professional, error } = await supabase
             .from('professionals')
-            .select('*')
+            .select('*, subscription_status')
             .eq('email', user.email)
             .single()
 
@@ -142,7 +143,8 @@ export default function UserDashboard() {
               email: professional.email || '',
               phone: phoneWithoutCode,
               specialty: professional.specialty || '',
-              company: professional.company || ''
+              company: professional.company || '',
+              subscription_status: professional.subscription_status || ''
             }
             
             console.log('👤 Perfil carregado:', profileData)
@@ -835,6 +837,39 @@ export default function UserDashboard() {
           </div>
         </div>
       </header>
+
+      {/* Notificação de assinatura */}
+      {(!userProfile.subscription_status || !['active', 'trialing'].includes(userProfile.subscription_status)) && (
+        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium">
+                    Seus links estão bloqueados até você ativar sua assinatura
+                  </h3>
+                  <p className="text-sm opacity-90 mt-1">
+                    Ative sua assinatura para liberar todos os seus links e começar a gerar leads.
+                  </p>
+                </div>
+              </div>
+              <div className="flex-shrink-0">
+                <Link
+                  href="/payment"
+                  className="bg-white text-orange-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                >
+                  Ativar Assinatura
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Navigation Tabs */}

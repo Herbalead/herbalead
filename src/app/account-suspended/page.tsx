@@ -35,10 +35,10 @@ function AccountSuspendedContent() {
                 <AlertTriangle className="w-8 h-8 text-orange-600" />
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                Conta Temporariamente Indisponível
+                Conteúdo Disponível Após Assinatura
               </h1>
               <p className="text-gray-600">
-                Este profissional está renovando sua assinatura
+                Este profissional precisa ativar sua assinatura para disponibilizar este conteúdo
               </p>
             </div>
 
@@ -57,12 +57,12 @@ function AccountSuspendedContent() {
 
             {/* Status Message */}
             <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-gray-900 mb-2">O que está acontecendo?</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Como funciona?</h3>
               <ul className="text-sm text-gray-700 space-y-1">
-                <li>• Este profissional está renovando sua assinatura</li>
-                <li>• Os links estarão disponíveis em breve</li>
-                <li>• Todos os dados estão seguros</li>
-                <li>• Você pode tentar novamente em alguns minutos</li>
+                <li>• Este profissional ainda não ativou sua assinatura</li>
+                <li>• Os links ficam bloqueados até o pagamento</li>
+                <li>• Após assinar, todo conteúdo fica disponível</li>
+                <li>• Você pode tentar novamente após a ativação</li>
               </ul>
             </div>
 

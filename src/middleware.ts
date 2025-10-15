@@ -88,7 +88,7 @@ export async function middleware(request: NextRequest) {
         .single()
       
       // Se usuário não tem assinatura ativa, mostrar página de bloqueio
-      if (!professional || !['active', 'trialing'].includes(professional.subscription_status)) {
+      if (!professional || !professional.subscription_status || !['active', 'trialing'].includes(professional.subscription_status)) {
         return NextResponse.redirect(new URL(`/account-suspended?user=${username}`, url))
       }
       
