@@ -5,11 +5,16 @@ export async function POST(request: NextRequest) {
   try {
     const { planType, email } = await request.json()
     
+    console.log('Creating subscription for plan:', planType, 'email:', email)
+    
     // Get plan configuration
     const plan = stripePlans[planType as keyof typeof stripePlans]
     if (!plan) {
+      console.error('Invalid plan type:', planType)
       return NextResponse.json({ error: 'Plano inválido' }, { status: 400 })
     }
+    
+    console.log('Using plan:', plan)
 
     // Create subscription checkout session
     const session = await stripe.checkout.sessions.create({
@@ -21,10 +26,12 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://herbalead.com'}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://herbalead.com'}/payment`,
       customer_email: email,
     })
+    
+    console.log('Stripe session created:', session.id)
     
     return NextResponse.json({ 
       sessionId: session.id,
