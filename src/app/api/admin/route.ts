@@ -168,7 +168,10 @@ export async function POST(request: NextRequest) {
   try {
     const { action, userId, subscriptionId, newPlan, days } = await request.json()
     
-    if (!action || !userId) {
+    // Validação específica para create_user (não precisa de userId)
+    if (action === 'create_user') {
+      // Lógica específica para create_user será tratada abaixo
+    } else if (!action || !userId) {
       return NextResponse.json({ error: 'Ação e ID do usuário são obrigatórios' }, { status: 400 })
     }
 
