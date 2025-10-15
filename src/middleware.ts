@@ -90,10 +90,33 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Verificar acesso para links públicos (páginas de usuário)
-  if (url.pathname.match(/^\/[^\/]+\/[^\/]+$/)) {
-    const pathParts = url.pathname.split('/')
-    const username = pathParts[1]
+  // Verificar acesso para links públicos (páginas de usuário) e calculadoras
+  if (url.pathname.match(/^\/[^\/]+\/[^\/]+$/) || url.pathname.startsWith('/calculators/')) {
+    let username = null
+    
+    // Para links públicos, extrair username da URL
+    if (url.pathname.match(/^\/[^\/]+\/[^\/]+$/)) {
+      const pathParts = url.pathname.split('/')
+      username = pathParts[1]
+    }
+    
+    // Para calculadoras, extrair username dos parâmetros da URL
+    if (url.pathname.startsWith('/calculators/')) {
+      const urlParams = new URLSearchParams(url.search)
+      const userParam = urlParams.get('user')
+      if (userParam) {
+        try {
+          const userData = JSON.parse(decodeURIComponent(userParam))
+          username = userData.username || userData.userId
+        } catch (e) {
+          console.log('Erro ao parsear user param:', e)
+        }
+      }
+    }
+    
+    if (!username) {
+      return NextResponse.redirect(new URL('/login', url))
+    }
     
     try {
       // Buscar dados do usuário
