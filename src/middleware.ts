@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone()
@@ -30,6 +36,67 @@ export async function middleware(request: NextRequest) {
   // Redirecionar página inicial do projeto para página específica
   if (url.pathname === '/' && subdomain === 'herbalead') {
     return NextResponse.redirect(new URL('/herbalead', url))
+  }
+
+  // Verificar acesso para rotas protegidas
+  if (url.pathname.startsWith('/user') || 
+      url.pathname.startsWith('/quiz-builder') ||
+      url.pathname.startsWith('/tools/')) {
+    
+    // Verificar se usuário está logado
+    const token = request.cookies.get('sb-access-token')?.value
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', url))
+    }
+    
+    // Verificar status da assinatura
+    try {
+      const { data: { user } } = await supabase.auth.getUser(token)
+      if (!user) {
+        return NextResponse.redirect(new URL('/login', url))
+      }
+      
+      // Buscar dados do usuário e assinatura
+      const { data: professional } = await supabase
+        .from('professionals')
+        .select('subscription_status, subscription_plan')
+        .eq('email', user.email)
+        .single()
+      
+      // Se usuário não tem assinatura ativa, bloquear acesso
+      if (!professional || !['active', 'trialing'].includes(professional.subscription_status)) {
+        return NextResponse.redirect(new URL('/payment-overdue', url))
+      }
+      
+    } catch (error) {
+      console.error('Middleware auth error:', error)
+      return NextResponse.redirect(new URL('/login', url))
+    }
+  }
+
+  // Verificar acesso para links públicos (páginas de usuário)
+  if (url.pathname.match(/^\/[^\/]+\/[^\/]+$/)) {
+    const pathParts = url.pathname.split('/')
+    const username = pathParts[1]
+    const project = pathParts[2]
+    
+    try {
+      // Buscar dados do usuário
+      const { data: professional } = await supabase
+        .from('professionals')
+        .select('subscription_status, subscription_plan')
+        .eq('username', username)
+        .single()
+      
+      // Se usuário não tem assinatura ativa, mostrar página de bloqueio
+      if (!professional || !['active', 'trialing'].includes(professional.subscription_status)) {
+        return NextResponse.redirect(new URL(`/account-suspended?user=${username}`, url))
+      }
+      
+    } catch (error) {
+      console.error('Middleware link access error:', error)
+      // Se não conseguir verificar, permitir acesso (fallback)
+    }
   }
 
   // Adicionar contexto do projeto para páginas de auth e ferramentas

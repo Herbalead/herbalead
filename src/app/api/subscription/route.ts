@@ -10,34 +10,72 @@ const supabase = createClient(
 // GET - Obter dados da assinatura do usuário
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID é obrigatório' }, { status: 400 })
+    // Verificar autenticação via cookie
+    const token = request.cookies.get('sb-access-token')?.value
+    if (!token) {
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
     }
 
-    // Buscar dados da assinatura
-    const { data: subscription, error: subError } = await supabase
-      .rpc('get_user_subscription', { user_uuid: userId })
-
-    if (subError) {
-      console.error('Erro ao buscar assinatura:', subError)
-      return NextResponse.json({ error: 'Erro ao buscar assinatura' }, { status: 500 })
+    // Verificar usuário no Supabase
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 401 })
     }
 
-    // Buscar histórico de pagamentos
-    const { data: payments, error: paymentsError } = await supabase
-      .rpc('get_user_payment_history', { user_uuid: userId })
+    // Buscar dados do profissional
+    const { data: professional, error: profError } = await supabase
+      .from('professionals')
+      .select('id, email, username, subscription_status, subscription_plan, stripe_customer_id')
+      .eq('email', user.email)
+      .single()
 
-    if (paymentsError) {
-      console.error('Erro ao buscar pagamentos:', paymentsError)
+    if (profError) {
+      console.error('Erro ao buscar profissional:', profError)
+      return NextResponse.json({ error: 'Profissional não encontrado' }, { status: 404 })
+    }
+
+    // Buscar dados da assinatura se existir
+    let subscription = null
+    let payments = []
+
+    if (professional.stripe_customer_id) {
+      try {
+        // Buscar assinatura ativa no Stripe
+        const stripeSubscriptions = await stripe.subscriptions.list({
+          customer: professional.stripe_customer_id,
+          status: 'all',
+          limit: 1
+        })
+
+        if (stripeSubscriptions.data.length > 0) {
+          subscription = stripeSubscriptions.data[0]
+        }
+
+        // Buscar histórico de pagamentos
+        const { data: paymentData, error: paymentsError } = await supabase
+          .from('payments')
+          .select('*')
+          .eq('professional_id', professional.id)
+          .order('created_at', { ascending: false })
+          .limit(10)
+
+        if (!paymentsError) {
+          payments = paymentData || []
+        }
+      } catch (stripeError) {
+        console.error('Erro ao buscar dados do Stripe:', stripeError)
+      }
     }
 
     return NextResponse.json({
-      subscription: subscription[0] || null,
-      payments: payments || [],
-      hasActiveSubscription: subscription.length > 0
+      id: professional.id,
+      email: professional.email,
+      username: professional.username,
+      subscription_status: professional.subscription_status,
+      subscription_plan: professional.subscription_plan,
+      subscription: subscription,
+      payments: payments,
+      hasActiveSubscription: ['active', 'trialing'].includes(professional.subscription_status)
     })
 
   } catch (error) {
