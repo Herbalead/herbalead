@@ -285,18 +285,41 @@ export async function POST(request: NextRequest) {
       const graceEndDate = new Date()
       graceEndDate.setDate(graceEndDate.getDate() + 10) // 10 dias de período de graça
       
-      const { error: profileError } = await supabase
+      // Tentar inserir com grace_period_end, se falhar, inserir sem
+      let insertData: Record<string, unknown> = {
+        id: authData.user.id,
+        name: name,
+        email: email,
+        phone: phone || null,
+        username: username,
+        subscription_status: 'active',
+        grace_period_end: graceEndDate.toISOString(),
+        created_at: new Date().toISOString()
+      }
+      
+      let { error: profileError } = await supabase
         .from('professionals')
-        .insert({
+        .insert(insertData)
+      
+      // Se erro por coluna não existir, tentar sem grace_period_end
+      if (profileError && profileError.message?.includes('grace_period_end')) {
+        console.log('Coluna grace_period_end não existe, inserindo sem ela')
+        insertData = {
           id: authData.user.id,
           name: name,
           email: email,
           phone: phone || null,
           username: username,
           subscription_status: 'active',
-          grace_period_end: graceEndDate.toISOString(),
           created_at: new Date().toISOString()
-        })
+        }
+        
+        const { error: retryError } = await supabase
+          .from('professionals')
+          .insert(insertData)
+        
+        profileError = retryError
+      }
       
       if (profileError) {
         console.error('Erro ao criar perfil:', profileError)

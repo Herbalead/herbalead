@@ -709,13 +709,20 @@ function CreateUserModal({ onClose, onCreateUser, loading }: {
     name: '',
     email: '',
     phone: '',
-    username: ''
+    username: '',
+    countryCode: '+55'
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (formData.name && formData.email && formData.username) {
-      onCreateUser(formData)
+      const phoneWithCountryCode = formData.phone ? `${formData.countryCode} ${formData.phone}` : undefined
+      onCreateUser({
+        name: formData.name,
+        email: formData.email,
+        username: formData.username,
+        phone: phoneWithCountryCode
+      })
     }
   }
 
@@ -779,13 +786,42 @@ function CreateUserModal({ onClose, onCreateUser, loading }: {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Telefone (opcional)
             </label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              placeholder="(11) 99999-9999"
-            />
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <select
+                  value={formData.countryCode || '+55'}
+                  onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
+                  className="px-3 py-2 border border-gray-300 rounded-l-md border-r-0 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50"
+                >
+                  <option value="+55">🇧🇷 +55</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+54">🇦🇷 +54</option>
+                  <option value="+56">🇨🇱 +56</option>
+                </select>
+              </div>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/\D/g, '')
+                  if (value.length <= 11) {
+                    if (value.length <= 2) {
+                      value = value
+                    } else if (value.length <= 6) {
+                      value = `(${value.slice(0, 2)}) ${value.slice(2)}`
+                    } else if (value.length <= 10) {
+                      value = `(${value.slice(0, 2)}) ${value.slice(2, 6)}-${value.slice(6)}`
+                    } else {
+                      value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`
+                    }
+                    setFormData({ ...formData, phone: value })
+                  }
+                }}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="(11) 99999-9999"
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Formato: (DDD) 99999-9999</p>
           </div>
 
           <div className="bg-blue-50 p-3 rounded-md">
