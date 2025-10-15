@@ -8,8 +8,17 @@ ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'inactive' CHECK (subs
 ADD COLUMN IF NOT EXISTS subscription_plan TEXT CHECK (subscription_plan IN ('monthly', 'yearly'));
 
 -- Adicionar constraint única no email para evitar duplicatas
-ALTER TABLE public.professionals 
-ADD CONSTRAINT IF NOT EXISTS unique_email UNIQUE (email);
+-- (Execute apenas se a constraint não existir)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'unique_email' 
+        AND table_name = 'professionals'
+    ) THEN
+        ALTER TABLE public.professionals ADD CONSTRAINT unique_email UNIQUE (email);
+    END IF;
+END $$;
 
 -- 2. Criar tabela de assinaturas
 CREATE TABLE IF NOT EXISTS public.subscriptions (
