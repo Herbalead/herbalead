@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
     status TEXT NOT NULL CHECK (status IN ('active', 'canceled', 'incomplete', 'incomplete_expired', 'past_due', 'trialing', 'unpaid')),
     plan_type TEXT NOT NULL CHECK (plan_type IN ('monthly', 'yearly')),
     current_period_start TIMESTAMP WITH TIME ZONE NOT NULL,
-    current_period_end TIMESTAMP WITH WITH TIME ZONE NOT NULL,
+    current_period_end TIMESTAMP WITH TIME ZONE NOT NULL,
     cancel_at_period_end BOOLEAN DEFAULT FALSE,
     canceled_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
