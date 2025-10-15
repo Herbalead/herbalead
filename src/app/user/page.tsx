@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Plus, Link as LinkIcon, Users, TrendingUp, Settings, BookOpen } from 'lucide-react'
+import { Plus, Link as LinkIcon, Users, TrendingUp, Settings, BookOpen, KeyRound, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 import HelpButton from '@/components/HelpButton'
@@ -53,6 +53,15 @@ export default function UserDashboard() {
     company: ''
   })
   const [countryCode, setCountryCode] = useState('55')
+  
+  // Estados para troca de senha
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordSuccess, setPasswordSuccess] = useState('')
   const [loading, setLoading] = useState(true)
 
   // Função para normalizar texto removendo acentos e caracteres especiais
@@ -817,6 +826,43 @@ export default function UserDashboard() {
     }
   }
 
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setPasswordLoading(true)
+    setPasswordError('')
+    setPasswordSuccess('')
+
+    if (newPassword.length < 6) {
+      setPasswordError('A senha deve ter pelo menos 6 caracteres.')
+      setPasswordLoading(false)
+      return
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError('As senhas não coincidem.')
+      setPasswordLoading(false)
+      return
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      })
+
+      if (error) {
+        setPasswordError(error.message)
+      } else {
+        setPasswordSuccess('Senha alterada com sucesso!')
+        setNewPassword('')
+        setConfirmNewPassword('')
+      }
+    } catch (err) {
+      setPasswordError('Ocorreu um erro inesperado.')
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -1297,6 +1343,94 @@ export default function UserDashboard() {
                 </button>
               </div>
             )}
+
+            {/* Seção de Troca de Senha */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <KeyRound className="w-5 h-5 text-green-600 mr-2" />
+                Alterar Senha
+              </h4>
+              
+              <form onSubmit={handleChangePassword} className="space-y-4">
+                <div>
+                  <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-1">
+                    Nova Senha *
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="new-password"
+                      type={showNewPassword ? 'text' : 'password'}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      disabled={passwordLoading}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                    >
+                      {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+                  {newPassword && newPassword.length < 6 && (
+                    <p className="text-red-500 text-xs mt-1">A senha deve ter pelo menos 6 caracteres.</p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">
+                    Confirmar Nova Senha *
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="confirm-password"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      disabled={passwordLoading}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                    >
+                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+                  {confirmNewPassword && newPassword !== confirmNewPassword && (
+                    <p className="text-red-500 text-xs mt-1">As senhas não coincidem.</p>
+                  )}
+                </div>
+
+                {passwordError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                    {passwordError}
+                  </div>
+                )}
+
+                {passwordSuccess && (
+                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+                    {passwordSuccess}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={passwordLoading || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword}
+                  className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  {passwordLoading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  ) : (
+                    'Alterar Senha'
+                  )}
+                </button>
+              </form>
+            </div>
           </div>
         )}
 
@@ -1304,23 +1438,6 @@ export default function UserDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Configurações</h3>
             <div className="space-y-4">
-              {/* Perfil */}
-              <div className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-gray-900">Perfil</h4>
-                    <p className="text-sm text-gray-500">Altere sua senha e informações pessoais</p>
-                  </div>
-                  <Link
-                    href="/user/profile"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Configurar
-                  </Link>
-                </div>
-              </div>
-
               {/* Assinatura */}
               <div className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between">
