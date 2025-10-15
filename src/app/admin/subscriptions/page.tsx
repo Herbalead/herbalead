@@ -64,6 +64,12 @@ export default function AdminDashboard() {
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  
+  // Filtros
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [planFilter, setPlanFilter] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [dateFilter, setDateFilter] = useState('all')
 
   useEffect(() => {
     loadDashboardData()
@@ -157,8 +163,55 @@ export default function AdminDashboard() {
       case 'canceled': return 'Cancelado'
       case 'past_due': return 'Em Atraso'
       case 'inactive': return 'Inativo'
+      case 'unpaid': return 'Não Pago'
       default: return status
     }
+  }
+
+  // Função para filtrar usuários
+  const getFilteredUsers = () => {
+    return users.filter(user => {
+      // Filtro por status
+      if (statusFilter !== 'all' && user.subscription_status !== statusFilter) {
+        return false
+      }
+
+      // Filtro por plano
+      const userPlan = user.subscriptions?.[0]?.plan_type || user.subscription_plan
+      if (planFilter !== 'all' && userPlan !== planFilter) {
+        return false
+      }
+
+      // Filtro por busca (nome ou email)
+      if (searchTerm && !user.name?.toLowerCase().includes(searchTerm.toLowerCase()) && 
+          !user.email?.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false
+      }
+
+      // Filtro por data
+      if (dateFilter !== 'all') {
+        const userDate = new Date(user.created_at)
+        const now = new Date()
+        const daysDiff = Math.floor((now.getTime() - userDate.getTime()) / (1000 * 60 * 60 * 24))
+        
+        switch (dateFilter) {
+          case 'today':
+            if (daysDiff !== 0) return false
+            break
+          case 'week':
+            if (daysDiff > 7) return false
+            break
+          case 'month':
+            if (daysDiff > 30) return false
+            break
+          case 'year':
+            if (daysDiff > 365) return false
+            break
+        }
+      }
+
+      return true
+    })
   }
 
   if (loading) {
@@ -312,6 +365,75 @@ export default function AdminDashboard() {
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Gestão de Usuários</h3>
             </div>
+            
+            {/* Filtros */}
+            <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Busca por nome/email */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+                  <input
+                    type="text"
+                    placeholder="Nome ou email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* Filtro por status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="all">Todos os status</option>
+                    <option value="active">Ativo</option>
+                    <option value="inactive">Inativo</option>
+                    <option value="past_due">Em Atraso</option>
+                    <option value="canceled">Cancelado</option>
+                    <option value="unpaid">Não Pago</option>
+                  </select>
+                </div>
+
+                {/* Filtro por plano */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Plano</label>
+                  <select
+                    value={planFilter}
+                    onChange={(e) => setPlanFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="all">Todos os planos</option>
+                    <option value="monthly">Mensal</option>
+                    <option value="yearly">Anual</option>
+                  </select>
+                </div>
+
+                {/* Filtro por data */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro</label>
+                  <select
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="all">Todas as datas</option>
+                    <option value="today">Hoje</option>
+                    <option value="week">Última semana</option>
+                    <option value="month">Último mês</option>
+                    <option value="year">Último ano</option>
+                  </select>
+                </div>
+              </div>
+              
+              {/* Contador de resultados */}
+              <div className="mt-3 text-sm text-gray-600">
+                Mostrando {getFilteredUsers().length} de {users.length} usuários
+              </div>
+            </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -324,7 +446,7 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map((user) => (
+                  {getFilteredUsers().map((user) => (
                     <tr key={user.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
