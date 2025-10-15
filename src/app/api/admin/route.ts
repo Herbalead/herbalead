@@ -260,16 +260,19 @@ export async function POST(request: NextRequest) {
 
     } else if (action === 'create_user') {
       // Criar usuário manualmente
-      const { name, email, phone, username } = await request.json()
+      const { name, email, phone, username, tempPassword } = await request.json()
       
-      if (!name || !email || !username) {
-        return NextResponse.json({ error: 'Nome, email e username são obrigatórios' }, { status: 400 })
+      console.log('Dados recebidos para criação:', { name, email, phone, username, tempPassword: !!tempPassword })
+      
+      if (!name || !email || !username || !tempPassword) {
+        console.log('Campos obrigatórios faltando:', { name: !!name, email: !!email, username: !!username, tempPassword: !!tempPassword })
+        return NextResponse.json({ error: 'Nome, email, username e senha temporária são obrigatórios' }, { status: 400 })
       }
       
-      // Gerar senha temporária
-      const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8).toUpperCase()
+      console.log('Usando senha fornecida pelo admin:', tempPassword)
       
       // Criar usuário no Supabase Auth
+      console.log('Criando usuário no Supabase Auth...')
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: email,
         password: tempPassword,
@@ -281,9 +284,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Erro ao criar usuário: ' + authError.message }, { status: 500 })
       }
       
+      console.log('Usuário criado no auth com sucesso:', authData.user.id)
+      
       // Criar perfil na tabela professionals
       const graceEndDate = new Date()
-      graceEndDate.setDate(graceEndDate.getDate() + 10) // 10 dias de período de graça
+      graceEndDate.setDate(graceEndDate.getDate() + 7) // 7 dias de período de graça
       
       // Tentar inserir com grace_period_end, se falhar, inserir sem
       let insertData: Record<string, unknown> = {
@@ -338,9 +343,39 @@ export async function POST(request: NextRequest) {
         }
       })
 
+    } else if (action === 'give_free_subscription') {
+      // Dar assinatura gratuita (mensal ou anual)
+      const { planType, months } = await request.json()
+      
+      if (!planType || !months) {
+        return NextResponse.json({ error: 'Tipo de plano e duração são obrigatórios' }, { status: 400 })
+      }
+      
+      const endDate = new Date()
+      endDate.setMonth(endDate.getMonth() + months)
+      
+      const { error } = await supabase
+        .from('professionals')
+        .update({ 
+          subscription_status: 'active',
+          subscription_plan: planType,
+          grace_period_end: endDate.toISOString() // Usar grace_period_end para controlar fim da assinatura gratuita
+        })
+        .eq('id', userId)
+
+      if (error) {
+        console.error('Erro ao dar assinatura gratuita:', error)
+        return NextResponse.json({ error: 'Erro ao dar assinatura gratuita: ' + error.message }, { status: 500 })
+      }
+
+      return NextResponse.json({ 
+        success: true, 
+        message: `Assinatura ${planType} gratuita de ${months} meses concedida até ${endDate.toLocaleDateString('pt-BR')}` 
+      })
+
     } else if (action === 'give_grace_period') {
       // Conceder período de graça
-      const graceDays = days || 10
+      const graceDays = days || 7
       const graceEndDate = new Date()
       graceEndDate.setDate(graceEndDate.getDate() + graceDays)
       

@@ -839,7 +839,7 @@ export default function UserDashboard() {
       </header>
 
       {/* Notificação de assinatura */}
-      {(!userProfile.subscription_status || !['active', 'trialing'].includes(userProfile.subscription_status)) && (
+      {(!userProfile.subscription_status || userProfile.subscription_status !== 'active') && (
         <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">

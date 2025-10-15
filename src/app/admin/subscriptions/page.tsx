@@ -134,6 +134,36 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleGiveFreeSubscription = async (userId: string, planType: string, months: number) => {
+    setActionLoading(userId)
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'give_free_subscription',
+          userId: userId,
+          planType: planType,
+          months: months
+        })
+      })
+
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
+        await loadDashboardData()
+        alert(result.message || `Assinatura ${planType} gratuita de ${months} meses concedida!`)
+      } else {
+        alert('Erro: ' + (result.error || result.message || 'Erro desconhecido'))
+      }
+    } catch (error) {
+      console.error('Erro ao dar assinatura gratuita:', error)
+      alert('Erro ao dar assinatura gratuita: ' + (error instanceof Error ? error.message : 'Erro desconhecido'))
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
   const handleGiveGracePeriod = async (userId: string) => {
     setActionLoading(userId)
     try {
@@ -163,7 +193,7 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleCreateUser = async (userData: { name: string; email: string; phone?: string; username: string }) => {
+  const handleCreateUser = async (userData: { name: string; email: string; phone?: string; username: string; tempPassword: string }) => {
     setActionLoading('create_user')
     try {
       const response = await fetch('/api/admin', {
@@ -591,9 +621,28 @@ export default function AdminDashboard() {
                           onClick={() => handleGiveGracePeriod(user.id)}
                           disabled={actionLoading === user.id}
                           className="text-purple-600 hover:text-purple-900 ml-2"
-                          title="Conceder 10 dias de período de graça"
+                          title="Conceder 7 dias de período de graça"
                         >
-                          {actionLoading === user.id ? '...' : '10 dias'}
+                          {actionLoading === user.id ? '...' : '7 dias'}
+                        </button>
+                        
+                        {/* Botões de assinatura gratuita */}
+                        <button
+                          onClick={() => handleGiveFreeSubscription(user.id, 'monthly', 1)}
+                          disabled={actionLoading === user.id}
+                          className="text-green-600 hover:text-green-900 ml-2"
+                          title="Dar 1 mês gratuito"
+                        >
+                          {actionLoading === user.id ? '...' : '1 mês'}
+                        </button>
+                        
+                        <button
+                          onClick={() => handleGiveFreeSubscription(user.id, 'yearly', 12)}
+                          disabled={actionLoading === user.id}
+                          className="text-blue-600 hover:text-blue-900 ml-2"
+                          title="Dar 1 ano gratuito"
+                        >
+                          {actionLoading === user.id ? '...' : '1 ano'}
                         </button>
                       </td>
                     </tr>
@@ -702,7 +751,7 @@ export default function AdminDashboard() {
 // Componente do Modal de Criação de Usuário
 function CreateUserModal({ onClose, onCreateUser, loading }: { 
   onClose: () => void
-  onCreateUser: (data: { name: string; email: string; phone?: string; username: string }) => void
+  onCreateUser: (data: { name: string; email: string; phone?: string; username: string; tempPassword: string }) => void
   loading: boolean 
 }) {
   const [formData, setFormData] = useState({
@@ -710,18 +759,20 @@ function CreateUserModal({ onClose, onCreateUser, loading }: {
     email: '',
     phone: '',
     username: '',
-    countryCode: '+55'
+    countryCode: '+55',
+    tempPassword: ''
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (formData.name && formData.email && formData.username) {
+    if (formData.name && formData.email && formData.username && formData.tempPassword) {
       const phoneWithCountryCode = formData.phone ? `${formData.countryCode} ${formData.phone}` : undefined
       onCreateUser({
         name: formData.name,
         email: formData.email,
         username: formData.username,
-        phone: phoneWithCountryCode
+        phone: phoneWithCountryCode,
+        tempPassword: formData.tempPassword
       })
     }
   }
@@ -784,6 +835,33 @@ function CreateUserModal({ onClose, onCreateUser, loading }: {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
+              Senha Temporária *
+            </label>
+            <div className="flex">
+              <input
+                type="text"
+                required
+                value={formData.tempPassword}
+                onChange={(e) => setFormData({ ...formData, tempPassword: e.target.value })}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="Senha temporária"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const newPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8).toUpperCase()
+                  setFormData({ ...formData, tempPassword: newPassword })
+                }}
+                className="ml-2 px-3 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 text-sm"
+              >
+                Gerar
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Senha temporária que o usuário usará para fazer login</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Telefone (opcional)
             </label>
             <div className="flex">
@@ -793,10 +871,20 @@ function CreateUserModal({ onClose, onCreateUser, loading }: {
                   onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
                   className="px-3 py-2 border border-gray-300 rounded-l-md border-r-0 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50"
                 >
-                  <option value="+55">🇧🇷 +55</option>
-                  <option value="+1">🇺🇸 +1</option>
-                  <option value="+54">🇦🇷 +54</option>
-                  <option value="+56">🇨🇱 +56</option>
+                  <option value="+55">🇧🇷 +55 Brasil</option>
+                  <option value="+351">🇵🇹 +351 Portugal</option>
+                  <option value="+34">🇪🇸 +34 Espanha</option>
+                  <option value="+1">🇺🇸 +1 EUA/Canadá</option>
+                  <option value="+44">🇬🇧 +44 Reino Unido</option>
+                  <option value="+33">🇫🇷 +33 França</option>
+                  <option value="+49">🇩🇪 +49 Alemanha</option>
+                  <option value="+39">🇮🇹 +39 Itália</option>
+                  <option value="+54">🇦🇷 +54 Argentina</option>
+                  <option value="+56">🇨🇱 +56 Chile</option>
+                  <option value="+57">🇨🇴 +57 Colômbia</option>
+                  <option value="+52">🇲🇽 +52 México</option>
+                  <option value="+598">🇺🇾 +598 Uruguai</option>
+                  <option value="+595">🇵🇾 +595 Paraguai</option>
                 </select>
               </div>
               <input
@@ -804,7 +892,10 @@ function CreateUserModal({ onClose, onCreateUser, loading }: {
                 value={formData.phone}
                 onChange={(e) => {
                   let value = e.target.value.replace(/\D/g, '')
-                  if (value.length <= 11) {
+                  
+                  // Aplicar máscara baseada no país selecionado
+                  if (formData.countryCode === '+55') {
+                    // Brasil: (DDD) 99999-9999
                     if (value.length <= 2) {
                       value = value
                     } else if (value.length <= 6) {
@@ -814,19 +905,47 @@ function CreateUserModal({ onClose, onCreateUser, loading }: {
                     } else {
                       value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`
                     }
-                    setFormData({ ...formData, phone: value })
+                  } else if (formData.countryCode === '+351') {
+                    // Portugal: 999 999 999
+                    if (value.length <= 3) {
+                      value = value
+                    } else if (value.length <= 6) {
+                      value = `${value.slice(0, 3)} ${value.slice(3)}`
+                    } else {
+                      value = `${value.slice(0, 3)} ${value.slice(3, 6)} ${value.slice(6, 9)}`
+                    }
+                  } else if (formData.countryCode === '+1') {
+                    // EUA/Canadá: (999) 999-9999
+                    if (value.length <= 3) {
+                      value = value
+                    } else if (value.length <= 6) {
+                      value = `(${value.slice(0, 3)}) ${value.slice(3)}`
+                    } else {
+                      value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6, 10)}`
+                    }
+                  } else {
+                    // Outros países: formato simples
+                    if (value.length > 15) value = value.slice(0, 15)
                   }
+                  
+                  setFormData({ ...formData, phone: value })
                 }}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                placeholder="(11) 99999-9999"
+                placeholder={formData.countryCode === '+55' ? '(11) 99999-9999' : 
+                           formData.countryCode === '+351' ? '999 999 999' :
+                           formData.countryCode === '+1' ? '(999) 999-9999' : '999999999'}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">Formato: (DDD) 99999-9999</p>
+            <p className="text-xs text-gray-500 mt-1">
+              Formato: {formData.countryCode === '+55' ? '(DDD) 99999-9999' : 
+                       formData.countryCode === '+351' ? '999 999 999' :
+                       formData.countryCode === '+1' ? '(999) 999-9999' : '999999999'}
+            </p>
           </div>
 
           <div className="bg-blue-50 p-3 rounded-md">
             <p className="text-sm text-blue-800">
-              <strong>Período de graça:</strong> O usuário receberá automaticamente 10 dias de acesso completo.
+              <strong>Período de graça:</strong> O usuário receberá automaticamente 7 dias de acesso completo.
             </p>
           </div>
 
@@ -840,7 +959,7 @@ function CreateUserModal({ onClose, onCreateUser, loading }: {
             </button>
             <button
               type="submit"
-              disabled={loading || !formData.name || !formData.email || !formData.username}
+              disabled={loading || !formData.name || !formData.email || !formData.username || !formData.tempPassword}
               className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Criando...' : 'Criar Usuário'}
