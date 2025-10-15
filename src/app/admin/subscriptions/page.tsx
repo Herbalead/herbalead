@@ -715,7 +715,7 @@ export default function AdminDashboard() {
                           '-'
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-6 py-4 text-sm font-medium">
                         <div className="relative inline-block dropdown-container">
                           <button
                             onClick={(e) => {
@@ -729,7 +729,7 @@ export default function AdminDashboard() {
                           </button>
                           
                           {openDropdown === user.id && (
-                            <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-50 border border-gray-200 max-h-96 overflow-y-auto">
+                            <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-md shadow-lg z-50 border border-gray-200 max-h-96 overflow-y-auto">
                               <div className="py-1">
                                 {/* Período de graça */}
                                 <button
