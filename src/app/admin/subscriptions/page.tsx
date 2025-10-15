@@ -97,7 +97,8 @@ export default function AdminDashboard() {
   // Fechar dropdown ao clicar fora
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (openDropdown) {
+      const target = event.target as HTMLElement
+      if (openDropdown && !target.closest('.dropdown-container')) {
         setOpenDropdown(null)
       }
     }
@@ -715,9 +716,12 @@ export default function AdminDashboard() {
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="relative">
+                        <div className="relative inline-block dropdown-container">
                           <button
-                            onClick={() => setOpenDropdown(openDropdown === user.id ? null : user.id)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setOpenDropdown(openDropdown === user.id ? null : user.id)
+                            }}
                             className="flex items-center space-x-1 px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50"
                           >
                             <MoreVertical className="w-4 h-4" />
@@ -725,7 +729,7 @@ export default function AdminDashboard() {
                           </button>
                           
                           {openDropdown === user.id && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                            <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-50 border border-gray-200 max-h-96 overflow-y-auto">
                               <div className="py-1">
                                 {/* Período de graça */}
                                 <button

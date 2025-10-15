@@ -232,34 +232,6 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ success: true, message: 'Plano alterado com sucesso' })
 
-    } else if (action === 'cancel_subscription') {
-      if (!subscriptionId) {
-        return NextResponse.json({ error: 'ID da assinatura é obrigatório' }, { status: 400 })
-      }
-
-      // Cancelar assinatura
-      const { error } = await supabase
-        .from('subscriptions')
-        .update({ 
-          status: 'canceled',
-          canceled_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', subscriptionId)
-
-      if (error) {
-        console.error('Erro ao cancelar assinatura:', error)
-        return NextResponse.json({ error: 'Erro ao cancelar assinatura' }, { status: 500 })
-      }
-
-      // Atualizar também na tabela professionals
-      await supabase
-        .from('professionals')
-        .update({ subscription_status: 'canceled' })
-        .eq('id', userId)
-
-      return NextResponse.json({ success: true, message: 'Assinatura cancelada com sucesso' })
-
     } else if (action === 'create_user') {
       // Criar usuário manualmente
       const { name, email, phone, username, tempPassword } = requestData
