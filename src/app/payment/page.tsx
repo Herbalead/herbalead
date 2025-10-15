@@ -139,12 +139,17 @@ export default function PaymentPage() {
             {/* Plan Details */}
             <div className="text-center mb-12">
               <div className="relative">
-                <div className="text-4xl md:text-5xl font-bold text-emerald-600 mb-4">
+                <div className="text-4xl md:text-5xl font-bold text-emerald-600 mb-2">
                   {currentPlan.price}
                   <span className="text-sm md:text-base text-gray-500 ml-2 font-normal">
-                    {selectedPlan === 'monthly' ? '/mês' : '/ano'}
+                    {currentPlan.period}
                   </span>
                 </div>
+                {selectedPlan === 'yearly' && (
+                  <div className="text-sm text-gray-400 mb-4">
+                    {currentPlan.total}
+                  </div>
+                )}
                 <div className="text-base md:text-lg text-gray-500 mb-6">
                   {currentPlan.description}
                 </div>
