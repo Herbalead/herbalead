@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   
   const pageTitle = toolMessage?.title || `${projeto} - HerbaLead`
   const pageDescription = toolMessage?.description || 'Acesse nossa ferramenta especializada para cuidar da sua saúde.'
+  const pageImage = toolMessage?.image || 'https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg'
   
   return {
     title: pageTitle,
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       siteName: 'HerbaLead',
       images: [
         {
-          url: 'https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg',
+          url: pageImage,
           width: 1200,
           height: 630,
           alt: pageTitle,
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       card: 'summary_large_image',
       title: pageTitle,
       description: pageDescription,
-      images: ['https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg'],
+      images: [pageImage],
     },
     other: {
       'theme-color': '#10b981',
