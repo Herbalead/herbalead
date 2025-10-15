@@ -59,9 +59,25 @@ export async function middleware(request: NextRequest) {
       // Buscar dados do usuário e assinatura
       const { data: professional } = await supabase
         .from('professionals')
-        .select('subscription_status, subscription_plan')
+        .select('subscription_status, subscription_plan, grace_period_end')
         .eq('email', user.email)
         .single()
+      
+      // Verificar se período de graça expirou
+      if (professional?.subscription_status === 'trialing' && professional.grace_period_end) {
+        const graceEndDate = new Date(professional.grace_period_end)
+        const now = new Date()
+        
+        if (now > graceEndDate) {
+          // Período de graça expirou - atualizar status para inactive
+          await supabase
+            .from('professionals')
+            .update({ subscription_status: 'inactive' })
+            .eq('email', user.email)
+          
+          return NextResponse.redirect(new URL('/payment-overdue', url))
+        }
+      }
       
       // Se usuário não tem assinatura ativa, bloquear acesso
       if (!professional || !['active', 'trialing'].includes(professional.subscription_status)) {
@@ -83,9 +99,25 @@ export async function middleware(request: NextRequest) {
       // Buscar dados do usuário
       const { data: professional } = await supabase
         .from('professionals')
-        .select('subscription_status, subscription_plan')
+        .select('subscription_status, subscription_plan, grace_period_end')
         .eq('username', username)
         .single()
+      
+      // Verificar se período de graça expirou
+      if (professional?.subscription_status === 'trialing' && professional.grace_period_end) {
+        const graceEndDate = new Date(professional.grace_period_end)
+        const now = new Date()
+        
+        if (now > graceEndDate) {
+          // Período de graça expirou - atualizar status para inactive
+          await supabase
+            .from('professionals')
+            .update({ subscription_status: 'inactive' })
+            .eq('username', username)
+          
+          return NextResponse.redirect(new URL(`/account-suspended?user=${username}`, url))
+        }
+      }
       
       // Se usuário não tem assinatura ativa, mostrar página de bloqueio
       if (!professional || !professional.subscription_status || !['active', 'trialing'].includes(professional.subscription_status)) {

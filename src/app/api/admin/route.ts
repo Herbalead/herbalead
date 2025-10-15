@@ -67,6 +67,7 @@ export async function GET(request: NextRequest) {
           subscription_status,
           subscription_plan,
           stripe_customer_id,
+          grace_period_end,
           created_at,
           subscriptions (
             id,
@@ -257,12 +258,15 @@ export async function POST(request: NextRequest) {
     } else if (action === 'give_grace_period') {
       // Conceder período de graça
       const graceDays = days || 10
+      const graceEndDate = new Date()
+      graceEndDate.setDate(graceEndDate.getDate() + graceDays)
       
-      // Atualizar status para trialing (sem depender da coluna grace_period_end)
+      // Atualizar status para trialing com data de fim
       const { error } = await supabase
         .from('professionals')
         .update({ 
-          subscription_status: 'trialing'
+          subscription_status: 'trialing',
+          grace_period_end: graceEndDate.toISOString()
         })
         .eq('id', userId)
 
@@ -273,7 +277,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ 
         success: true, 
-        message: `Período de graça de ${graceDays} dias concedido com sucesso` 
+        message: `Período de graça de ${graceDays} dias concedido com sucesso até ${graceEndDate.toLocaleDateString('pt-BR')}` 
       })
 
     } else {
