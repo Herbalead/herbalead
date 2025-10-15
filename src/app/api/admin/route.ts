@@ -15,10 +15,10 @@ export async function GET(request: NextRequest) {
     if (action === 'dashboard') {
       // Estatísticas gerais
       const [
-        { data: totalUsers, error: usersError },
-        { data: activeSubscriptions, error: subsError },
-        { data: totalRevenue, error: revenueError },
-        { data: recentUsers, error: recentError }
+        { data: totalUsers },
+        { data: activeSubscriptions },
+        { data: totalRevenue },
+        { data: recentUsers }
       ] = await Promise.all([
         // Total de usuários
         supabase

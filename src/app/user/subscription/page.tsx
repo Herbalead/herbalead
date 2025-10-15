@@ -3,16 +3,13 @@
 import { useState, useEffect } from 'react'
 import { 
   CreditCard, 
-  Calendar, 
   AlertTriangle, 
   CheckCircle, 
   XCircle,
   RefreshCw,
   ArrowLeft,
   Settings,
-  DollarSign,
-  Clock,
-  User
+  Clock
 } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
@@ -48,7 +45,7 @@ export default function SubscriptionSettingsPage() {
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{ id: string; email: string } | null>(null)
 
   useEffect(() => {
     const getUser = async () => {
@@ -73,7 +70,7 @@ export default function SubscriptionSettingsPage() {
     }
   }
 
-  const handleSubscriptionAction = async (action: string, subscriptionId: string, additionalData?: any) => {
+  const handleSubscriptionAction = async (action: string, subscriptionId: string, additionalData?: Record<string, unknown>) => {
     setActionLoading(action)
     try {
       const response = await fetch('/api/subscription', {
