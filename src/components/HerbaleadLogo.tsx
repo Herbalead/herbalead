@@ -18,21 +18,18 @@ export default function HerbaleadLogo({
 }: HerbaleadLogoProps) {
   
   const sizeClasses = {
-    sm: 32,
-    md: 40, 
-    lg: 56,
-    xl: 64
+    sm: { width: 120, height: 32 },
+    md: { width: 150, height: 40 }, 
+    lg: { width: 200, height: 56 },
+    xl: { width: 250, height: 64 }
   }
   
   const iconSizeClasses = {
-    sm: 32,
-    md: 40, 
-    lg: 56,
-    xl: 64
+    sm: { width: 32, height: 32 },
+    md: { width: 40, height: 40 }, 
+    lg: { width: 56, height: 56 },
+    xl: { width: 64, height: 64 }
   }
-
-  // Responsive sizes
-  const responsiveSize = responsive ? { width: 0, height: 0 } : { width: sizeClasses[size], height: sizeClasses[size] }
 
   // Logo paths
   const logoPaths = {
@@ -46,12 +43,14 @@ export default function HerbaleadLogo({
   if (variant === 'iconOnly') {
     return (
       <Image
-        src={`${logoPaths.iconOnly}?v=2024`}
+        src={logoPaths.iconOnly}
         alt="HerbaLead"
-        width={iconSizeClasses[size]}
-        height={iconSizeClasses[size]}
+        width={iconSizeClasses[size].width}
+        height={iconSizeClasses[size].height}
         className={className}
         priority
+        quality={100}
+        unoptimized={false}
       />
     )
   }
@@ -59,12 +58,14 @@ export default function HerbaleadLogo({
   return (
     <div className={`flex items-center ${className}`}>
       <Image
-        src={`${logoPaths[variant]}?v=2024`}
+        src={logoPaths[variant]}
         alt="HerbaLead - Your Lead Accelerator"
-        width={responsive ? 0 : sizeClasses[size]}
-        height={responsive ? 0 : sizeClasses[size]}
+        width={responsive ? 200 : sizeClasses[size].width}
+        height={responsive ? 56 : sizeClasses[size].height}
         className={responsive ? 'h-10 md:h-12 lg:h-14 w-auto' : 'w-auto'}
         priority
+        quality={100}
+        unoptimized={false}
       />
     </div>
   )

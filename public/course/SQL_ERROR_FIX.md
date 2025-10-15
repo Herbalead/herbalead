@@ -115,3 +115,4 @@ O sistema agora usa a estrutura correta da tabela `professionals` e deve funcion
 
 
 
+
