@@ -1304,6 +1304,23 @@ export default function UserDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Configurações</h3>
             <div className="space-y-4">
+              {/* Perfil */}
+              <div className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-gray-900">Perfil</h4>
+                    <p className="text-sm text-gray-500">Altere sua senha e informações pessoais</p>
+                  </div>
+                  <Link
+                    href="/user/profile"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Configurar
+                  </Link>
+                </div>
+              </div>
+
               {/* Assinatura */}
               <div className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between">

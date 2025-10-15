@@ -22,7 +22,8 @@ import {
   Pause,
   Play,
   Ban,
-  Trash2
+  Trash2,
+  KeyRound
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -210,6 +211,11 @@ export default function AdminDashboard() {
         message: `Cancelar assinatura de ${userName}?`,
         icon: Ban,
         color: 'text-orange-600'
+      },
+      'reset_password': {
+        message: `Resetar senha de ${userName}? Uma nova senha temporária será definida.`,
+        icon: KeyRound,
+        color: 'text-blue-600'
       },
       'delete_user': {
         message: `EXCLUIR PERMANENTEMENTE o usuário ${userName}? Esta ação não pode ser desfeita!`,
@@ -907,7 +913,16 @@ export default function AdminDashboard() {
             
             <div className="border-t border-gray-100 my-1"></div>
             
-            {/* Gerenciamento */}
+            {/* Reset de senha */}
+            <button
+              onClick={() => showConfirmation('reset_password', openDropdown, users.find(u => u.id === openDropdown)?.name || 'Usuário')}
+              className="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
+            >
+              <KeyRound className="w-4 h-4 mr-2" />
+              Resetar senha
+            </button>
+            
+            <div className="border-t border-gray-100 my-1"></div>
             <button
               onClick={() => showConfirmation('suspend_user', openDropdown, users.find(u => u.id === openDropdown)?.name || 'Usuário')}
               className="flex items-center w-full px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50"

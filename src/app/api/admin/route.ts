@@ -478,6 +478,33 @@ export async function POST(request: NextRequest) {
         message: `Período de graça de ${graceDays} dias concedido com sucesso até ${graceEndDate.toLocaleDateString('pt-BR')}` 
       })
 
+    } else if (action === 'reset_password') {
+      // Resetar senha do usuário
+      if (!userId) {
+        return NextResponse.json({ error: 'ID do usuário é obrigatório' }, { status: 400 })
+      }
+
+      // Gerar nova senha temporária
+      const newPassword = 'HerbaLead2024!'
+      
+      console.log('Resetando senha para usuário:', userId)
+      
+      // Resetar senha usando Supabase Admin
+      const { data, error } = await supabase.auth.admin.updateUserById(
+        userId,
+        { password: newPassword }
+      )
+
+      if (error) {
+        console.error('Erro ao resetar senha:', error)
+        return NextResponse.json({ error: 'Erro ao resetar senha: ' + error.message }, { status: 500 })
+      }
+
+      return NextResponse.json({ 
+        success: true, 
+        message: `Senha resetada com sucesso! Nova senha: ${newPassword}` 
+      })
+
     } else {
       return NextResponse.json({ error: 'Ação não reconhecida' }, { status: 400 })
     }

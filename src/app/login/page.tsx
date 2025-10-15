@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Mail, Lock, User, CreditCard } from 'lucide-react'
+import { ArrowLeft, Mail, Lock, User, CreditCard, Eye, EyeOff } from 'lucide-react'
 import { signIn } from '@/lib/supabase'
 
 interface FormData {
@@ -17,10 +17,7 @@ export default function LoginPage() {
   const [projectDomain, setProjectDomain] = useState('')
   const router = useRouter()
 
-  const [formData, setFormData] = useState<FormData>({
-    email: '',
-    password: ''
-  })
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
     // Detectar projeto pelo subdomínio
@@ -143,13 +140,20 @@ export default function LoginPage() {
               <div className="relative">
                 <Lock className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   placeholder="Sua senha"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
 
