@@ -102,7 +102,7 @@ export async function signIn(email: string, password: string) {
     
     // Verificar se o usuário existe na tabela professionals
     if (data.user) {
-      const { data: professional, error: profError } = await supabase
+      const { error: profError } = await supabase
         .from('professionals')
         .select('id')
         .eq('email', email)
@@ -236,7 +236,7 @@ export async function checkAndCleanEmail(email: string) {
     console.log('🔍 Verificando email:', email)
     
     // Verificar se existe na tabela professionals
-    const { data: professional, error: profError } = await supabase
+    const { error: profError } = await supabase
       .from('professionals')
       .select('id, email')
       .eq('email', email)
@@ -248,7 +248,7 @@ export async function checkAndCleanEmail(email: string) {
       
       // Tentar fazer login para ver se existe no auth
       try {
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        await supabase.auth.signInWithPassword({
           email,
           password: 'dummy_password_to_check_existence'
         })
@@ -256,8 +256,9 @@ export async function checkAndCleanEmail(email: string) {
         // Se chegou aqui, o usuário existe no auth mas com senha errada
         console.log('⚠️ Email existe no auth mas não na tabela professionals')
         return { exists: true, needsCleanup: true }
-      } catch (authError: any) {
-        if (authError.message?.includes('Invalid login credentials')) {
+      } catch (authError: unknown) {
+        const errorMessage = authError instanceof Error ? authError.message : String(authError)
+        if (errorMessage.includes('Invalid login credentials')) {
           // Usuário existe no auth mas senha está errada
           console.log('⚠️ Email existe no auth mas senha está errada')
           return { exists: true, needsCleanup: true }
