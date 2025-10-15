@@ -693,7 +693,7 @@ export default function AdminDashboard() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plano</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cadastro</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Período de Graça</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vencimento</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                   </tr>
                 </thead>
@@ -725,6 +725,21 @@ export default function AdminDashboard() {
                           <div>
                             <div className="text-xs text-purple-600">Período de graça</div>
                             <div className="text-xs">{formatDate(user.grace_period_end)}</div>
+                          </div>
+                        ) : user.subscriptions?.[0]?.current_period_end ? (
+                          <div>
+                            <div className="text-xs text-blue-600">Assinatura</div>
+                            <div className="text-xs">{formatDate(user.subscriptions[0].current_period_end)}</div>
+                            {(() => {
+                              const endDate = new Date(user.subscriptions[0].current_period_end)
+                              const now = new Date()
+                              const daysLeft = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+                              return daysLeft > 0 ? (
+                                <div className="text-xs text-green-600">{daysLeft} dias restantes</div>
+                              ) : (
+                                <div className="text-xs text-red-600">Vencido</div>
+                              )
+                            })()}
                           </div>
                         ) : (
                           '-'
