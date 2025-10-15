@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '../../../../../lib/stripe-subscriptions'
 import { createClient } from '@supabase/supabase-js'
+import { sendPaymentConfirmationEmail } from '../../../../../lib/payment-validation'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,7 +30,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
     }
 
-    console.log('Stripe webhook received:', event.type)
+    console.log('🔔 Stripe webhook received:', {
+      type: event.type,
+      id: event.id,
+      created: new Date(event.created * 1000).toISOString(),
+      livemode: event.livemode
+    })
 
     // Handle different event types
     switch (event.type) {
@@ -55,7 +61,7 @@ export async function POST(request: NextRequest) {
             // Criar usuário na auth.users primeiro
             const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
               email: session.customer_email,
-              password: 'temp-password-' + Date.now(), // Senha temporária
+              password: 'tetemp-password-' + Date.now(), // Senha temporária
               email_confirm: true,
               user_metadata: {
                 name: session.customer_details?.name || 'Usuário'
@@ -275,17 +281,35 @@ export async function POST(request: NextRequest) {
 
       case 'invoice.payment_succeeded':
         const invoice = event.data.object
-        console.log('Payment succeeded:', invoice.id)
+        console.log('💳 Payment succeeded:', {
+          invoice_id: invoice.id,
+          subscription_id: invoice.subscription,
+          amount: invoice.amount_paid,
+          currency: invoice.currency,
+          customer_email: invoice.customer_email
+        })
         
         // Salvar pagamento no banco
         if (invoice.subscription) {
           const { data: subscription, error: subError } = await supabase
             .from('subscriptions')
-            .select('id')
+            .select('id, user_id')
             .eq('stripe_subscription_id', invoice.subscription)
             .single()
 
           if (!subError && subscription) {
+            // Verificar se pagamento já existe (evitar duplicatas)
+            const { data: existingPayment } = await supabase
+              .from('payments')
+              .select('id')
+              .eq('stripe_invoice_id', invoice.id)
+              .single()
+
+            if (existingPayment) {
+              console.log('⚠️ Pagamento já existe, ignorando:', invoice.id)
+              break
+            }
+
             const { error: paymentError } = await supabase
               .from('payments')
               .insert({
@@ -299,10 +323,42 @@ export async function POST(request: NextRequest) {
               })
 
             if (paymentError) {
-              console.error('Erro ao salvar pagamento:', paymentError)
+              console.error('❌ Erro ao salvar pagamento:', paymentError)
             } else {
-              console.log('✅ Pagamento salvo:', invoice.id)
+              console.log('✅ Pagamento salvo com sucesso:', invoice.id)
+              
+              // Atualizar status do profissional para ativo
+              const { error: updateError } = await supabase
+                .from('professionals')
+                .update({ 
+                  subscription_status: 'active',
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', subscription.user_id)
+
+              if (updateError) {
+                console.error('❌ Erro ao atualizar status do profissional:', updateError)
+              } else {
+                console.log('✅ Status do profissional atualizado para ativo:', subscription.user_id)
+                
+                // Enviar email de confirmação
+                if (invoice.customer_email) {
+                  const emailResult = await sendPaymentConfirmationEmail(
+                    invoice.customer_email,
+                    invoice.amount_paid,
+                    invoice.currency
+                  )
+                  
+                  if (emailResult.success) {
+                    console.log('✅ Email de confirmação enviado para:', invoice.customer_email)
+                  } else {
+                    console.error('❌ Erro ao enviar email:', emailResult.error)
+                  }
+                }
+              }
             }
+          } else {
+            console.error('❌ Assinatura não encontrada para invoice:', invoice.subscription)
           }
         }
         break
