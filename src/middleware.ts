@@ -147,7 +147,7 @@ export async function middleware(request: NextRequest) {
       // 1. Status é 'active' OU
       // 2. Status é 'active' com grace_period_end (período de graça)
       const hasActiveSubscription = professional?.subscription_status === 'active'
-      const hasGracePeriod = professional?.subscription_status === 'active' && professional?.grace_period_end
+      // const hasGracePeriod = professional?.subscription_status === 'active' && professional?.grace_period_end
       
       if (!professional || !hasActiveSubscription) {
         return NextResponse.redirect(new URL(`/account-suspended?user=${username}`, url))

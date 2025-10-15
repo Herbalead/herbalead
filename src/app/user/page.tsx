@@ -856,7 +856,7 @@ export default function UserDashboard() {
         setNewPassword('')
         setConfirmNewPassword('')
       }
-    } catch (err) {
+    } catch {
       setPasswordError('Ocorreu um erro inesperado.')
     } finally {
       setPasswordLoading(false)

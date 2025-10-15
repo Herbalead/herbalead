@@ -15,7 +15,11 @@ export default function SuccessPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [sessionData, setSessionData] = useState<any>(null)
+  const [sessionData, setSessionData] = useState<{
+    id: string
+    customer_email: string
+    subscription_id: string
+  } | null>(null)
   const [userExists, setUserExists] = useState(false)
   const [userEmail, setUserEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -87,7 +91,7 @@ export default function SuccessPage() {
           router.push('/user')
         }, 2000)
       }
-    } catch (err) {
+    } catch {
       setError('Erro ao criar senha. Tente novamente.')
     }
   }
