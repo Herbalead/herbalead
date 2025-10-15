@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '../../../../../lib/stripe-subscriptions'
 import { createClient } from '@supabase/supabase-js'
-import { sendPaymentConfirmationEmail } from '../../../../../lib/payment-validation'
+import { sendPaymentConfirmationEmail } from '../../../../../src/lib/payment-validation'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
