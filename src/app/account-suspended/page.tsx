@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { AlertTriangle, RefreshCw, ExternalLink } from 'lucide-react'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 
@@ -85,13 +86,13 @@ export default function AccountSuspendedPage() {
                 )}
               </button>
 
-              <a
+              <Link
                 href="/"
                 className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-medium transition-colors duration-200 flex items-center justify-center"
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Voltar ao Início
-              </a>
+              </Link>
             </div>
 
             {/* Support Info */}

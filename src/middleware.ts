@@ -78,7 +78,6 @@ export async function middleware(request: NextRequest) {
   if (url.pathname.match(/^\/[^\/]+\/[^\/]+$/)) {
     const pathParts = url.pathname.split('/')
     const username = pathParts[1]
-    const project = pathParts[2]
     
     try {
       // Buscar dados do usuário

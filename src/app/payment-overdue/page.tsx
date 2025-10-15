@@ -7,7 +7,13 @@ import HerbaleadLogo from '@/components/HerbaleadLogo'
 
 export default function PaymentOverduePage() {
   const [loading, setLoading] = useState(false)
-  const [userData, setUserData] = useState<any>(null)
+  const [userData, setUserData] = useState<{
+    id: string;
+    email: string;
+    username: string;
+    subscription_status: string;
+    subscription_plan: string;
+  } | null>(null)
   const router = useRouter()
 
   useEffect(() => {
