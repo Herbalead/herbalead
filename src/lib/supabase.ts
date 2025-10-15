@@ -99,6 +99,46 @@ export async function signIn(email: string, password: string) {
     }
 
     console.log('✅ Login realizado:', data.user?.id)
+    
+    // Verificar se o usuário existe na tabela professionals
+    if (data.user) {
+      const { data: professional, error: profError } = await supabase
+        .from('professionals')
+        .select('id')
+        .eq('email', email)
+        .single()
+
+      if (profError && profError.code === 'PGRST116') {
+        // Usuário não existe na tabela professionals - criar perfil básico
+        console.log('⚠️ Usuário não encontrado na tabela professionals, criando perfil básico...')
+        
+        try {
+          const { error: createError } = await supabase
+            .from('professionals')
+            .insert({
+              id: data.user.id,
+              email: email,
+              name: data.user.user_metadata?.name || 'Usuário',
+              phone: data.user.user_metadata?.phone || '',
+              specialty: data.user.user_metadata?.specialty || '',
+              company: data.user.user_metadata?.company || ''
+            })
+
+          if (createError) {
+            console.error('❌ Erro ao criar perfil básico:', createError)
+          } else {
+            console.log('✅ Perfil básico criado com sucesso')
+          }
+        } catch (createError) {
+          console.error('❌ Erro ao criar perfil básico:', createError)
+        }
+      } else if (profError) {
+        console.error('❌ Erro ao verificar perfil profissional:', profError)
+      } else {
+        console.log('✅ Perfil profissional encontrado')
+      }
+    }
+    
     return data
   } catch (error) {
     console.error('❌ Erro completo no signIn:', error)
@@ -137,6 +177,107 @@ export async function createProfessionalProfile(userId: string, email: string, p
   } catch (error) {
     console.error('❌ Erro completo ao criar perfil profissional:', error)
     throw error
+  }
+}
+
+// Função para limpar usuários "fantasma" (existem no auth mas não na tabela professionals)
+export async function cleanupGhostUsers() {
+  try {
+    console.log('🧹 Limpando usuários fantasma...')
+    
+    // Buscar todos os usuários do auth
+    const { data: { users }, error: authError } = await supabase.auth.admin.listUsers()
+    
+    if (authError) {
+      console.error('❌ Erro ao buscar usuários do auth:', authError)
+      return
+    }
+
+    // Buscar todos os profissionais
+    const { data: professionals, error: profError } = await supabase
+      .from('professionals')
+      .select('id, email')
+
+    if (profError) {
+      console.error('❌ Erro ao buscar profissionais:', profError)
+      return
+    }
+
+    const professionalIds = new Set(professionals?.map(p => p.id) || [])
+    
+    // Identificar usuários fantasma
+    const ghostUsers = users?.filter(user => !professionalIds.has(user.id)) || []
+    
+    console.log(`🔍 Encontrados ${ghostUsers.length} usuários fantasma`)
+    
+    // Deletar usuários fantasma do auth
+    for (const user of ghostUsers) {
+      try {
+        const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id)
+        if (deleteError) {
+          console.error(`❌ Erro ao deletar usuário fantasma ${user.email}:`, deleteError)
+        } else {
+          console.log(`✅ Usuário fantasma deletado: ${user.email}`)
+        }
+      } catch (deleteError) {
+        console.error(`❌ Erro ao deletar usuário fantasma ${user.email}:`, deleteError)
+      }
+    }
+    
+    console.log('✅ Limpeza de usuários fantasma concluída')
+  } catch (error) {
+    console.error('❌ Erro na limpeza de usuários fantasma:', error)
+  }
+}
+
+// Função para verificar se email já existe e limpar se necessário
+export async function checkAndCleanEmail(email: string) {
+  try {
+    console.log('🔍 Verificando email:', email)
+    
+    // Verificar se existe na tabela professionals
+    const { data: professional, error: profError } = await supabase
+      .from('professionals')
+      .select('id, email')
+      .eq('email', email)
+      .single()
+
+    if (profError && profError.code === 'PGRST116') {
+      // Não existe na tabela professionals - verificar se existe no auth
+      console.log('⚠️ Email não encontrado na tabela professionals')
+      
+      // Tentar fazer login para ver se existe no auth
+      try {
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email,
+          password: 'dummy_password_to_check_existence'
+        })
+        
+        // Se chegou aqui, o usuário existe no auth mas com senha errada
+        console.log('⚠️ Email existe no auth mas não na tabela professionals')
+        return { exists: true, needsCleanup: true }
+      } catch (authError: any) {
+        if (authError.message?.includes('Invalid login credentials')) {
+          // Usuário existe no auth mas senha está errada
+          console.log('⚠️ Email existe no auth mas senha está errada')
+          return { exists: true, needsCleanup: true }
+        } else {
+          // Usuário não existe no auth
+          console.log('✅ Email não existe - pode cadastrar')
+          return { exists: false, needsCleanup: false }
+        }
+      }
+    } else if (profError) {
+      console.error('❌ Erro ao verificar profissional:', profError)
+      return { exists: false, needsCleanup: false }
+    } else {
+      // Existe na tabela professionals
+      console.log('⚠️ Email já existe na tabela professionals')
+      return { exists: true, needsCleanup: false }
+    }
+  } catch (error) {
+    console.error('❌ Erro ao verificar email:', error)
+    return { exists: false, needsCleanup: false }
   }
 }
 

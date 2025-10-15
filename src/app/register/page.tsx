@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Mail, Lock, User, Phone, Building, GraduationCap, Eye, EyeOff } from 'lucide-react'
-import { signUp, signIn, signOut } from '@/lib/supabase'
+import { signUp, signIn, signOut, checkAndCleanEmail } from '@/lib/supabase'
 // import HerbaleadLogo from '@/components/HerbaleadLogo'
 
 interface FormData {
@@ -71,12 +71,21 @@ export default function RegisterPage() {
         } catch {
           console.log('⚠️ Logout não necessário (usuário não estava logado)')
         }
+        
         if (formData.password !== formData.confirmPassword) {
           throw new Error('As senhas não coincidem')
         }
         
         if (formData.password.length < 6) {
           throw new Error('A senha deve ter pelo menos 6 caracteres')
+        }
+
+        // Verificar se email já existe e limpar se necessário
+        console.log('🔍 Verificando email antes do cadastro...')
+        const emailCheck = await checkAndCleanEmail(formData.email)
+        
+        if (emailCheck.exists && !emailCheck.needsCleanup) {
+          throw new Error('Este email já está cadastrado. Tente fazer login ou use outro email.')
         }
 
         const profileData = {
@@ -92,6 +101,7 @@ export default function RegisterPage() {
       }
     } catch (err: unknown) {
       const error = err as Error
+      console.error('❌ Erro no handleSubmit:', error)
       setError(error.message || 'Erro ao fazer login/registro')
     } finally {
       setLoading(false)
