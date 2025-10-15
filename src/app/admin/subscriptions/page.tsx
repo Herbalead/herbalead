@@ -338,7 +338,9 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {user.subscription_plan === 'monthly' ? 'Mensal' : 
+                        {user.subscriptions?.[0]?.plan_type === 'monthly' ? 'Mensal' : 
+                         user.subscriptions?.[0]?.plan_type === 'yearly' ? 'Anual' : 
+                         user.subscription_plan === 'monthly' ? 'Mensal' :
                          user.subscription_plan === 'yearly' ? 'Anual' : 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
