@@ -8,6 +8,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Função auxiliar para converter timestamp para ISOString com segurança
+const safeTimestampToISOString = (timestamp: number | null | undefined): string | null => {
+  if (typeof timestamp === 'number' && !isNaN(timestamp) && timestamp > 0) {
+    return new Date(timestamp * 1000).toISOString()
+  }
+  return null
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text()
@@ -33,7 +41,7 @@ export async function POST(request: NextRequest) {
     console.log('🔔 Stripe webhook received:', {
       type: event.type,
       id: event.id,
-      created: new Date(event.created * 1000).toISOString(),
+      created: safeTimestampToISOString(event.created),
       livemode: event.livemode
     })
 
@@ -112,8 +120,8 @@ export async function POST(request: NextRequest) {
               stripe_price_id: subscription.items.data[0].price.id,
               status: subscription.status,
               plan_type: subscription.items.data[0].price.recurring?.interval === 'year' ? 'yearly' : 'monthly',
-              current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-              current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+              current_period_start: safeTimestampToISOString(subscription.current_period_start),
+              current_period_end: safeTimestampToISOString(subscription.current_period_end),
               cancel_at_period_end: subscription.cancel_at_period_end
             })
 
@@ -222,8 +230,8 @@ export async function POST(request: NextRequest) {
             stripe_price_id: subscription.items.data[0].price.id,
             status: subscription.status,
             plan_type: subscription.items.data[0].price.recurring?.interval === 'year' ? 'yearly' : 'monthly',
-            current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-            current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            current_period_start: safeTimestampToISOString(subscription.current_period_start),
+            current_period_end: safeTimestampToISOString(subscription.current_period_end),
             cancel_at_period_end: subscription.cancel_at_period_end
           })
 
@@ -243,10 +251,10 @@ export async function POST(request: NextRequest) {
           .from('subscriptions')
           .update({
             status: updatedSubscription.status,
-            current_period_start: new Date(updatedSubscription.current_period_start * 1000).toISOString(),
-            current_period_end: new Date(updatedSubscription.current_period_end * 1000).toISOString(),
+            current_period_start: safeTimestampToISOString(updatedSubscription.current_period_start),
+            current_period_end: safeTimestampToISOString(updatedSubscription.current_period_end),
             cancel_at_period_end: updatedSubscription.cancel_at_period_end,
-            canceled_at: updatedSubscription.canceled_at ? new Date(updatedSubscription.canceled_at * 1000).toISOString() : null,
+            canceled_at: safeTimestampToISOString(updatedSubscription.canceled_at),
             updated_at: new Date().toISOString()
           })
           .eq('stripe_subscription_id', updatedSubscription.id)
