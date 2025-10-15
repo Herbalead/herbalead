@@ -499,7 +499,7 @@ export default function AdminDashboard() {
                         {formatDate(user.created_at)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.subscription_status === 'trialing' && user.grace_period_end ? (
+                        {user.subscription_status === 'active' && user.grace_period_end ? (
                           <div>
                             <div className="text-xs text-purple-600">Período de graça</div>
                             <div className="text-xs">{formatDate(user.grace_period_end)}</div>

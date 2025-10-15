@@ -265,7 +265,7 @@ export async function POST(request: NextRequest) {
       
       // Primeiro tentar com grace_period_end, se falhar, tentar sem
       let updateData: Record<string, unknown> = { 
-        subscription_status: 'trialing',
+        subscription_status: 'active',
         grace_period_end: graceEndDate.toISOString()
       }
       
@@ -277,7 +277,7 @@ export async function POST(request: NextRequest) {
       // Se erro por coluna não existir, tentar sem grace_period_end
       if (error && error.message?.includes('grace_period_end')) {
         console.log('Coluna grace_period_end não existe, usando apenas subscription_status')
-        updateData = { subscription_status: 'trialing' }
+        updateData = { subscription_status: 'active' }
         
         const { error: retryError } = await supabase
           .from('professionals')

@@ -64,7 +64,7 @@ export async function middleware(request: NextRequest) {
         .single()
       
       // Verificar se período de graça expirou (apenas se coluna existir)
-      if (professional?.subscription_status === 'trialing' && professional.grace_period_end) {
+      if (professional?.subscription_status === 'active' && professional.grace_period_end) {
         const graceEndDate = new Date(professional.grace_period_end)
         const now = new Date()
         
@@ -80,7 +80,7 @@ export async function middleware(request: NextRequest) {
       }
       
       // Se usuário não tem assinatura ativa, bloquear acesso
-      if (!professional || !['active', 'trialing'].includes(professional.subscription_status)) {
+      if (!professional || !['active'].includes(professional.subscription_status)) {
         return NextResponse.redirect(new URL('/payment-overdue', url))
       }
       
@@ -104,7 +104,7 @@ export async function middleware(request: NextRequest) {
         .single()
       
       // Verificar se período de graça expirou (apenas se coluna existir)
-      if (professional?.subscription_status === 'trialing' && professional.grace_period_end) {
+      if (professional?.subscription_status === 'active' && professional.grace_period_end) {
         const graceEndDate = new Date(professional.grace_period_end)
         const now = new Date()
         
@@ -120,7 +120,7 @@ export async function middleware(request: NextRequest) {
       }
       
       // Se usuário não tem assinatura ativa, mostrar página de bloqueio
-      if (!professional || !professional.subscription_status || !['active', 'trialing'].includes(professional.subscription_status)) {
+      if (!professional || !professional.subscription_status || !['active'].includes(professional.subscription_status)) {
         return NextResponse.redirect(new URL(`/account-suspended?user=${username}`, url))
       }
       
