@@ -64,8 +64,6 @@ export default function AdminDashboard() {
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
-  const [showGracePeriodModal, setShowGracePeriodModal] = useState(false)
-  const [selectedUserForGrace, setSelectedUserForGrace] = useState<User | null>(null)
   
   // Filtros
   const [statusFilter, setStatusFilter] = useState('all')

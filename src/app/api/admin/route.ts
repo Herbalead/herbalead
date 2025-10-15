@@ -264,7 +264,7 @@ export async function POST(request: NextRequest) {
       console.log('Concedendo período de graça:', { userId, graceDays, graceEndDate: graceEndDate.toISOString() })
       
       // Primeiro tentar com grace_period_end, se falhar, tentar sem
-      let updateData: any = { 
+      let updateData: Record<string, unknown> = { 
         subscription_status: 'trialing',
         grace_period_end: graceEndDate.toISOString()
       }
