@@ -52,21 +52,40 @@ export async function POST(request: NextRequest) {
           if (userError || !existingUser) {
             console.log('Usuário não encontrado, criando automaticamente...')
             
-            // Criar usuário automaticamente
+            // Criar usuário na auth.users primeiro
+            const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+              email: session.customer_email,
+              password: 'temp-password-' + Date.now(), // Senha temporária
+              email_confirm: true,
+              user_metadata: {
+                name: session.customer_details?.name || 'Usuário'
+              }
+            })
+            
+            if (authError) {
+              console.error('Erro ao criar usuário na auth:', authError)
+              break
+            }
+            
+            console.log('✅ Usuário criado na auth.users:', authUser.user.id)
+            
+            // Criar usuário na tabela professionals
             const { data: newUser, error: createError } = await supabase
               .from('professionals')
               .insert({
+                id: authUser.user.id, // Usar o mesmo ID da auth.users
                 email: session.customer_email,
                 name: session.customer_details?.name || 'Usuário',
                 phone: session.customer_details?.phone || '',
                 subscription_status: 'active',
+                stripe_customer_id: subscription.customer as string,
                 created_at: new Date().toISOString()
               })
               .select('id')
               .single()
 
             if (createError) {
-              console.error('Erro ao criar usuário:', createError)
+              console.error('Erro ao criar usuário na professionals:', createError)
               break
             }
             
@@ -129,10 +148,28 @@ export async function POST(request: NextRequest) {
             if (emailError || !userByEmail) {
               console.log('Usuário não encontrado pelo email, criando automaticamente...')
               
-              // Criar usuário automaticamente
+              // Criar usuário na auth.users primeiro
+              const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+                email: customerEmail,
+                password: 'temp-password-' + Date.now(), // Senha temporária
+                email_confirm: true,
+                user_metadata: {
+                  name: customer.name || 'Usuário'
+                }
+              })
+              
+              if (authError) {
+                console.error('Erro ao criar usuário na auth:', authError)
+                break
+              }
+              
+              console.log('✅ Usuário criado na auth.users:', authUser.user.id)
+              
+              // Criar usuário na tabela professionals
               const { data: newUser, error: createError } = await supabase
                 .from('professionals')
                 .insert({
+                  id: authUser.user.id, // Usar o mesmo ID da auth.users
                   email: customerEmail,
                   name: customer.name || 'Usuário',
                   phone: customer.phone || '',
@@ -144,7 +181,7 @@ export async function POST(request: NextRequest) {
                 .single()
 
               if (createError) {
-                console.error('Erro ao criar usuário:', createError)
+                console.error('Erro ao criar usuário na professionals:', createError)
                 break
               }
               
