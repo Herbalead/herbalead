@@ -670,7 +670,7 @@ export default function AdminDashboard() {
                 Mostrando {getFilteredUsers().length} de {users.length} usuários
               </div>
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-visible">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -718,6 +718,7 @@ export default function AdminDashboard() {
                       <td className="px-6 py-4 text-sm font-medium">
                         <div className="relative inline-block dropdown-container">
                           <button
+                            data-user-id={user.id}
                             onClick={(e) => {
                               e.stopPropagation()
                               setOpenDropdown(openDropdown === user.id ? null : user.id)
@@ -729,7 +730,8 @@ export default function AdminDashboard() {
                           </button>
                           
                           {openDropdown === user.id && (
-                            <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-md shadow-lg z-50 border border-gray-200 max-h-96 overflow-y-auto">
+                            <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-md shadow-lg z-50 border border-gray-200 max-h-96 overflow-y-auto" 
+                                 style={{ position: 'absolute', zIndex: 9999 }}>
                               <div className="py-1">
                                 {/* Período de graça */}
                                 <button
@@ -813,7 +815,7 @@ export default function AdminDashboard() {
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Histórico de Pagamentos</h3>
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-visible">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
