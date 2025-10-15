@@ -72,3 +72,4 @@ LEFT JOIN information_schema.constraint_column_usage AS ccu
     AND ccu.table_schema = tc.table_schema
 WHERE tc.table_name IN ('quizzes', 'questions')
 ORDER BY tc.table_name, tc.constraint_type;
+

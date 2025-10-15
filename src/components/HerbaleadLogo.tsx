@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react';
+import Image from 'next/image';
 
 interface HerbaleadLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -17,21 +18,21 @@ export default function HerbaleadLogo({
 }: HerbaleadLogoProps) {
   
   const sizeClasses = {
-    sm: 'h-8',
-    md: 'h-10', 
-    lg: 'h-14',
-    xl: 'h-16'
+    sm: 32,
+    md: 40, 
+    lg: 56,
+    xl: 64
   }
   
   const iconSizeClasses = {
-    sm: 'w-8 h-8',
-    md: 'w-10 h-10', 
-    lg: 'w-14 h-14',
-    xl: 'w-16 h-16'
+    sm: 32,
+    md: 40, 
+    lg: 56,
+    xl: 64
   }
 
-  // Responsive classes
-  const responsiveClasses = responsive ? 'h-10 md:h-12 lg:h-14' : sizeClasses[size]
+  // Responsive sizes
+  const responsiveSize = responsive ? { width: 0, height: 0 } : { width: sizeClasses[size], height: sizeClasses[size] }
 
   // Logo paths
   const logoPaths = {
@@ -44,20 +45,26 @@ export default function HerbaleadLogo({
   // For icon-only variant, don't show text
   if (variant === 'iconOnly') {
     return (
-      <img
+      <Image
         src={`${logoPaths.iconOnly}?v=2024`}
         alt="HerbaLead"
-        className={`${iconSizeClasses[size]} ${className}`}
+        width={iconSizeClasses[size]}
+        height={iconSizeClasses[size]}
+        className={className}
+        priority
       />
     )
   }
 
   return (
     <div className={`flex items-center ${className}`}>
-      <img
+      <Image
         src={`${logoPaths[variant]}?v=2024`}
         alt="HerbaLead - Your Lead Accelerator"
-        className={`${responsiveClasses} w-auto`}
+        width={responsive ? 0 : sizeClasses[size]}
+        height={responsive ? 0 : sizeClasses[size]}
+        className={responsive ? 'h-10 md:h-12 lg:h-14 w-auto' : 'w-auto'}
+        priority
       />
     </div>
   )

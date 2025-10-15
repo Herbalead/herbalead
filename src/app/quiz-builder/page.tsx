@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, Suspense } from 'react'
 import { Plus, Trash2, Save, Info, Copy, ChevronDown, ChevronRight, ArrowLeft, GripVertical } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 import { getProjectConfig } from '@/lib/project-config'
@@ -53,7 +53,8 @@ interface Question {
   max_options?: number // Número máximo de alternativas
 }
 
-export default function QuizBuilder() {
+// Componente principal do Quiz Builder
+function QuizBuilderContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [projectDomain] = useState('herbalead')
@@ -1755,5 +1756,26 @@ export default function QuizBuilder() {
         </div>
       )}
     </div>
+  )
+}
+
+// Componente de loading para Suspense
+function QuizBuilderLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Carregando Quiz Builder...</p>
+      </div>
+    </div>
+  )
+}
+
+// Export default com Suspense boundary
+export default function QuizBuilder() {
+  return (
+    <Suspense fallback={<QuizBuilderLoading />}>
+      <QuizBuilderContent />
+    </Suspense>
   )
 }

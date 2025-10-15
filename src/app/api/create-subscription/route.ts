@@ -1,18 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSubscriptionCheckout, stripeConfig } from '../../../../lib/stripe-subscriptions'
+import { stripe, stripePlans } from '../../../../lib/stripe-subscriptions'
 
 export async function POST(request: NextRequest) {
   try {
     const { planType, email } = await request.json()
     
     // Get plan configuration
-    const plan = stripeConfig.plans[planType as keyof typeof stripeConfig.plans]
+    const plan = stripePlans[planType as keyof typeof stripePlans]
     if (!plan) {
       return NextResponse.json({ error: 'Plano inválido' }, { status: 400 })
     }
 
     // Create subscription checkout session
-    const session = await createSubscriptionCheckout(plan.priceId, email)
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: plan.priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment`,
+      customer_email: email,
+    })
     
     return NextResponse.json({ 
       sessionId: session.id,
