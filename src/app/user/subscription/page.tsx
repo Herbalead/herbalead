@@ -39,6 +39,9 @@ interface SubscriptionData {
     created_at: string
   }>
   hasActiveSubscription: boolean
+  subscription_status: string
+  subscription_plan: string
+  grace_period_end: string | null
 }
 
 export default function SubscriptionSettingsPage() {
@@ -200,6 +203,43 @@ export default function SubscriptionSettingsPage() {
               <CreditCard className="w-5 h-5 mr-2" />
               Assinar Plano
             </Link>
+          </div>
+        ) : subscriptionData?.grace_period_end ? (
+          // Período de graça ativo
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
+                <Clock className="w-8 h-8 text-purple-600" />
+              </div>
+            </div>
+            
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Período de Graça Ativo</h2>
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+                <p className="text-purple-800 font-semibold mb-2">
+                  🎉 Você está aproveitando seu período de teste gratuito!
+                </p>
+                <p className="text-purple-700 text-sm">
+                  Válido até: <span className="font-semibold">{new Date(subscriptionData.grace_period_end).toLocaleDateString('pt-BR')}</span>
+                </p>
+              </div>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <p className="text-yellow-800 text-sm">
+                  ⚠️ Para continuar usando após o período de graça, você precisará assinar um plano.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <Link
+                href="/payment"
+                className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors"
+              >
+                <CreditCard className="w-5 h-5 mr-2" />
+                Assinar Plano Agora
+              </Link>
+            </div>
           </div>
         ) : (
           // Com assinatura ativa

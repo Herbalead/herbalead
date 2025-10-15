@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     // Buscar dados do profissional
     const { data: professional, error: profError } = await supabase
       .from('professionals')
-      .select('id, email, username, subscription_status, subscription_plan, stripe_customer_id')
+      .select('id, email, username, subscription_status, subscription_plan, stripe_customer_id, grace_period_end')
       .eq('email', user.email)
       .single()
 
@@ -67,15 +67,27 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Verificar se tem assinatura ativa (incluindo período de graça)
+    const hasActiveSubscription = professional.subscription_status === 'active'
+    
+    // Se tem período de graça, verificar se ainda é válido
+    let isGracePeriodValid = true
+    if (professional.grace_period_end) {
+      const graceEndDate = new Date(professional.grace_period_end)
+      const now = new Date()
+      isGracePeriodValid = graceEndDate > now
+    }
+
     return NextResponse.json({
       id: professional.id,
       email: professional.email,
       username: professional.username,
       subscription_status: professional.subscription_status,
       subscription_plan: professional.subscription_plan,
+      grace_period_end: professional.grace_period_end,
       subscription: subscription,
       payments: payments,
-      hasActiveSubscription: ['active', 'trialing'].includes(professional.subscription_status)
+      hasActiveSubscription: hasActiveSubscription && isGracePeriodValid
     })
 
   } catch (error) {
