@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { 
   Users, 
   DollarSign, 
@@ -76,6 +77,7 @@ export default function AdminDashboard() {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [showCreateUserModal, setShowCreateUserModal] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [dropdownPosition, setDropdownPosition] = useState<{top: number, left: number} | null>(null)
   const [confirmAction, setConfirmAction] = useState<{
     show: boolean
     action: string
@@ -106,6 +108,19 @@ export default function AdminDashboard() {
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
   }, [openDropdown])
+
+  const handleDropdownClick = (e: React.MouseEvent, userId: string) => {
+    e.stopPropagation()
+    
+    const buttonRect = e.currentTarget.getBoundingClientRect()
+    const position = {
+      top: buttonRect.bottom + 5,
+      left: buttonRect.right - 224 // 224px = w-56 (14rem)
+    }
+    
+    setDropdownPosition(position)
+    setOpenDropdown(openDropdown === userId ? null : userId)
+  }
 
   const loadDashboardData = async () => {
     setLoading(true)
@@ -719,86 +734,13 @@ export default function AdminDashboard() {
                         <div className="relative inline-block dropdown-container">
                           <button
                             data-user-id={user.id}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setOpenDropdown(openDropdown === user.id ? null : user.id)
-                            }}
+                            onClick={(e) => handleDropdownClick(e, user.id)}
                             className="flex items-center space-x-1 px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50"
                           >
                             <MoreVertical className="w-4 h-4" />
                             <span>Ações</span>
                           </button>
                           
-                          {openDropdown === user.id && (
-                            <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-md shadow-lg z-50 border border-gray-200 max-h-96 overflow-y-auto" 
-                                 style={{ position: 'absolute', zIndex: 9999 }}>
-                              <div className="py-1">
-                                {/* Período de graça */}
-                                <button
-                                  onClick={() => showConfirmation('give_grace_period', user.id, user.name)}
-                                  className="flex items-center w-full px-4 py-2 text-sm text-purple-600 hover:bg-purple-50"
-                                >
-                                  <Clock className="w-4 h-4 mr-2" />
-                                  7 dias de graça
-                                </button>
-                                
-                                {/* Assinaturas gratuitas */}
-                                <button
-                                  onClick={() => showConfirmation('give_free_subscription_monthly', user.id, user.name)}
-                                  className="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50"
-                                >
-                                  <Gift className="w-4 h-4 mr-2" />
-                                  1 mês gratuito
-                                </button>
-                                
-                                <button
-                                  onClick={() => showConfirmation('give_free_subscription_yearly', user.id, user.name)}
-                                  className="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
-                                >
-                                  <Gift className="w-4 h-4 mr-2" />
-                                  1 ano gratuito
-                                </button>
-                                
-                                <div className="border-t border-gray-100 my-1"></div>
-                                
-                                {/* Gerenciamento */}
-                                <button
-                                  onClick={() => showConfirmation('suspend_user', user.id, user.name)}
-                                  className="flex items-center w-full px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50"
-                                >
-                                  <Pause className="w-4 h-4 mr-2" />
-                                  Suspender
-                                </button>
-                                
-                                <button
-                                  onClick={() => showConfirmation('reactivate_user', user.id, user.name)}
-                                  className="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50"
-                                >
-                                  <Play className="w-4 h-4 mr-2" />
-                                  Reativar
-                                </button>
-                                
-                                <button
-                                  onClick={() => showConfirmation('cancel_subscription', user.id, user.name)}
-                                  className="flex items-center w-full px-4 py-2 text-sm text-orange-600 hover:bg-orange-50"
-                                >
-                                  <Ban className="w-4 h-4 mr-2" />
-                                  Cancelar assinatura
-                                </button>
-                                
-                                <div className="border-t border-gray-100 my-1"></div>
-                                
-                                {/* Ação perigosa */}
-                                <button
-                                  onClick={() => showConfirmation('delete_user', user.id, user.name)}
-                                  className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                                >
-                                  <Trash2 className="w-4 h-4 mr-2" />
-                                  Excluir usuário
-                                </button>
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -910,6 +852,84 @@ export default function AdminDashboard() {
           onCancel={() => setConfirmAction(null)}
           loading={actionLoading === confirmAction.action}
         />
+      )}
+
+      {/* Dropdown Portal */}
+      {openDropdown && dropdownPosition && typeof window !== 'undefined' && createPortal(
+        <div 
+          className="fixed w-56 bg-white rounded-md shadow-lg z-50 border border-gray-200 max-h-96 overflow-y-auto"
+          style={{
+            top: dropdownPosition.top,
+            left: dropdownPosition.left
+          }}
+        >
+          <div className="py-1">
+            {/* Período de graça */}
+            <button
+              onClick={() => showConfirmation('give_grace_period', openDropdown, users.find(u => u.id === openDropdown)?.name || 'Usuário')}
+              className="flex items-center w-full px-4 py-2 text-sm text-purple-600 hover:bg-purple-50"
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              7 dias de graça
+            </button>
+            
+            {/* Assinaturas gratuitas */}
+            <button
+              onClick={() => showConfirmation('give_free_subscription_monthly', openDropdown, users.find(u => u.id === openDropdown)?.name || 'Usuário')}
+              className="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50"
+            >
+              <Gift className="w-4 h-4 mr-2" />
+              1 mês gratuito
+            </button>
+            
+            <button
+              onClick={() => showConfirmation('give_free_subscription_yearly', openDropdown, users.find(u => u.id === openDropdown)?.name || 'Usuário')}
+              className="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
+            >
+              <Gift className="w-4 h-4 mr-2" />
+              1 ano gratuito
+            </button>
+            
+            <div className="border-t border-gray-100 my-1"></div>
+            
+            {/* Gerenciamento */}
+            <button
+              onClick={() => showConfirmation('suspend_user', openDropdown, users.find(u => u.id === openDropdown)?.name || 'Usuário')}
+              className="flex items-center w-full px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50"
+            >
+              <Pause className="w-4 h-4 mr-2" />
+              Suspender
+            </button>
+            
+            <button
+              onClick={() => showConfirmation('reactivate_user', openDropdown, users.find(u => u.id === openDropdown)?.name || 'Usuário')}
+              className="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50"
+            >
+              <Play className="w-4 h-4 mr-2" />
+              Reativar
+            </button>
+            
+            <button
+              onClick={() => showConfirmation('cancel_subscription', openDropdown, users.find(u => u.id === openDropdown)?.name || 'Usuário')}
+              className="flex items-center w-full px-4 py-2 text-sm text-orange-600 hover:bg-orange-50"
+            >
+              <Ban className="w-4 h-4 mr-2" />
+              Cancelar assinatura
+            </button>
+            
+            <div className="border-t border-gray-100 my-1"></div>
+            
+            {/* Ação perigosa */}
+            <button
+              onClick={() => showConfirmation('delete_user', openDropdown, users.find(u => u.id === openDropdown)?.name || 'Usuário')}
+              className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Excluir usuário
+            </button>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   )
