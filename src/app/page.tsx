@@ -193,8 +193,8 @@ export default function HerbaleadLandingPage() {
                 onClick={() => router.push('/login')}
                 className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm sm:text-base"
               >
-                <span className="hidden sm:inline">Quero começar agora</span>
-                <span className="sm:hidden">Começar</span>
+                <span className="hidden sm:inline">Entrar</span>
+                <span className="sm:hidden">Entrar</span>
               </button>
             </div>
           </div>
