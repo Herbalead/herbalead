@@ -103,23 +103,56 @@ CREATE TRIGGER sync_subscription_status_trigger
 ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 
--- 10. Criar políticas RLS para subscriptions
-CREATE POLICY "Users can view own subscriptions" ON public.subscriptions
-    FOR SELECT USING (user_id = auth.uid()::uuid);
+-- 10. Criar políticas RLS para subscriptions (apenas se não existirem)
+DO $$ 
+BEGIN
+    -- Política para visualizar próprias assinaturas
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'subscriptions' 
+        AND policyname = 'Users can view own subscriptions'
+    ) THEN
+        CREATE POLICY "Users can view own subscriptions" ON public.subscriptions
+            FOR SELECT USING (user_id = auth.uid()::uuid);
+    END IF;
 
-CREATE POLICY "Users can insert own subscriptions" ON public.subscriptions
-    FOR INSERT WITH CHECK (user_id = auth.uid()::uuid);
+    -- Política para inserir próprias assinaturas
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'subscriptions' 
+        AND policyname = 'Users can insert own subscriptions'
+    ) THEN
+        CREATE POLICY "Users can insert own subscriptions" ON public.subscriptions
+            FOR INSERT WITH CHECK (user_id = auth.uid()::uuid);
+    END IF;
 
-CREATE POLICY "Users can update own subscriptions" ON public.subscriptions
-    FOR UPDATE USING (user_id = auth.uid()::uuid);
+    -- Política para atualizar próprias assinaturas
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'subscriptions' 
+        AND policyname = 'Users can update own subscriptions'
+    ) THEN
+        CREATE POLICY "Users can update own subscriptions" ON public.subscriptions
+            FOR UPDATE USING (user_id = auth.uid()::uuid);
+    END IF;
+END $$;
 
--- 11. Criar políticas RLS para payments
-CREATE POLICY "Users can view own payments" ON public.payments
-    FOR SELECT USING (
-        subscription_id IN (
-            SELECT id FROM public.subscriptions WHERE user_id = auth.uid()::uuid
-        )
-    );
+-- 11. Criar políticas RLS para payments (apenas se não existirem)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'payments' 
+        AND policyname = 'Users can view own payments'
+    ) THEN
+        CREATE POLICY "Users can view own payments" ON public.payments
+            FOR SELECT USING (
+                subscription_id IN (
+                    SELECT id FROM public.subscriptions WHERE user_id = auth.uid()::uuid
+                )
+            );
+    END IF;
+END $$;
 
 -- 12. Criar função para verificar se usuário tem assinatura ativa
 CREATE OR REPLACE FUNCTION user_has_active_subscription(user_uuid UUID)
