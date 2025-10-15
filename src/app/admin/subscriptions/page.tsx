@@ -64,6 +64,8 @@ export default function AdminDashboard() {
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [showGracePeriodModal, setShowGracePeriodModal] = useState(false)
+  const [selectedUserForGrace, setSelectedUserForGrace] = useState<User | null>(null)
   
   // Filtros
   const [statusFilter, setStatusFilter] = useState('all')
@@ -127,6 +129,34 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Erro na ação:', error)
       alert('Erro ao processar ação')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleGiveGracePeriod = async (userId: string) => {
+    setActionLoading(userId)
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'give_grace_period',
+          userId: userId,
+          days: 10
+        })
+      })
+
+      if (response.ok) {
+        await loadDashboardData()
+        alert('Período de graça de 10 dias concedido com sucesso!')
+      } else {
+        const error = await response.json()
+        alert('Erro: ' + error.message)
+      }
+    } catch (error) {
+      console.error('Erro ao conceder período de graça:', error)
+      alert('Erro ao conceder período de graça')
     } finally {
       setActionLoading(null)
     }
@@ -507,6 +537,16 @@ export default function AdminDashboard() {
                             </button>
                           </>
                         )}
+                        
+                        {/* Botão de período de graça */}
+                        <button
+                          onClick={() => handleGiveGracePeriod(user.id)}
+                          disabled={actionLoading === user.id}
+                          className="text-purple-600 hover:text-purple-900 ml-2"
+                          title="Conceder 10 dias de período de graça"
+                        >
+                          {actionLoading === user.id ? '...' : '10 dias'}
+                        </button>
                       </td>
                     </tr>
                   ))}

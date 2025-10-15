@@ -165,7 +165,7 @@ export async function GET(request: NextRequest) {
 // POST - Ações administrativas (ativar, desativar, alterar plano)
 export async function POST(request: NextRequest) {
   try {
-    const { action, userId, subscriptionId, newPlan } = await request.json()
+    const { action, userId, subscriptionId, newPlan, days } = await request.json()
     
     if (!action || !userId) {
       return NextResponse.json({ error: 'Ação e ID do usuário são obrigatórios' }, { status: 400 })
@@ -253,6 +253,31 @@ export async function POST(request: NextRequest) {
         .eq('id', userId)
 
       return NextResponse.json({ success: true, message: 'Assinatura cancelada com sucesso' })
+
+    } else if (action === 'give_grace_period') {
+      // Conceder período de graça
+      const graceDays = days || 10
+      const graceEndDate = new Date()
+      graceEndDate.setDate(graceEndDate.getDate() + graceDays)
+      
+      // Atualizar status para trialing com data de fim
+      const { error } = await supabase
+        .from('professionals')
+        .update({ 
+          subscription_status: 'trialing',
+          grace_period_end: graceEndDate.toISOString()
+        })
+        .eq('id', userId)
+
+      if (error) {
+        console.error('Erro ao conceder período de graça:', error)
+        return NextResponse.json({ error: 'Erro ao conceder período de graça' }, { status: 500 })
+      }
+
+      return NextResponse.json({ 
+        success: true, 
+        message: `Período de graça de ${graceDays} dias concedido com sucesso` 
+      })
 
     } else {
       return NextResponse.json({ error: 'Ação não reconhecida' }, { status: 400 })
