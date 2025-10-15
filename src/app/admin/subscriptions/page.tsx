@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { 
   Users, 
@@ -15,7 +15,6 @@ import {
   PieChart,
   X,
   MoreVertical,
-  CheckCircle,
   AlertTriangle,
   Clock,
   Gift,

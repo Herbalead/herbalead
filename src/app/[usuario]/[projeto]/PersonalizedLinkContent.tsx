@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { getToolMessage } from '@/lib/tool-messages'
 import HelpButton from '@/components/HelpButton'
@@ -209,9 +209,6 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
 
   // Obter mensagem personalizada baseada na ferramenta
   const toolMessage = linkData?.tool_name ? getToolMessage(linkData.tool_name) : null
-  const pageTitle = toolMessage?.title || `${linkData?.name} - HerbaLead`
-  const pageDescription = toolMessage?.description || 'Acesse nossa ferramenta especializada para cuidar da sua saúde.'
-  const whatsappMessage = toolMessage?.shortMessage || 'Acesse nossa ferramenta de saúde 🏥'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">

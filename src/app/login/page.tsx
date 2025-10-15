@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft, Mail, Lock, User, CreditCard, Eye, EyeOff } from 'lucide-react'
 import { signIn } from '@/lib/supabase'
 
-interface FormData {
+interface LoginFormData {
   email: string
   password: string
 }
@@ -18,6 +18,10 @@ export default function LoginPage() {
   const router = useRouter()
 
   const [showPassword, setShowPassword] = useState(false)
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: '',
+    password: ''
+  })
 
   useEffect(() => {
     // Detectar projeto pelo subdomínio
