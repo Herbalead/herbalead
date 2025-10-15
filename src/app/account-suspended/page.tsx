@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { AlertTriangle, RefreshCw, ExternalLink } from 'lucide-react'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 
-export default function AccountSuspendedPage() {
+function AccountSuspendedContent() {
   const [loading, setLoading] = useState(false)
   const searchParams = useSearchParams()
   const username = searchParams.get('user')
@@ -108,5 +108,37 @@ export default function AccountSuspendedPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function AccountSuspendedLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center mb-8">
+          <HerbaleadLogo />
+        </div>
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-xl p-8 border-l-4 border-orange-500">
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-4">
+                <RefreshCw className="w-8 h-8 text-orange-600 animate-spin" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                Carregando...
+              </h1>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function AccountSuspendedPage() {
+  return (
+    <Suspense fallback={<AccountSuspendedLoading />}>
+      <AccountSuspendedContent />
+    </Suspense>
   )
 }
