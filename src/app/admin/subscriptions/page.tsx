@@ -12,7 +12,16 @@ import {
   Settings,
   BarChart3,
   PieChart,
-  X
+  X,
+  MoreVertical,
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  Gift,
+  Pause,
+  Play,
+  Ban,
+  Trash2
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -66,6 +75,14 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [showCreateUserModal, setShowCreateUserModal] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [confirmAction, setConfirmAction] = useState<{
+    show: boolean
+    action: string
+    userId: string
+    userName: string
+    message: string
+  } | null>(null)
   
   // Filtros
   const [statusFilter, setStatusFilter] = useState('all')
@@ -76,6 +93,18 @@ export default function AdminDashboard() {
   useEffect(() => {
     loadDashboardData()
   }, [])
+
+  // Fechar dropdown ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openDropdown) {
+        setOpenDropdown(null)
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [openDropdown])
 
   const loadDashboardData = async () => {
     setLoading(true)
@@ -131,6 +160,115 @@ export default function AdminDashboard() {
       alert('Erro ao processar ação')
     } finally {
       setActionLoading(null)
+    }
+  }
+
+  const showConfirmation = (action: string, userId: string, userName: string) => {
+    const actions = {
+      'give_grace_period': {
+        message: `Conceder 7 dias de período de graça para ${userName}?`,
+        icon: Clock,
+        color: 'text-purple-600'
+      },
+      'give_free_subscription_monthly': {
+        message: `Dar 1 mês de assinatura gratuita para ${userName}?`,
+        icon: Gift,
+        color: 'text-green-600'
+      },
+      'give_free_subscription_yearly': {
+        message: `Dar 1 ano de assinatura gratuita para ${userName}?`,
+        icon: Gift,
+        color: 'text-blue-600'
+      },
+      'suspend_user': {
+        message: `Suspender usuário ${userName}?`,
+        icon: Pause,
+        color: 'text-yellow-600'
+      },
+      'reactivate_user': {
+        message: `Reativar usuário ${userName}?`,
+        icon: Play,
+        color: 'text-green-600'
+      },
+      'cancel_subscription': {
+        message: `Cancelar assinatura de ${userName}?`,
+        icon: Ban,
+        color: 'text-orange-600'
+      },
+      'delete_user': {
+        message: `EXCLUIR PERMANENTEMENTE o usuário ${userName}? Esta ação não pode ser desfeita!`,
+        icon: Trash2,
+        color: 'text-red-600'
+      }
+    }
+
+    const actionConfig = actions[action as keyof typeof actions]
+    if (actionConfig) {
+      setConfirmAction({
+        show: true,
+        action,
+        userId,
+        userName,
+        message: actionConfig.message
+      })
+    }
+  }
+
+  const confirmActionHandler = async () => {
+    if (!confirmAction) return
+
+    setActionLoading(confirmAction.action)
+    try {
+      let response
+      
+      if (confirmAction.action === 'give_free_subscription_monthly') {
+        response = await fetch('/api/admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            action: 'give_free_subscription', 
+            userId: confirmAction.userId, 
+            planType: 'monthly', 
+            months: 1 
+          })
+        })
+      } else if (confirmAction.action === 'give_free_subscription_yearly') {
+        response = await fetch('/api/admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            action: 'give_free_subscription', 
+            userId: confirmAction.userId, 
+            planType: 'yearly', 
+            months: 12 
+          })
+        })
+      } else {
+        response = await fetch('/api/admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            action: confirmAction.action, 
+            userId: confirmAction.userId 
+          })
+        })
+      }
+
+      const result = await response.json()
+      
+      if (result.success) {
+        alert(result.message)
+        await loadDashboardData()
+      } else {
+        alert('Erro: ' + result.error)
+      }
+    } catch (error) {
+      console.error('Erro na ação:', error)
+      alert('Erro ao processar ação')
+    } finally {
+      setActionLoading(null)
+      setConfirmAction(null)
+      setOpenDropdown(null)
     }
   }
 
@@ -576,111 +714,86 @@ export default function AdminDashboard() {
                           '-'
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                        {user.subscription_status === 'active' ? (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="relative">
                           <button
-                            onClick={() => handleUserAction('deactivate_user', user.id)}
-                            disabled={actionLoading === 'deactivate_user'}
-                            className="text-red-600 hover:text-red-900"
+                            onClick={() => setOpenDropdown(openDropdown === user.id ? null : user.id)}
+                            className="flex items-center space-x-1 px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50"
                           >
-                            Desativar
+                            <MoreVertical className="w-4 h-4" />
+                            <span>Ações</span>
                           </button>
-                        ) : (
-                          <button
-                            onClick={() => handleUserAction('activate_user', user.id)}
-                            disabled={actionLoading === 'activate_user'}
-                            className="text-green-600 hover:text-green-900"
-                          >
-                            Ativar
-                          </button>
-                        )}
-                        
-                        {user.subscriptions?.[0] && (
-                          <>
-                            <button
-                              onClick={() => handleUserAction('change_plan', user.id, user.subscriptions[0].id, 
-                                user.subscription_plan === 'monthly' ? 'yearly' : 'monthly')}
-                              disabled={actionLoading === 'change_plan'}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              Alterar Plano
-                            </button>
-                            
-                            <button
-                              onClick={() => handleUserAction('cancel_subscription', user.id, user.subscriptions[0].id)}
-                              disabled={actionLoading === 'cancel_subscription'}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              Cancelar
-                            </button>
-                          </>
-                        )}
-                        
-                        {/* Botão de período de graça */}
-                        <button
-                          onClick={() => handleGiveGracePeriod(user.id)}
-                          disabled={actionLoading === user.id}
-                          className="text-purple-600 hover:text-purple-900 ml-2"
-                          title="Conceder 7 dias de período de graça"
-                        >
-                          {actionLoading === user.id ? '...' : '7 dias'}
-                        </button>
-                        
-                        {/* Botões de assinatura gratuita */}
-                        <button
-                          onClick={() => handleGiveFreeSubscription(user.id, 'monthly', 1)}
-                          disabled={actionLoading === user.id}
-                          className="text-green-600 hover:text-green-900 ml-2"
-                          title="Dar 1 mês gratuito"
-                        >
-                          {actionLoading === user.id ? '...' : '1 mês'}
-                        </button>
-                        
-                        <button
-                          onClick={() => handleGiveFreeSubscription(user.id, 'yearly', 12)}
-                          disabled={actionLoading === user.id}
-                          className="text-blue-600 hover:text-blue-900 ml-2"
-                          title="Dar 1 ano gratuito"
-                        >
-                          {actionLoading === user.id ? '...' : '1 ano'}
-                        </button>
-                        
-                        {/* Botões de gerenciamento */}
-                        <button
-                          onClick={() => handleUserAction('suspend_user', user.id)}
-                          disabled={actionLoading === user.id}
-                          className="text-yellow-600 hover:text-yellow-900 ml-2"
-                          title="Suspender usuário"
-                        >
-                          {actionLoading === user.id ? '...' : 'Suspender'}
-                        </button>
-                        
-                        <button
-                          onClick={() => handleUserAction('reactivate_user', user.id)}
-                          disabled={actionLoading === user.id}
-                          className="text-green-600 hover:text-green-900 ml-2"
-                          title="Reativar usuário"
-                        >
-                          {actionLoading === user.id ? '...' : 'Reativar'}
-                        </button>
-                        
-                        <button
-                          onClick={() => handleUserAction('cancel_subscription', user.id)}
-                          disabled={actionLoading === user.id}
-                          className="text-orange-600 hover:text-orange-900 ml-2"
-                          title="Cancelar assinatura"
-                        >
-                          {actionLoading === user.id ? '...' : 'Cancelar'}
-                        </button>
-                        
-                        <button
-                          onClick={() => handleUserAction('delete_user', user.id)}
-                          disabled={actionLoading === user.id}
-                          className="text-red-600 hover:text-red-900 ml-2"
-                          title="Excluir usuário permanentemente"
-                        >
-                          {actionLoading === user.id ? '...' : 'Excluir'}
-                        </button>
+                          
+                          {openDropdown === user.id && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                              <div className="py-1">
+                                {/* Período de graça */}
+                                <button
+                                  onClick={() => showConfirmation('give_grace_period', user.id, user.name)}
+                                  className="flex items-center w-full px-4 py-2 text-sm text-purple-600 hover:bg-purple-50"
+                                >
+                                  <Clock className="w-4 h-4 mr-2" />
+                                  7 dias de graça
+                                </button>
+                                
+                                {/* Assinaturas gratuitas */}
+                                <button
+                                  onClick={() => showConfirmation('give_free_subscription_monthly', user.id, user.name)}
+                                  className="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50"
+                                >
+                                  <Gift className="w-4 h-4 mr-2" />
+                                  1 mês gratuito
+                                </button>
+                                
+                                <button
+                                  onClick={() => showConfirmation('give_free_subscription_yearly', user.id, user.name)}
+                                  className="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
+                                >
+                                  <Gift className="w-4 h-4 mr-2" />
+                                  1 ano gratuito
+                                </button>
+                                
+                                <div className="border-t border-gray-100 my-1"></div>
+                                
+                                {/* Gerenciamento */}
+                                <button
+                                  onClick={() => showConfirmation('suspend_user', user.id, user.name)}
+                                  className="flex items-center w-full px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50"
+                                >
+                                  <Pause className="w-4 h-4 mr-2" />
+                                  Suspender
+                                </button>
+                                
+                                <button
+                                  onClick={() => showConfirmation('reactivate_user', user.id, user.name)}
+                                  className="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50"
+                                >
+                                  <Play className="w-4 h-4 mr-2" />
+                                  Reativar
+                                </button>
+                                
+                                <button
+                                  onClick={() => showConfirmation('cancel_subscription', user.id, user.name)}
+                                  className="flex items-center w-full px-4 py-2 text-sm text-orange-600 hover:bg-orange-50"
+                                >
+                                  <Ban className="w-4 h-4 mr-2" />
+                                  Cancelar assinatura
+                                </button>
+                                
+                                <div className="border-t border-gray-100 my-1"></div>
+                                
+                                {/* Ação perigosa */}
+                                <button
+                                  onClick={() => showConfirmation('delete_user', user.id, user.name)}
+                                  className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Excluir usuário
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -779,6 +892,17 @@ export default function AdminDashboard() {
           onClose={() => setShowCreateUserModal(false)}
           onCreateUser={handleCreateUser}
           loading={actionLoading === 'create_user'}
+        />
+      )}
+
+      {/* Modal de confirmação */}
+      {confirmAction && (
+        <ConfirmationModal
+          show={confirmAction.show}
+          message={confirmAction.message}
+          onConfirm={confirmActionHandler}
+          onCancel={() => setConfirmAction(null)}
+          loading={actionLoading === confirmAction.action}
         />
       )}
     </div>
@@ -1003,6 +1127,53 @@ function CreateUserModal({ onClose, onCreateUser, loading }: {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  )
+}
+
+// Modal de confirmação
+function ConfirmationModal({ 
+  show, 
+  message, 
+  onConfirm, 
+  onCancel, 
+  loading 
+}: { 
+  show: boolean
+  message: string
+  onConfirm: () => void
+  onCancel: () => void
+  loading: boolean
+}) {
+  if (!show) return null
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+        <div className="flex items-center mb-4">
+          <AlertTriangle className="w-6 h-6 text-yellow-500 mr-3" />
+          <h3 className="text-lg font-semibold text-gray-900">Confirmar Ação</h3>
+        </div>
+        
+        <p className="text-gray-700 mb-6">{message}</p>
+        
+        <div className="flex justify-end space-x-3">
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Processando...' : 'Confirmar'}
+          </button>
+        </div>
       </div>
     </div>
   )

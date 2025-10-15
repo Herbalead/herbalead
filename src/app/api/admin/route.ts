@@ -166,7 +166,9 @@ export async function GET(request: NextRequest) {
 // POST - Ações administrativas (ativar, desativar, alterar plano)
 export async function POST(request: NextRequest) {
   try {
-    const { action, userId, subscriptionId, newPlan, days } = await request.json()
+    // Ler o body uma única vez no início
+    const requestData = await request.json()
+    const { action, userId, subscriptionId, newPlan, days } = requestData
     
     // Validação específica para create_user (não precisa de userId)
     if (action === 'create_user') {
@@ -260,7 +262,7 @@ export async function POST(request: NextRequest) {
 
     } else if (action === 'create_user') {
       // Criar usuário manualmente
-      const { name, email, phone, username, tempPassword } = await request.json()
+      const { name, email, phone, username, tempPassword } = requestData
       
       console.log('Dados recebidos para criação:', { name, email, phone, username, tempPassword: !!tempPassword })
       
@@ -411,23 +413,46 @@ export async function POST(request: NextRequest) {
 
     } else if (action === 'give_free_subscription') {
       // Dar assinatura gratuita (mensal ou anual)
-      const { planType, months } = await request.json()
+      const { userId: requestUserId, planType, months } = requestData
       
-      if (!planType || !months) {
-        return NextResponse.json({ error: 'Tipo de plano e duração são obrigatórios' }, { status: 400 })
+      const targetUserId = requestUserId || userId
+      
+      if (!targetUserId || !planType || !months) {
+        return NextResponse.json({ error: 'ID do usuário, tipo de plano e duração são obrigatórios' }, { status: 400 })
       }
       
       const endDate = new Date()
       endDate.setMonth(endDate.getMonth() + months)
       
-      const { error } = await supabase
+      console.log('Dando assinatura gratuita:', { targetUserId, planType, months, endDate: endDate.toISOString() })
+      
+      // Tentar com grace_period_end, se falhar, tentar sem
+      let updateData: Record<string, unknown> = { 
+        subscription_status: 'active',
+        subscription_plan: planType,
+        grace_period_end: endDate.toISOString()
+      }
+      
+      let { error } = await supabase
         .from('professionals')
-        .update({ 
+        .update(updateData)
+        .eq('id', targetUserId)
+
+      // Se erro por coluna não existir, tentar sem grace_period_end
+      if (error && error.message?.includes('grace_period_end')) {
+        console.log('Coluna grace_period_end não existe, usando apenas subscription_status e subscription_plan')
+        updateData = { 
           subscription_status: 'active',
-          subscription_plan: planType,
-          grace_period_end: endDate.toISOString() // Usar grace_period_end para controlar fim da assinatura gratuita
-        })
-        .eq('id', userId)
+          subscription_plan: planType
+        }
+        
+        const { error: retryError } = await supabase
+          .from('professionals')
+          .update(updateData)
+          .eq('id', targetUserId)
+        
+        error = retryError
+      }
 
       if (error) {
         console.error('Erro ao dar assinatura gratuita:', error)

@@ -600,16 +600,16 @@ export default function NutritionAssessmentDemoPage() {
                 Sexo *
               </label>
               <select
-                required
-                value={formData.gender}
-                onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                  required
+                  value={formData.gender}
+                  onChange={(e) => setFormData({...formData, gender: e.target.value})}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              >
-                <option value="">Selecione</option>
-                <option value="masculino">Masculino</option>
-                <option value="feminino">Feminino</option>
-              </select>
-            </div>
+                >
+                  <option value="">Selecione</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="feminino">Feminino</option>
+                </select>
+              </div>
 
             {/* Symptoms */}
             <div>
@@ -776,7 +776,7 @@ export default function NutritionAssessmentDemoPage() {
               className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl"
             >
               Clique abaixo e começa a gerar seus leads agora
-            </button>
+          </button>
         </div>
 
         {/* Disclaimer */}
