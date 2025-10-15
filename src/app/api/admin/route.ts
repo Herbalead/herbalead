@@ -255,6 +255,63 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ success: true, message: 'Assinatura cancelada com sucesso' })
 
+    } else if (action === 'create_user') {
+      // Criar usuário manualmente
+      const { name, email, phone, username } = await request.json()
+      
+      if (!name || !email || !username) {
+        return NextResponse.json({ error: 'Nome, email e username são obrigatórios' }, { status: 400 })
+      }
+      
+      // Gerar senha temporária
+      const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8).toUpperCase()
+      
+      // Criar usuário no Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: email,
+        password: tempPassword,
+        email_confirm: true
+      })
+      
+      if (authError) {
+        console.error('Erro ao criar usuário no auth:', authError)
+        return NextResponse.json({ error: 'Erro ao criar usuário: ' + authError.message }, { status: 500 })
+      }
+      
+      // Criar perfil na tabela professionals
+      const graceEndDate = new Date()
+      graceEndDate.setDate(graceEndDate.getDate() + 10) // 10 dias de período de graça
+      
+      const { error: profileError } = await supabase
+        .from('professionals')
+        .insert({
+          id: authData.user.id,
+          name: name,
+          email: email,
+          phone: phone || null,
+          username: username,
+          subscription_status: 'active',
+          grace_period_end: graceEndDate.toISOString(),
+          created_at: new Date().toISOString()
+        })
+      
+      if (profileError) {
+        console.error('Erro ao criar perfil:', profileError)
+        // Tentar remover usuário do auth se falhou
+        await supabase.auth.admin.deleteUser(authData.user.id)
+        return NextResponse.json({ error: 'Erro ao criar perfil: ' + profileError.message }, { status: 500 })
+      }
+      
+      return NextResponse.json({ 
+        success: true, 
+        message: `Usuário criado com sucesso! Email: ${email}, Senha temporária: ${tempPassword}`,
+        user: {
+          id: authData.user.id,
+          email: email,
+          tempPassword: tempPassword
+        }
+      })
+
     } else if (action === 'give_grace_period') {
       // Conceder período de graça
       const graceDays = days || 10

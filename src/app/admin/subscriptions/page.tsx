@@ -11,7 +11,8 @@ import {
   RefreshCw,
   Settings,
   BarChart3,
-  PieChart
+  PieChart,
+  X
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -64,6 +65,7 @@ export default function AdminDashboard() {
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false)
   
   // Filtros
   const [statusFilter, setStatusFilter] = useState('all')
@@ -156,6 +158,35 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Erro ao conceder período de graça:', error)
       alert('Erro ao conceder período de graça: ' + (error instanceof Error ? error.message : 'Erro desconhecido'))
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleCreateUser = async (userData: { name: string; email: string; phone?: string; username: string }) => {
+    setActionLoading('create_user')
+    try {
+      const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_user',
+          ...userData
+        })
+      })
+
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
+        await loadDashboardData()
+        setShowCreateUserModal(false)
+        alert(`Usuário criado com sucesso!\n\nEmail: ${result.user.email}\nSenha temporária: ${result.user.tempPassword}\n\nCompartilhe essas credenciais com o usuário.`)
+      } else {
+        alert('Erro: ' + (result.error || result.message || 'Erro desconhecido'))
+      }
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error)
+      alert('Erro ao criar usuário: ' + (error instanceof Error ? error.message : 'Erro desconhecido'))
     } finally {
       setActionLoading(null)
     }
@@ -391,8 +422,15 @@ export default function AdminDashboard() {
         {/* Users Tab */}
         {activeTab === 'users' && (
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">Gestão de Usuários</h3>
+              <button
+                onClick={() => setShowCreateUserModal(true)}
+                className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Criar Usuário
+              </button>
             </div>
             
             {/* Filtros */}
@@ -648,6 +686,132 @@ export default function AdminDashboard() {
           </div>
         )}
       </main>
+
+      {/* Modal de Criação de Usuário */}
+      {showCreateUserModal && (
+        <CreateUserModal
+          onClose={() => setShowCreateUserModal(false)}
+          onCreateUser={handleCreateUser}
+          loading={actionLoading === 'create_user'}
+        />
+      )}
+    </div>
+  )
+}
+
+// Componente do Modal de Criação de Usuário
+function CreateUserModal({ onClose, onCreateUser, loading }: { 
+  onClose: () => void
+  onCreateUser: (data: { name: string; email: string; phone?: string; username: string }) => void
+  loading: boolean 
+}) {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    username: ''
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (formData.name && formData.email && formData.username) {
+      onCreateUser(formData)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">Criar Novo Usuário</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nome Completo *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder="Nome completo do usuário"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email *
+            </label>
+            <input
+              type="email"
+              required
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder="email@exemplo.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Username *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder="username"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Telefone (opcional)
+            </label>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder="(11) 99999-9999"
+            />
+          </div>
+
+          <div className="bg-blue-50 p-3 rounded-md">
+            <p className="text-sm text-blue-800">
+              <strong>Período de graça:</strong> O usuário receberá automaticamente 10 dias de acesso completo.
+            </p>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={loading || !formData.name || !formData.email || !formData.username}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Criando...' : 'Criar Usuário'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }
