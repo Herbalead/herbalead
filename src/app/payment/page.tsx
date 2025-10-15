@@ -12,7 +12,7 @@ export default function PaymentPage() {
   const plans = {
         monthly: {
           price: 'R$ 60',
-          period: '',
+          period: '/mês',
           total: 'R$ 60',
           description: 'Acesso completo por 30 dias',
           features: [
@@ -25,10 +25,10 @@ export default function PaymentPage() {
           ]
         },
         yearly: {
-          price: 'R$ 570',
-          period: '',
-          total: 'R$ 570',
-          description: 'Economize 20% pagando anualmente',
+          price: 'R$ 47,50',
+          period: '/mês',
+          total: 'R$ 570 total',
+          description: 'Economize R$ 150 por ano!',
           features: [
             '🚀 Gere contatos novos todos os dias, sem depender de anúncios',
             '🔗 Crie links inteligentes que atraem e convertem',
