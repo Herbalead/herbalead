@@ -63,7 +63,7 @@ export async function middleware(request: NextRequest) {
         .eq('email', user.email)
         .single()
       
-      // Verificar se período de graça expirou
+      // Verificar se período de graça expirou (apenas se coluna existir)
       if (professional?.subscription_status === 'trialing' && professional.grace_period_end) {
         const graceEndDate = new Date(professional.grace_period_end)
         const now = new Date()
@@ -103,7 +103,7 @@ export async function middleware(request: NextRequest) {
         .eq('username', username)
         .single()
       
-      // Verificar se período de graça expirou
+      // Verificar se período de graça expirou (apenas se coluna existir)
       if (professional?.subscription_status === 'trialing' && professional.grace_period_end) {
         const graceEndDate = new Date(professional.grace_period_end)
         const now = new Date()

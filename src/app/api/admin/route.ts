@@ -261,18 +261,35 @@ export async function POST(request: NextRequest) {
       const graceEndDate = new Date()
       graceEndDate.setDate(graceEndDate.getDate() + graceDays)
       
-      // Atualizar status para trialing com data de fim
-      const { error } = await supabase
+      console.log('Concedendo período de graça:', { userId, graceDays, graceEndDate: graceEndDate.toISOString() })
+      
+      // Primeiro tentar com grace_period_end, se falhar, tentar sem
+      let updateData: any = { 
+        subscription_status: 'trialing',
+        grace_period_end: graceEndDate.toISOString()
+      }
+      
+      let { error } = await supabase
         .from('professionals')
-        .update({ 
-          subscription_status: 'trialing',
-          grace_period_end: graceEndDate.toISOString()
-        })
+        .update(updateData)
         .eq('id', userId)
+
+      // Se erro por coluna não existir, tentar sem grace_period_end
+      if (error && error.message?.includes('grace_period_end')) {
+        console.log('Coluna grace_period_end não existe, usando apenas subscription_status')
+        updateData = { subscription_status: 'trialing' }
+        
+        const { error: retryError } = await supabase
+          .from('professionals')
+          .update(updateData)
+          .eq('id', userId)
+        
+        error = retryError
+      }
 
       if (error) {
         console.error('Erro ao conceder período de graça:', error)
-        return NextResponse.json({ error: 'Erro ao conceder período de graça' }, { status: 500 })
+        return NextResponse.json({ error: 'Erro ao conceder período de graça: ' + error.message }, { status: 500 })
       }
 
       return NextResponse.json({ 
