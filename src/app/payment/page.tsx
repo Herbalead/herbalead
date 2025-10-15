@@ -27,7 +27,7 @@ export default function PaymentPage() {
         yearly: {
           price: 'R$ 47,50',
           period: '/mês',
-          total: 'R$ 570 total',
+          total: 'R$ 570 anual',
           description: 'Economize R$ 150 por ano!',
           features: [
             '🚀 Gere contatos novos todos os dias, sem depender de anúncios',
