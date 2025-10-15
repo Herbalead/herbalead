@@ -41,16 +41,40 @@ export async function POST(request: NextRequest) {
           // Buscar dados da assinatura no Stripe
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
           
-          // Buscar usuário pelo email
-          const { data: user, error: userError } = await supabase
+          // Buscar ou criar usuário pelo email
+          let user
+          const { data: existingUser, error: userError } = await supabase
             .from('professionals')
             .select('id')
             .eq('email', session.customer_email)
             .single()
 
-          if (userError || !user) {
-            console.error('Usuário não encontrado:', userError)
-            break
+          if (userError || !existingUser) {
+            console.log('Usuário não encontrado, criando automaticamente...')
+            
+            // Criar usuário automaticamente
+            const { data: newUser, error: createError } = await supabase
+              .from('professionals')
+              .insert({
+                email: session.customer_email,
+                name: session.customer_details?.name || 'Usuário',
+                phone: session.customer_details?.phone || '',
+                subscription_status: 'active',
+                created_at: new Date().toISOString()
+              })
+              .select('id')
+              .single()
+
+            if (createError) {
+              console.error('Erro ao criar usuário:', createError)
+              break
+            }
+            
+            user = newUser
+            console.log('✅ Usuário criado automaticamente:', user.id)
+          } else {
+            user = existingUser
+            console.log('✅ Usuário encontrado:', user.id)
           }
 
           // Salvar assinatura no banco
@@ -80,16 +104,69 @@ export async function POST(request: NextRequest) {
         const subscription = event.data.object
         console.log('Subscription created:', subscription.id)
         
-        // Buscar usuário pelo customer ID
-        const { data: user, error: userError } = await supabase
+        // Buscar usuário pelo customer ID ou email
+        let user
+        const { data: existingUser, error: userError } = await supabase
           .from('professionals')
-          .select('id')
+          .select('id, email')
           .eq('stripe_customer_id', subscription.customer)
           .single()
 
-        if (userError || !user) {
-          console.error('Usuário não encontrado pelo customer ID:', userError)
-          break
+        if (userError || !existingUser) {
+          console.log('Usuário não encontrado pelo customer ID, buscando pelo email...')
+          
+          // Buscar pelo email do customer no Stripe
+          const customer = await stripe.customers.retrieve(subscription.customer as string)
+          const customerEmail = customer.email
+          
+          if (customerEmail) {
+            const { data: userByEmail, error: emailError } = await supabase
+              .from('professionals')
+              .select('id')
+              .eq('email', customerEmail)
+              .single()
+
+            if (emailError || !userByEmail) {
+              console.log('Usuário não encontrado pelo email, criando automaticamente...')
+              
+              // Criar usuário automaticamente
+              const { data: newUser, error: createError } = await supabase
+                .from('professionals')
+                .insert({
+                  email: customerEmail,
+                  name: customer.name || 'Usuário',
+                  phone: customer.phone || '',
+                  stripe_customer_id: subscription.customer as string,
+                  subscription_status: 'active',
+                  created_at: new Date().toISOString()
+                })
+                .select('id')
+                .single()
+
+              if (createError) {
+                console.error('Erro ao criar usuário:', createError)
+                break
+              }
+              
+              user = newUser
+              console.log('✅ Usuário criado automaticamente:', user.id)
+            } else {
+              // Atualizar customer ID no usuário existente
+              await supabase
+                .from('professionals')
+                .update({ stripe_customer_id: subscription.customer as string })
+                .eq('id', userByEmail.id)
+              
+              user = userByEmail
+              console.log('✅ Usuário encontrado e customer ID atualizado:', user.id)
+            }
+          } else {
+            console.error('Email do customer não encontrado no Stripe')
+            break
+          }
+        } else {
+          user = existingUser
+          console.log('✅ Usuário encontrado pelo customer ID:', user.id)
         }
 
         // Salvar assinatura no banco

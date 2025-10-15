@@ -7,6 +7,10 @@ ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT,
 ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'inactive' CHECK (subscription_status IN ('active', 'inactive', 'canceled', 'past_due', 'unpaid')),
 ADD COLUMN IF NOT EXISTS subscription_plan TEXT CHECK (subscription_plan IN ('monthly', 'yearly'));
 
+-- Adicionar constraint única no email para evitar duplicatas
+ALTER TABLE public.professionals 
+ADD CONSTRAINT IF NOT EXISTS unique_email UNIQUE (email);
+
 -- 2. Criar tabela de assinaturas
 CREATE TABLE IF NOT EXISTS public.subscriptions (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
