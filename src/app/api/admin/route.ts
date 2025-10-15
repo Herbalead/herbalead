@@ -257,15 +257,12 @@ export async function POST(request: NextRequest) {
     } else if (action === 'give_grace_period') {
       // Conceder período de graça
       const graceDays = days || 10
-      const graceEndDate = new Date()
-      graceEndDate.setDate(graceEndDate.getDate() + graceDays)
       
-      // Atualizar status para trialing com data de fim
+      // Atualizar status para trialing (sem depender da coluna grace_period_end)
       const { error } = await supabase
         .from('professionals')
         .update({ 
-          subscription_status: 'trialing',
-          grace_period_end: graceEndDate.toISOString()
+          subscription_status: 'trialing'
         })
         .eq('id', userId)
 

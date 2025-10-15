@@ -147,16 +147,17 @@ export default function AdminDashboard() {
         })
       })
 
-      if (response.ok) {
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
         await loadDashboardData()
-        alert('Período de graça de 10 dias concedido com sucesso!')
+        alert(result.message || 'Período de graça de 10 dias concedido com sucesso!')
       } else {
-        const error = await response.json()
-        alert('Erro: ' + error.message)
+        alert('Erro: ' + (result.error || result.message || 'Erro desconhecido'))
       }
     } catch (error) {
       console.error('Erro ao conceder período de graça:', error)
-      alert('Erro ao conceder período de graça')
+      alert('Erro ao conceder período de graça: ' + (error instanceof Error ? error.message : 'Erro desconhecido'))
     } finally {
       setActionLoading(null)
     }
