@@ -63,13 +63,13 @@ export async function middleware(request: NextRequest) {
         .eq('email', user.email)
         .single()
       
-      // Verificar se período de graça expirou (apenas se coluna existir)
+      // Verificar se período de graça/assinatura gratuita expirou
       if (professional?.subscription_status === 'active' && professional.grace_period_end) {
         const graceEndDate = new Date(professional.grace_period_end)
         const now = new Date()
         
         if (now > graceEndDate) {
-          // Período de graça expirou - atualizar status para inactive
+          // Período expirou - atualizar status para inactive
           await supabase
             .from('professionals')
             .update({ subscription_status: 'inactive' })
@@ -103,13 +103,13 @@ export async function middleware(request: NextRequest) {
         .eq('username', username)
         .single()
       
-      // Verificar se período de graça expirou (apenas se coluna existir)
+      // Verificar se período de graça/assinatura gratuita expirou
       if (professional?.subscription_status === 'active' && professional.grace_period_end) {
         const graceEndDate = new Date(professional.grace_period_end)
         const now = new Date()
         
         if (now > graceEndDate) {
-          // Período de graça expirou - atualizar status para inactive
+          // Período expirou - atualizar status para inactive
           await supabase
             .from('professionals')
             .update({ subscription_status: 'inactive' })

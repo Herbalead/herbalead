@@ -343,6 +343,72 @@ export async function POST(request: NextRequest) {
         }
       })
 
+    } else if (action === 'delete_user') {
+      // Excluir usuário completamente
+      const { error: profileError } = await supabase
+        .from('professionals')
+        .delete()
+        .eq('id', userId)
+
+      if (profileError) {
+        console.error('Erro ao excluir perfil:', profileError)
+        return NextResponse.json({ error: 'Erro ao excluir usuário: ' + profileError.message }, { status: 500 })
+      }
+
+      // Tentar excluir do auth também
+      try {
+        await supabase.auth.admin.deleteUser(userId)
+      } catch (authError) {
+        console.log('Usuário já removido do auth ou erro:', authError)
+      }
+
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Usuário excluído com sucesso' 
+      })
+
+    } else if (action === 'suspend_user') {
+      // Suspender usuário
+      const { error } = await supabase
+        .from('professionals')
+        .update({ subscription_status: 'inactive' })
+        .eq('id', userId)
+
+      if (error) {
+        console.error('Erro ao suspender usuário:', error)
+        return NextResponse.json({ error: 'Erro ao suspender usuário' }, { status: 500 })
+      }
+
+      return NextResponse.json({ success: true, message: 'Usuário suspenso com sucesso' })
+
+    } else if (action === 'reactivate_user') {
+      // Reativar usuário
+      const { error } = await supabase
+        .from('professionals')
+        .update({ subscription_status: 'active' })
+        .eq('id', userId)
+
+      if (error) {
+        console.error('Erro ao reativar usuário:', error)
+        return NextResponse.json({ error: 'Erro ao reativar usuário' }, { status: 500 })
+      }
+
+      return NextResponse.json({ success: true, message: 'Usuário reativado com sucesso' })
+
+    } else if (action === 'cancel_subscription') {
+      // Cancelar assinatura
+      const { error } = await supabase
+        .from('professionals')
+        .update({ subscription_status: 'canceled' })
+        .eq('id', userId)
+
+      if (error) {
+        console.error('Erro ao cancelar assinatura:', error)
+        return NextResponse.json({ error: 'Erro ao cancelar assinatura' }, { status: 500 })
+      }
+
+      return NextResponse.json({ success: true, message: 'Assinatura cancelada com sucesso' })
+
     } else if (action === 'give_free_subscription') {
       // Dar assinatura gratuita (mensal ou anual)
       const { planType, months } = await request.json()

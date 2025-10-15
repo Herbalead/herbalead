@@ -644,6 +644,43 @@ export default function AdminDashboard() {
                         >
                           {actionLoading === user.id ? '...' : '1 ano'}
                         </button>
+                        
+                        {/* Botões de gerenciamento */}
+                        <button
+                          onClick={() => handleUserAction('suspend_user', user.id)}
+                          disabled={actionLoading === user.id}
+                          className="text-yellow-600 hover:text-yellow-900 ml-2"
+                          title="Suspender usuário"
+                        >
+                          {actionLoading === user.id ? '...' : 'Suspender'}
+                        </button>
+                        
+                        <button
+                          onClick={() => handleUserAction('reactivate_user', user.id)}
+                          disabled={actionLoading === user.id}
+                          className="text-green-600 hover:text-green-900 ml-2"
+                          title="Reativar usuário"
+                        >
+                          {actionLoading === user.id ? '...' : 'Reativar'}
+                        </button>
+                        
+                        <button
+                          onClick={() => handleUserAction('cancel_subscription', user.id)}
+                          disabled={actionLoading === user.id}
+                          className="text-orange-600 hover:text-orange-900 ml-2"
+                          title="Cancelar assinatura"
+                        >
+                          {actionLoading === user.id ? '...' : 'Cancelar'}
+                        </button>
+                        
+                        <button
+                          onClick={() => handleUserAction('delete_user', user.id)}
+                          disabled={actionLoading === user.id}
+                          className="text-red-600 hover:text-red-900 ml-2"
+                          title="Excluir usuário permanentemente"
+                        >
+                          {actionLoading === user.id ? '...' : 'Excluir'}
+                        </button>
                       </td>
                     </tr>
                   ))}
