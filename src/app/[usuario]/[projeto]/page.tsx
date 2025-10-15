@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Head from 'next/head'
 import { supabase } from '@/lib/supabase'
+import { getToolMessage } from '@/lib/tool-messages'
 import HelpButton from '@/components/HelpButton'
 
 export default function PersonalizedLinkPage() {
@@ -200,9 +202,42 @@ export default function PersonalizedLinkPage() {
     )
   }
 
+  // Obter mensagem personalizada baseada na ferramenta
+  const toolMessage = linkData?.tool_name ? getToolMessage(linkData.tool_name) : null
+  const pageTitle = toolMessage?.title || `${linkData?.name} - HerbaLead`
+  const pageDescription = toolMessage?.description || 'Acesse nossa ferramenta especializada para cuidar da sua saúde.'
+  const whatsappMessage = toolMessage?.shortMessage || 'Acesse nossa ferramenta de saúde 🏥'
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">
-      <div className="container mx-auto px-4 py-8">
+    <>
+      <Head>
+        {/* Meta tags básicas */}
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`https://www.herbalead.com/${usuario}/${projeto}`} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={`https://www.herbalead.com/${usuario}/${projeto}`} />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg" />
+        
+        {/* WhatsApp específico */}
+        <meta property="og:site_name" content="HerbaLead" />
+        <meta name="theme-color" content="#10b981" />
+      </Head>
+      
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">
+        <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
@@ -237,8 +272,9 @@ export default function PersonalizedLinkPage() {
         </div>
       </div>
       
-      {/* Botão de Ajuda */}
-      <HelpButton />
-    </div>
+        {/* Botão de Ajuda */}
+        <HelpButton />
+      </div>
+    </>
   )
 }

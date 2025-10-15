@@ -3,6 +3,7 @@
 import { MessageSquare, Download, CheckCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { getToolMessage } from '@/lib/tool-messages'
 
 interface SpecialistCTAProps {
   toolName?: string
@@ -304,16 +305,18 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
     )
   }
 
+  // Obter mensagem personalizada baseada na ferramenta
+  const toolMessage = linkData?.tool_name ? getToolMessage(linkData.tool_name) : null
+  const displayMessage = linkData?.custom_message || toolMessage?.shortMessage || 'Quer receber orientações personalizadas?'
+
   return (
     <div className={`mt-6 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200 ${className}`}>
-      {/* Mostrar apenas a mensagem personalizada (sem label) */}
-      {linkData?.custom_message && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800">
-            {linkData.custom_message}
-          </p>
-        </div>
-      )}
+      {/* Mostrar mensagem personalizada */}
+      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <p className="text-sm text-blue-800">
+          {displayMessage}
+        </p>
+      </div>
       
       {/* Botão personalizado */}
       <button

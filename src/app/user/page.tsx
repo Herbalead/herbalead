@@ -6,6 +6,7 @@ import { Plus, Link as LinkIcon, Users, TrendingUp, Settings, BookOpen } from 'l
 import { supabase } from '@/lib/supabase'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 import HelpButton from '@/components/HelpButton'
+import WhatsAppLinkGenerator from '@/components/WhatsAppLinkGenerator'
 
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -34,6 +35,8 @@ export default function UserDashboard() {
   const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null)
   const [userLinks, setUserLinks] = useState<Record<string, unknown>[]>([])
   const [userQuizzes, setUserQuizzes] = useState<Record<string, unknown>[]>([])
+  const [showWhatsAppGenerator, setShowWhatsAppGenerator] = useState(false)
+  const [selectedLinkForWhatsApp, setSelectedLinkForWhatsApp] = useState<Record<string, unknown> | null>(null)
   const [userProfile, setUserProfile] = useState({
     name: '',
     email: '',
@@ -504,6 +507,11 @@ export default function UserDashboard() {
       button_text: String(link.button_text || 'Consultar Especialista')
     })
     setShowEditModal(true)
+  }
+
+  const openWhatsAppGenerator = (link: Record<string, unknown>) => {
+    setSelectedLinkForWhatsApp(link)
+    setShowWhatsAppGenerator(true)
   }
 
   const updateLink = async () => {
@@ -1048,6 +1056,12 @@ export default function UserDashboard() {
                             {copiedLinkId === link.id ? '✓ Copiado!' : '📋 Copiar Link'}
                         </button>
                         <button 
+                          onClick={() => openWhatsAppGenerator(link)}
+                          className="text-sm px-3 py-1 bg-green-100 text-green-600 rounded-md hover:bg-green-200 transition-colors"
+                        >
+                          📱 WhatsApp
+                        </button>
+                        <button 
                           onClick={() => editLink(link)}
                             className="text-blue-600 hover:text-blue-800 text-sm"
                         >
@@ -1106,20 +1120,20 @@ export default function UserDashboard() {
             ) : (
               <div className="space-y-4">
                 {userQuizzes.map((quiz: Record<string, unknown>) => (
-                  <div key={quiz.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                  <div key={String(quiz.id)} className="border rounded-lg p-4 hover:bg-gray-50">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-semibold text-gray-900">{quiz.title}</h4>
-                        <p className="text-sm text-gray-600 mt-1">{quiz.description}</p>
+                        <h4 className="font-semibold text-gray-900">{String(quiz.title)}</h4>
+                        <p className="text-sm text-gray-600 mt-1">{String(quiz.description)}</p>
                         <p className="text-xs text-gray-500 mt-2">
-                          Projeto: {quiz.project_name} | 
-                          Criado em: {new Date(quiz.created_at).toLocaleDateString('pt-BR')}
+                          Projeto: {String(quiz.project_name)} | 
+                          Criado em: {new Date(String(quiz.created_at)).toLocaleDateString('pt-BR')}
                         </p>
                       </div>
                       <div className="flex space-x-2">
                         <button
                           onClick={() => {
-                            const url = `${window.location.origin}/${userProfile.name?.toLowerCase().replace(/\s+/g, '-') || 'usuario'}/quiz/${quiz.project_name}`
+                            const url = `${window.location.origin}/${userProfile.name?.toLowerCase().replace(/\s+/g, '-') || 'usuario'}/quiz/${String(quiz.project_name)}`
                             navigator.clipboard.writeText(url)
                             alert('Link copiado!')
                           }}
@@ -1135,8 +1149,8 @@ export default function UserDashboard() {
                         </button>
                         <button
                           onClick={() => {
-                            if (confirm(`Tem certeza que deseja apagar o quiz "${quiz.title}"? Esta ação não pode ser desfeita.`)) {
-                              deleteQuiz(quiz.id)
+                            if (confirm(`Tem certeza que deseja apagar o quiz "${String(quiz.title)}"? Esta ação não pode ser desfeita.`)) {
+                              deleteQuiz(String(quiz.id))
                             }
                           }}
                           className="px-2 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200 flex items-center"
@@ -1733,6 +1747,38 @@ export default function UserDashboard() {
             >
               OK
             </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal do Gerador de WhatsApp */}
+      {showWhatsAppGenerator && selectedLinkForWhatsApp && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  📱 Compartilhar no WhatsApp
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowWhatsAppGenerator(false)
+                    setSelectedLinkForWhatsApp(null)
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <WhatsAppLinkGenerator
+                toolName={selectedLinkForWhatsApp.tool_name as string}
+                userName={userProfile.name}
+                projectName={selectedLinkForWhatsApp.name as string}
+              />
+            </div>
           </div>
         </div>
       )}
