@@ -1773,13 +1773,22 @@ export default function AdminDashboard() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">Usuários</h2>
-              <button
-                onClick={() => setShowAddUserModal(true)}
-                className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-              >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Novo Usuário Admin
-              </button>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => window.location.href = '/admin/subscriptions'}
+                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Painel de Assinaturas
+                </button>
+                <button
+                  onClick={() => setShowAddUserModal(true)}
+                  className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Novo Usuário Admin
+                </button>
+              </div>
             </div>
             
             <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
