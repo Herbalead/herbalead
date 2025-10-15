@@ -1255,13 +1255,37 @@ export default function UserDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Configurações</h3>
             <div className="space-y-4">
-                <div>
-                <label className="block text-sm font-medium text-gray-700">Notificações</label>
-                <p className="mt-1 text-sm text-gray-500">Configure suas preferências de notificação</p>
+              {/* Assinatura */}
+              <div className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-gray-900">Assinatura</h4>
+                    <p className="text-sm text-gray-500">Gerencie sua assinatura e pagamentos</p>
+                  </div>
+                  <Link
+                    href="/user/subscription"
+                    className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Gerenciar
+                  </Link>
                 </div>
+              </div>
+
+              {/* Notificações */}
+              <div className="border border-gray-200 rounded-lg p-4">
                 <div>
-                <label className="block text-sm font-medium text-gray-700">Integrações</label>
-                <p className="mt-1 text-sm text-gray-500">Conecte com outras ferramentas</p>
+                  <label className="block text-sm font-medium text-gray-700">Notificações</label>
+                  <p className="mt-1 text-sm text-gray-500">Configure suas preferências de notificação</p>
+                </div>
+              </div>
+              
+              {/* Integrações */}
+              <div className="border border-gray-200 rounded-lg p-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Integrações</label>
+                  <p className="mt-1 text-sm text-gray-500">Conecte com outras ferramentas</p>
+                </div>
               </div>
             </div>
           </div>
