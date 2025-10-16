@@ -30,7 +30,7 @@ export default function FailurePage() {
               Entre em contato conosco pelo WhatsApp para esclarecer dúvidas sobre pagamento.
             </p>
             <a 
-              href="https://wa.me/5511999999999"
+              href="https://api.whatsapp.com/send?phone=5519996049800&text=Acabei%20de%20fazer%20a%20minha%20inscri%C3%A7%C3%A3o%20e%20estou%20com%20duvida"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-green-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-600 transition-colors inline-block"
