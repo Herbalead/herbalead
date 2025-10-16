@@ -8,14 +8,13 @@ import { ArrowLeft, CreditCard, CheckCircle } from 'lucide-react'
 export default function RegisterPage() {
   const router = useRouter()
 
-  useEffect(() => {
-    // Redirecionar para página de pagamento após 2 segundos
-    const timer = setTimeout(() => {
-      router.push('/payment')
-    }, 2000)
-
-    return () => clearTimeout(timer)
-  }, [router])
+  // Remover redirecionamento automático
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     router.push('/payment')
+  //   }, 2000)
+  //   return () => clearTimeout(timer)
+  // }, [router])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
