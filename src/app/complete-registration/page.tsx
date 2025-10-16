@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle, ArrowRight, User, KeyRound, Eye, EyeOff, Phone, Globe } from 'lucide-react'
+import { ArrowRight, User, KeyRound, Eye, EyeOff, Phone } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -11,7 +11,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export default function CompleteRegistrationPage() {
+function CompleteRegistrationContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
@@ -86,8 +86,8 @@ export default function CompleteRegistrationPage() {
     }
 
     try {
-      // Criar usuário no Supabase
-      const { data, error } = await supabase.auth.signUp({
+      // Criar usuário no Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: email,
         password: password,
         options: {
@@ -99,18 +99,38 @@ export default function CompleteRegistrationPage() {
         }
       })
 
-      if (error) {
-        setError(error.message)
-      } else {
-        setSuccess('Cadastro realizado com sucesso! Redirecionando...')
-        localStorage.setItem('user_email', email)
-        localStorage.setItem('user_name', name)
-        
-        setTimeout(() => {
-          router.push('/user')
-        }, 2000)
+      if (authError) {
+        setError(authError.message)
+        return
       }
-    } catch (err) {
+
+      // Criar perfil na tabela professionals
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from('professionals')
+          .insert({
+            id: authData.user.id,
+            name: name,
+            email: email,
+            phone: `${countryCode}${phone}`,
+            is_active: true,
+            is_admin: false
+          })
+
+        if (profileError) {
+          console.error('Erro ao criar perfil:', profileError)
+          setError('Usuário criado, mas erro ao salvar perfil. Entre em contato.')
+        } else {
+          setSuccess('Cadastro realizado com sucesso! Redirecionando...')
+          localStorage.setItem('user_email', email)
+          localStorage.setItem('user_name', name)
+          
+          setTimeout(() => {
+            router.push('/user')
+          }, 2000)
+        }
+      }
+    } catch {
       setError('Erro ao criar conta. Tente novamente.')
     }
 
@@ -284,5 +304,20 @@ export default function CompleteRegistrationPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CompleteRegistrationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-green-600">Carregando...</p>
+        </div>
+      </div>
+    }>
+      <CompleteRegistrationContent />
+    </Suspense>
   )
 }
