@@ -67,48 +67,14 @@ export async function POST(request: NextRequest) {
             .single()
 
           if (userError || !existingUser) {
-            console.log('Usuário não encontrado, criando automaticamente...')
+            console.log('⚠️ Usuário não encontrado - aguardando cadastro manual')
+            console.log('Email:', session.customer_email)
+            console.log('Customer ID:', subscription.customer)
             
-            // Criar usuário na auth.users primeiro
-            const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-              email: session.customer_email,
-              password: 'tetemp-password-' + Date.now(), // Senha temporária
-              email_confirm: true,
-              user_metadata: {
-                name: session.customer_details?.name || 'Usuário'
-              }
-            })
-            
-            if (authError) {
-              console.error('Erro ao criar usuário na auth:', authError)
-              break
-            }
-            
-            console.log('✅ Usuário criado na auth.users:', authUser.user.id)
-            
-            // Criar usuário na tabela professionals
-            const { data: newUser, error: createError } = await supabase
-              .from('professionals')
-              .insert({
-                id: authUser.user.id, // Usar o mesmo ID da auth.users
-                email: session.customer_email,
-                name: session.customer_details?.name || 'Usuário',
-                phone: session.customer_details?.phone || '',
-                is_active: true,
-                is_admin: false,
-                stripe_customer_id: subscription.customer as string,
-                subscription_status: 'active'
-              })
-              .select('id')
-              .single()
-
-            if (createError) {
-              console.error('Erro ao criar usuário na professionals:', createError)
-              break
-            }
-            
-            user = newUser
-            console.log('✅ Usuário criado automaticamente:', user.id)
+            // NÃO criar usuário automaticamente - aguardar cadastro manual
+            // Apenas salvar dados da assinatura para quando o usuário se cadastrar
+            console.log('📝 Pagamento processado, mas usuário deve completar cadastro manualmente')
+            break
           } else {
             user = existingUser
             console.log('✅ Usuário encontrado:', user.id)
@@ -164,48 +130,13 @@ export async function POST(request: NextRequest) {
               .single()
 
             if (emailError || !userByEmail) {
-              console.log('Usuário não encontrado pelo email, criando automaticamente...')
+              console.log('⚠️ Usuário não encontrado pelo email - aguardando cadastro manual')
+              console.log('Email:', customerEmail)
+              console.log('Customer ID:', subscription.customer)
               
-              // Criar usuário na auth.users primeiro
-              const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-                email: customerEmail,
-                password: 'temp-password-' + Date.now(), // Senha temporária
-                email_confirm: true,
-                user_metadata: {
-                  name: customer.name || 'Usuário'
-                }
-              })
-              
-              if (authError) {
-                console.error('Erro ao criar usuário na auth:', authError)
-                break
-              }
-              
-              console.log('✅ Usuário criado na auth.users:', authUser.user.id)
-              
-              // Criar usuário na tabela professionals
-              const { data: newUser, error: createError } = await supabase
-                .from('professionals')
-                .insert({
-                  id: authUser.user.id, // Usar o mesmo ID da auth.users
-                  email: customerEmail,
-                  name: customer.name || 'Usuário',
-                  phone: customer.phone || '',
-                  is_active: true,
-                  is_admin: false,
-                  stripe_customer_id: subscription.customer as string,
-                  subscription_status: 'active'
-                })
-                .select('id')
-                .single()
-
-              if (createError) {
-                console.error('Erro ao criar usuário na professionals:', createError)
-                break
-              }
-              
-              user = newUser
-              console.log('✅ Usuário criado automaticamente:', user.id)
+              // NÃO criar usuário automaticamente - aguardar cadastro manual
+              console.log('📝 Subscription criada, mas usuário deve completar cadastro manualmente')
+              break
             } else {
               // Atualizar customer ID no usuário existente
               await supabase
