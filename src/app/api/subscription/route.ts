@@ -10,29 +10,25 @@ const supabase = createClient(
 // GET - Obter dados da assinatura do usuário
 export async function GET(request: NextRequest) {
   try {
-    // Verificar autenticação via cookie
-    const token = request.cookies.get('sb-access-token')?.value
-    if (!token) {
-      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId')
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'userId é obrigatório' }, { status: 400 })
     }
 
-    // Verificar usuário no Supabase
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 401 })
-    }
-
-    // Buscar dados do profissional
+    // Buscar dados do profissional pelo userId
     const { data: professional, error: profError } = await supabase
       .from('professionals')
       .select('id, email, username, subscription_status, subscription_plan, stripe_customer_id, grace_period_end')
-      .eq('email', user.email)
+      .eq('id', userId)
       .single()
 
     if (profError) {
       console.error('Erro ao buscar profissional:', profError)
       return NextResponse.json({ error: 'Profissional não encontrado' }, { status: 404 })
     }
+
 
     // Buscar dados da assinatura se existir
     let subscription = null

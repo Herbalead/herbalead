@@ -270,15 +270,19 @@ export default function SubscriptionSettingsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 <div className="bg-gray-50 rounded-lg p-6">
-                  <h3 className="font-semibold text-gray-900 mb-2">Próximo Pagamento</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">Expira em</h3>
                   <p className="text-lg font-semibold text-gray-900">
                     {subscriptionData.subscription?.current_period_end ? 
                       formatDate(subscriptionData.subscription.current_period_end) : 'N/A'}
                   </p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {subscriptionData.subscription?.current_period_end ? 
+                      `Renovação automática ${subscriptionData.subscription.plan_type === 'monthly' ? 'mensal' : 'anual'}` : ''}
+                  </p>
                 </div>
                 
                 <div className="bg-gray-50 rounded-lg p-6">
-                  <h3 className="font-semibold text-gray-900 mb-2">Cancelamento</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">Status do Cancelamento</h3>
                   <p className="text-lg font-semibold text-gray-900">
                     {subscriptionData.subscription?.cancel_at_period_end ? 
                       'Será cancelada no final do período' : 'Não programado'}
@@ -291,7 +295,17 @@ export default function SubscriptionSettingsPage() {
             <div className="bg-white rounded-xl shadow-lg p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Gerenciar Assinatura</h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Botão Renovar Assinatura */}
+                <Link
+                  href="/payment"
+                  className="flex items-center justify-center px-6 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors"
+                >
+                  <RefreshCw className="w-5 h-5 mr-2" />
+                  Renovar Assinatura
+                </Link>
+
+                {/* Botões de Cancelar/Reativar */}
                 {subscriptionData.subscription?.cancel_at_period_end ? (
                   <button
                     onClick={() => handleSubscriptionAction('reactivate', subscriptionData.subscription!.stripe_subscription_id)}
