@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { getToolMessage } from '@/lib/tool-messages'
+// import { getToolMessage } from '@/lib/tool-messages' // Removido - não usado
 import HelpButton from '@/components/HelpButton'
 
 interface PersonalizedLinkContentProps {
