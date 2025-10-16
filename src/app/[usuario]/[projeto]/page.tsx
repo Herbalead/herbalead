@@ -9,7 +9,7 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { usuario, projeto } = params
+  const { usuario, projeto } = await params
   
   // Importar dinamicamente para evitar problemas de SSR
   const { getToolMessage } = await import('@/lib/tool-messages')
@@ -53,6 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default function PersonalizedLinkPage({ params }: PageProps) {
-  return <PersonalizedLinkContent params={params} />
+export default async function PersonalizedLinkPage({ params }: PageProps) {
+  const awaitedParams = await params
+  return <PersonalizedLinkContent params={awaitedParams} />
 }
