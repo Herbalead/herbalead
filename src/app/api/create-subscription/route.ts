@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
         const price = await stripe.prices.create({
           unit_amount: plan.unit_amount,
           currency: plan.currency,
-          recurring: { interval: plan.interval as any },
+          recurring: { interval: plan.interval as 'month' | 'year' },
           product: product.id,
         })
         
