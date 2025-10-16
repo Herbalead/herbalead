@@ -39,7 +39,7 @@ export default function MaterialUpload({ moduleId, onUploadComplete }: MaterialU
       const filePath = `course-materials/${fileName}`
 
       const { error: uploadError } = await supabase.storage
-        .from('course-materials')
+        .from('herbalead-public')
         .upload(filePath, file)
 
       if (uploadError) throw uploadError

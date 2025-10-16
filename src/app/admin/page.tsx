@@ -869,7 +869,7 @@ export default function AdminDashboard() {
         const filePath = `course-materials/${fileName}`
 
         const { error: uploadError } = await supabase.storage
-          .from('course-materials')
+          .from('herbalead-public')
           .upload(filePath, file)
 
         if (uploadError) throw uploadError
