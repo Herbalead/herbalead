@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle, ArrowRight, User, KeyRound, Eye, EyeOff } from 'lucide-react'
+import { CheckCircle, ArrowRight, User, KeyRound, Eye, EyeOff, Phone, Globe } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -15,6 +15,9 @@ export default function CompleteRegistrationPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [countryCode, setCountryCode] = useState('+55')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -22,6 +25,22 @@ export default function CompleteRegistrationPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+
+  // Lista de países com códigos
+  const countries = [
+    { code: '+55', name: 'Brasil', flag: '🇧🇷' },
+    { code: '+1', name: 'Estados Unidos', flag: '🇺🇸' },
+    { code: '+1', name: 'Canadá', flag: '🇨🇦' },
+    { code: '+54', name: 'Argentina', flag: '🇦🇷' },
+    { code: '+56', name: 'Chile', flag: '🇨🇱' },
+    { code: '+57', name: 'Colômbia', flag: '🇨🇴' },
+    { code: '+51', name: 'Peru', flag: '🇵🇪' },
+    { code: '+598', name: 'Uruguai', flag: '🇺🇾' },
+    { code: '+591', name: 'Bolívia', flag: '🇧🇴' },
+    { code: '+595', name: 'Paraguai', flag: '🇵🇾' },
+    { code: '+351', name: 'Portugal', flag: '🇵🇹' },
+    { code: '+34', name: 'Espanha', flag: '🇪🇸' },
+  ]
 
   useEffect(() => {
     // Tentar obter email da URL ou localStorage
@@ -41,6 +60,19 @@ export default function CompleteRegistrationPage() {
     setSuccess('')
     setLoading(true)
 
+    // Validações
+    if (!name.trim()) {
+      setError('Nome é obrigatório.')
+      setLoading(false)
+      return
+    }
+
+    if (!phone.trim()) {
+      setError('Telefone é obrigatório.')
+      setLoading(false)
+      return
+    }
+
     if (password.length < 6) {
       setError('A senha deve ter pelo menos 6 caracteres.')
       setLoading(false)
@@ -59,7 +91,11 @@ export default function CompleteRegistrationPage() {
         email: email,
         password: password,
         options: {
-          emailRedirectTo: `${window.location.origin}/success`
+          emailRedirectTo: `${window.location.origin}/success`,
+          data: {
+            full_name: name,
+            phone: `${countryCode}${phone}`,
+          }
         }
       })
 
@@ -68,6 +104,7 @@ export default function CompleteRegistrationPage() {
       } else {
         setSuccess('Cadastro realizado com sucesso! Redirecionando...')
         localStorage.setItem('user_email', email)
+        localStorage.setItem('user_name', name)
         
         setTimeout(() => {
           router.push('/user')
@@ -101,7 +138,24 @@ export default function CompleteRegistrationPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
+                Nome Completo *
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Seu nome completo"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email *
               </label>
               <input
                 type="email"
@@ -111,6 +165,36 @@ export default function CompleteRegistrationPage() {
                 placeholder="seu@email.com"
                 required
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Telefone *
+              </label>
+              <div className="flex">
+                <select
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+                >
+                  {countries.map((country) => (
+                    <option key={country.code + country.name} value={country.code}>
+                      {country.flag} {country.code}
+                    </option>
+                  ))}
+                </select>
+                <div className="relative flex-1">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="11999999999"
+                    required
+                  />
+                </div>
+              </div>
             </div>
 
             <div>
