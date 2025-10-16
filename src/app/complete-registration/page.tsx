@@ -177,31 +177,24 @@ function CompleteRegistrationContent() {
                     console.error('Erro ao criar perfil:', profileError)
                     setError('Usuário criado, mas erro ao salvar perfil. Entre em contato.')
                   } else {
-                    // Vincular assinatura órfã se existir
-                    const { data: orphanSub } = await supabase
-                      .from('subscriptions')
-                      .select('id, stripe_customer_id')
-                      .eq('customer_email', email)
-                      .is('user_id', null)
-                      .single()
+                    // Tentar vincular assinatura usando endpoint dedicado
+                    try {
+                      const linkResponse = await fetch('/api/link-subscription', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email: email })
+                      })
 
-                    if (orphanSub) {
-                      // Vincular assinatura órfã ao usuário
-                      await supabase
-                        .from('subscriptions')
-                        .update({ user_id: authData.user.id })
-                        .eq('id', orphanSub.id)
-
-                      // Atualizar status do profissional
-                      await supabase
-                        .from('professionals')
-                        .update({ 
-                          subscription_status: 'active',
-                          stripe_customer_id: orphanSub.stripe_customer_id
-                        })
-                        .eq('id', authData.user.id)
-
-                      console.log('✅ Assinatura órfã vinculada ao usuário')
+                      if (linkResponse.ok) {
+                        const linkResult = await linkResponse.json()
+                        console.log('✅ Assinatura vinculada:', linkResult.message)
+                      } else {
+                        console.log('⚠️ Não foi possível vincular assinatura automaticamente')
+                      }
+                    } catch (linkError) {
+                      console.error('❌ Erro ao vincular assinatura:', linkError)
                     }
 
                     setSuccess('Cadastro realizado com sucesso! Redirecionando...')
