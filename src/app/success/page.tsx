@@ -20,14 +20,6 @@ function SuccessPageContent() {
 
   const sessionId = searchParams.get('session_id')
 
-  useEffect(() => {
-    if (sessionId) {
-      checkSessionAndUser()
-    } else {
-      setLoading(false)
-    }
-  }, [sessionId, checkSessionAndUser])
-
   const checkSessionAndUser = async () => {
     try {
       // Verificar se o usuário já existe
@@ -89,6 +81,13 @@ function SuccessPageContent() {
     }
   }
 
+  useEffect(() => {
+    if (sessionId) {
+      checkSessionAndUser()
+    } else {
+      setLoading(false)
+    }
+  }, [sessionId])
 
   if (loading) {
     return (
