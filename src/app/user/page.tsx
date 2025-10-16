@@ -959,7 +959,13 @@ export default function UserDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
                 onClick={openCreateLinkModal}
-                className="bg-green-600 text-white p-4 rounded-lg hover:bg-green-700 flex items-center justify-center space-x-2"
+                disabled={!userProfile.subscription_status || userProfile.subscription_status !== 'active'}
+                className={`p-4 rounded-lg flex items-center justify-center space-x-2 transition-colors ${
+                  (!userProfile.subscription_status || userProfile.subscription_status !== 'active')
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                }`}
+                title={(!userProfile.subscription_status || userProfile.subscription_status !== 'active') ? 'Ative sua assinatura para criar links' : ''}
               >
                 <Plus className="w-5 h-5" />
                 <span>Criar Novo Link</span>
@@ -967,7 +973,13 @@ export default function UserDashboard() {
               
               <button 
                 onClick={() => window.location.href = '/quiz-builder'}
-                className="bg-purple-600 text-white p-4 rounded-lg hover:bg-purple-700 flex items-center justify-center space-x-2"
+                disabled={!userProfile.subscription_status || userProfile.subscription_status !== 'active'}
+                className={`p-4 rounded-lg flex items-center justify-center space-x-2 transition-colors ${
+                  (!userProfile.subscription_status || userProfile.subscription_status !== 'active')
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                    : 'bg-purple-600 text-white hover:bg-purple-700'
+                }`}
+                title={(!userProfile.subscription_status || userProfile.subscription_status !== 'active') ? 'Ative sua assinatura para criar quizzes' : ''}
               >
                 <Settings className="w-5 h-5" />
                 <span>Criar Quiz</span>
@@ -975,7 +987,13 @@ export default function UserDashboard() {
               
             <button
                 onClick={() => window.location.href = '/course'}
-                className="bg-orange-600 text-white p-4 rounded-lg hover:bg-orange-700 flex items-center justify-center space-x-2"
+                disabled={!userProfile.subscription_status || userProfile.subscription_status !== 'active'}
+                className={`p-4 rounded-lg flex items-center justify-center space-x-2 transition-colors ${
+                  (!userProfile.subscription_status || userProfile.subscription_status !== 'active')
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                    : 'bg-orange-600 text-white hover:bg-orange-700'
+                }`}
+                title={(!userProfile.subscription_status || userProfile.subscription_status !== 'active') ? 'Ative sua assinatura para acessar o curso' : ''}
               >
                 <BookOpen className="w-5 h-5" />
                 <span>Acessar Curso</span>
