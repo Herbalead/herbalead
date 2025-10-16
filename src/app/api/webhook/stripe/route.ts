@@ -67,13 +67,31 @@ export async function POST(request: NextRequest) {
             .single()
 
           if (userError || !existingUser) {
-            console.log('⚠️ Usuário não encontrado - aguardando cadastro manual')
+            console.log('⚠️ Usuário não encontrado - criando assinatura órfã')
             console.log('Email:', session.customer_email)
             console.log('Customer ID:', subscription.customer)
             
-            // NÃO criar usuário automaticamente - aguardar cadastro manual
-            // Apenas salvar dados da assinatura para quando o usuário se cadastrar
-            console.log('📝 Pagamento processado, mas usuário deve completar cadastro manualmente')
+            // Criar assinatura órfã (sem usuário) para vincular depois
+            const { error: orphanSubError } = await supabase
+              .from('subscriptions')
+              .insert({
+                user_id: null, // Sem usuário por enquanto
+                stripe_customer_id: subscription.customer as string,
+                stripe_subscription_id: subscription.id,
+                stripe_price_id: subscription.items.data[0].price.id,
+                status: subscription.status,
+                plan_type: subscription.items.data[0].price.recurring?.interval === 'year' ? 'yearly' : 'monthly',
+                current_period_start: safeTimestampToISOString(subscription.current_period_start),
+                current_period_end: safeTimestampToISOString(subscription.current_period_end),
+                cancel_at_period_end: subscription.cancel_at_period_end,
+                customer_email: session.customer_email // Salvar email para vincular depois
+              })
+
+            if (orphanSubError) {
+              console.error('Erro ao criar assinatura órfã:', orphanSubError)
+            } else {
+              console.log('✅ Assinatura órfã criada - será vinculada quando usuário se cadastrar')
+            }
             break
           } else {
             user = existingUser
