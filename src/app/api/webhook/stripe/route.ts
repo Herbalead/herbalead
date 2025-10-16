@@ -94,9 +94,10 @@ export async function POST(request: NextRequest) {
                 email: session.customer_email,
                 name: session.customer_details?.name || 'Usuário',
                 phone: session.customer_details?.phone || '',
-                subscription_status: 'active',
+                is_active: true,
+                is_admin: false,
                 stripe_customer_id: subscription.customer as string,
-                created_at: new Date().toISOString()
+                subscription_status: 'active'
               })
               .select('id')
               .single()
@@ -190,9 +191,10 @@ export async function POST(request: NextRequest) {
                   email: customerEmail,
                   name: customer.name || 'Usuário',
                   phone: customer.phone || '',
+                  is_active: true,
+                  is_admin: false,
                   stripe_customer_id: subscription.customer as string,
-                  subscription_status: 'active',
-                  created_at: new Date().toISOString()
+                  subscription_status: 'active'
                 })
                 .select('id')
                 .single()
