@@ -22,33 +22,44 @@ function SuccessPageContent() {
 
   const checkSessionAndUser = async () => {
     try {
-      // Verificar se o usuário já existe
+      // Primeiro, tentar obter dados da sessão do Stripe
+      let sessionEmail = ''
+      if (sessionId) {
+        try {
+          const response = await fetch(`/api/get-session-data?session_id=${sessionId}`)
+          if (response.ok) {
+            const sessionData = await response.json()
+            if (sessionData.customer_email) {
+              sessionEmail = sessionData.customer_email
+              setUserEmail(sessionEmail)
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao obter dados da sessão:', error)
+        }
+      }
+
+      // Verificar se o usuário já existe no Supabase
       const { data: { user } } = await supabase.auth.getUser()
       
-      if (user) {
+      if (user && user.email === sessionEmail) {
+        // Usuário logado é o mesmo que fez o pagamento
         setUserExists(true)
         setUserEmail(user.email || '')
         setLoading(false)
         return
+      } else if (user && user.email !== sessionEmail) {
+        // Usuário logado é diferente do que fez o pagamento
+        console.log('⚠️ Usuário logado diferente do pagamento:', user.email, 'vs', sessionEmail)
+        setUserExists(false)
+        setUserEmail(sessionEmail) // Usar email da sessão, não do usuário logado
+        setLoading(false)
+        return
       }
 
-        // REMOVIDO: Criação automática de usuário
-        // Sempre redirecionar para cadastro manual
-        if (sessionId) {
-          try {
-            // Tentar obter dados da sessão do Stripe apenas para mostrar email
-            const response = await fetch(`/api/get-session-data?session_id=${sessionId}`)
-            if (response.ok) {
-              const sessionData = await response.json()
-              if (sessionData.customer_email) {
-                setUserEmail(sessionData.customer_email)
-              }
-            }
-          } catch (error) {
-            console.error('Erro ao obter dados da sessão:', error)
-          }
-        }
-
+      // Usuário não está logado ou não existe
+      setUserExists(false)
+      setUserEmail(sessionEmail)
       setLoading(false)
     } catch (error) {
       console.error('Erro ao verificar usuário:', error)
