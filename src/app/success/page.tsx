@@ -51,11 +51,9 @@ function SuccessPageContent() {
         return
       }
 
-      // Se não existe usuário, verificar se o pagamento foi processado
-      // e redirecionar para login após um tempo
-      setTimeout(() => {
-        router.push('/login')
-      }, 5000)
+      // Se não existe usuário, mostrar página de boas-vindas
+      // O webhook deve criar o usuário automaticamente
+      setLoading(false)
 
     } catch (error) {
       console.error('Erro ao verificar usuário:', error)
@@ -149,96 +147,46 @@ function SuccessPageContent() {
               </Link>
             </div>
           ) : (
-            // Usuário novo - criar senha
+            // Usuário novo - aguardar webhook processar
             <div>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
                 <h2 className="text-xl font-semibold text-blue-800 mb-2">
-                  🔐 Finalize seu Cadastro
+                  🎉 Bem-vindo ao Herbalead!
                 </h2>
-                <p className="text-blue-700">
-                  Crie uma senha para acessar sua conta e começar a usar o Herbalead.
+                <p className="text-blue-700 mb-4">
+                  Seu pagamento foi processado com sucesso! Estamos criando sua conta...
                 </p>
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="ml-3 text-blue-600">Processando...</span>
+                </div>
               </div>
 
-              <form onSubmit={handleCreatePassword} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={userEmail}
-                    disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
-                  />
-                </div>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+                <h3 className="text-lg font-semibold text-green-800 mb-2">
+                  ✅ O que acontece agora?
+                </h3>
+                <ul className="text-green-700 space-y-2">
+                  <li>• Sua assinatura foi ativada</li>
+                  <li>• Sua conta está sendo criada</li>
+                  <li>• Você receberá um email de confirmação</li>
+                  <li>• Em alguns minutos, você poderá acessar o dashboard</li>
+                </ul>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nova Senha *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="Digite sua senha"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
-                    >
-                      {showPassword ? '👁️' : '👁️‍🗨️'}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Confirmar Senha *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="Confirme sua senha"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
-                    >
-                      {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
-                    </button>
-                  </div>
-                </div>
-
-                {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                    {error}
-                  </div>
-                )}
-
-                {success && (
-                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-                    {success}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center justify-center"
+              <div className="text-center">
+                <p className="text-gray-600 mb-4">
+                  Aguarde alguns minutos e tente fazer login novamente.
+                </p>
+                <Link
+                  href="/login"
+                  className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
                 >
-                  <KeyRound className="w-5 h-5 mr-2" />
-                  Criar Senha e Acessar
-                </button>
-              </form>
+                  <User className="w-5 h-5 mr-2" />
+                  Tentar Login
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Link>
+              </div>
             </div>
           )}
 
