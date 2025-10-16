@@ -86,21 +86,32 @@ function CompleteRegistrationContent() {
     }
 
             try {
-              // Primeiro, verificar se usuário já existe na auth.users
-              const { data: existingAuthUser } = await supabase.auth.getUser()
-              
-              if (existingAuthUser.user) {
-                // Usuário já existe na auth - apenas atualizar senha e perfil
-                const { error: updateError } = await supabase.auth.updateUser({
-                  password: password,
-                  data: {
-                    full_name: name,
-                    phone: `${countryCode}${phone}`,
+              // Primeiro, verificar se usuário já existe na tabela professionals
+              const { data: existingUser, error: checkError } = await supabase
+                .from('professionals')
+                .select('id, email')
+                .eq('email', email)
+                .single()
+
+              if (existingUser && !checkError) {
+                // Usuário já existe - apenas atualizar senha e perfil
+                console.log('Usuário já existe, atualizando senha...')
+                
+                // Atualizar senha usando admin API
+                const { error: updateError } = await supabase.auth.admin.updateUserById(
+                  existingUser.id,
+                  {
+                    password: password,
+                    user_metadata: {
+                      full_name: name,
+                      phone: `${countryCode}${phone}`,
+                    }
                   }
-                })
+                )
 
                 if (updateError) {
-                  setError(updateError.message)
+                  console.error('Erro ao atualizar senha:', updateError)
+                  setError('Erro ao atualizar senha. Entre em contato.')
                   return
                 }
 
@@ -129,6 +140,8 @@ function CompleteRegistrationContent() {
                 }
               } else {
                 // Usuário não existe - criar novo
+                console.log('Usuário não existe, criando novo...')
+                
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                   email: email,
                   password: password,
@@ -142,6 +155,7 @@ function CompleteRegistrationContent() {
                 })
 
                 if (authError) {
+                  console.error('Erro ao criar usuário:', authError)
                   setError(authError.message)
                   return
                 }
@@ -173,8 +187,9 @@ function CompleteRegistrationContent() {
                   }
                 }
               }
-            } catch {
-              setError('Erro ao criar conta. Tente novamente.')
+            } catch (error) {
+              console.error('Erro geral:', error)
+              setError('Erro ao processar cadastro. Tente novamente.')
             }
 
     setLoading(false)
