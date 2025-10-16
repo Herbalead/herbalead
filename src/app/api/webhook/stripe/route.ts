@@ -34,8 +34,10 @@ export async function POST(request: NextRequest) {
     let event
     
     try {
-      // TEMPORARY: Force test webhook secret for validation
-      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET_TEST || process.env.STRIPE_WEBHOOK_SECRET!
+      // Use production webhook secret in production, test in development
+      const webhookSecret = process.env.NODE_ENV === 'production'
+        ? process.env.STRIPE_WEBHOOK_SECRET!
+        : process.env.STRIPE_WEBHOOK_SECRET_TEST || process.env.STRIPE_WEBHOOK_SECRET!
       
       event = stripe.webhooks.constructEvent(
         body,
