@@ -85,54 +85,97 @@ function CompleteRegistrationContent() {
       return
     }
 
-    try {
-      // Criar usuário no Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/success`,
-          data: {
-            full_name: name,
-            phone: `${countryCode}${phone}`,
-          }
-        }
-      })
+            try {
+              // Primeiro, verificar se usuário já existe na auth.users
+              const { data: existingAuthUser } = await supabase.auth.getUser()
+              
+              if (existingAuthUser.user) {
+                // Usuário já existe na auth - apenas atualizar senha e perfil
+                const { error: updateError } = await supabase.auth.updateUser({
+                  password: password,
+                  data: {
+                    full_name: name,
+                    phone: `${countryCode}${phone}`,
+                  }
+                })
 
-      if (authError) {
-        setError(authError.message)
-        return
-      }
+                if (updateError) {
+                  setError(updateError.message)
+                  return
+                }
 
-      // Criar perfil na tabela professionals
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('professionals')
-          .insert({
-            id: authData.user.id,
-            name: name,
-            email: email,
-            phone: `${countryCode}${phone}`,
-            is_active: true,
-            is_admin: false
-          })
+                // Atualizar perfil na tabela professionals
+                const { error: profileError } = await supabase
+                  .from('professionals')
+                  .update({
+                    name: name,
+                    phone: `${countryCode}${phone}`,
+                    is_active: true,
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('email', email)
 
-        if (profileError) {
-          console.error('Erro ao criar perfil:', profileError)
-          setError('Usuário criado, mas erro ao salvar perfil. Entre em contato.')
-        } else {
-          setSuccess('Cadastro realizado com sucesso! Redirecionando...')
-          localStorage.setItem('user_email', email)
-          localStorage.setItem('user_name', name)
-          
-          setTimeout(() => {
-            router.push('/user')
-          }, 2000)
-        }
-      }
-    } catch {
-      setError('Erro ao criar conta. Tente novamente.')
-    }
+                if (profileError) {
+                  console.error('Erro ao atualizar perfil:', profileError)
+                  setError('Erro ao atualizar perfil. Entre em contato.')
+                } else {
+                  setSuccess('Perfil atualizado com sucesso! Redirecionando...')
+                  localStorage.setItem('user_email', email)
+                  localStorage.setItem('user_name', name)
+                  
+                  setTimeout(() => {
+                    router.push('/user')
+                  }, 2000)
+                }
+              } else {
+                // Usuário não existe - criar novo
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                  email: email,
+                  password: password,
+                  options: {
+                    emailRedirectTo: `${window.location.origin}/success`,
+                    data: {
+                      full_name: name,
+                      phone: `${countryCode}${phone}`,
+                    }
+                  }
+                })
+
+                if (authError) {
+                  setError(authError.message)
+                  return
+                }
+
+                // Criar perfil na tabela professionals
+                if (authData.user) {
+                  const { error: profileError } = await supabase
+                    .from('professionals')
+                    .insert({
+                      id: authData.user.id,
+                      name: name,
+                      email: email,
+                      phone: `${countryCode}${phone}`,
+                      is_active: true,
+                      is_admin: false
+                    })
+
+                  if (profileError) {
+                    console.error('Erro ao criar perfil:', profileError)
+                    setError('Usuário criado, mas erro ao salvar perfil. Entre em contato.')
+                  } else {
+                    setSuccess('Cadastro realizado com sucesso! Redirecionando...')
+                    localStorage.setItem('user_email', email)
+                    localStorage.setItem('user_name', name)
+                    
+                    setTimeout(() => {
+                      router.push('/user')
+                    }, 2000)
+                  }
+                }
+              }
+            } catch {
+              setError('Erro ao criar conta. Tente novamente.')
+            }
 
     setLoading(false)
   }
