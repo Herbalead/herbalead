@@ -1,6 +1,9 @@
 import Stripe from 'stripe'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Use test key if available, otherwise use production key
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY_TEST || process.env.STRIPE_SECRET_KEY!
+
+export const stripe = new Stripe(stripeSecretKey, {
   apiVersion: '2024-06-20',
 })
 
