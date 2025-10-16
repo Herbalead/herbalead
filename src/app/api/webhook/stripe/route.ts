@@ -98,31 +98,30 @@ export async function POST(request: NextRequest) {
             } else {
               console.log('✅ Assinatura órfã criada - será vinculada quando usuário se cadastrar')
             }
-            break
           } else {
             user = existingUser
             console.log('✅ Usuário encontrado:', user.id)
-          }
+            
+            // Salvar assinatura no banco para usuário existente
+            const { error: subError } = await supabase
+              .from('subscriptions')
+              .insert({
+                user_id: user.id,
+                stripe_customer_id: subscription.customer as string,
+                stripe_subscription_id: subscription.id,
+                stripe_price_id: subscription.items.data[0].price.id,
+                status: subscription.status,
+                plan_type: subscription.items.data[0].price.recurring?.interval === 'year' ? 'yearly' : 'monthly',
+                current_period_start: safeTimestampToISOString(subscription.current_period_start),
+                current_period_end: safeTimestampToISOString(subscription.current_period_end),
+                cancel_at_period_end: subscription.cancel_at_period_end
+              })
 
-          // Salvar assinatura no banco
-          const { error: subError } = await supabase
-            .from('subscriptions')
-            .insert({
-              user_id: user.id,
-              stripe_customer_id: subscription.customer as string,
-              stripe_subscription_id: subscription.id,
-              stripe_price_id: subscription.items.data[0].price.id,
-              status: subscription.status,
-              plan_type: subscription.items.data[0].price.recurring?.interval === 'year' ? 'yearly' : 'monthly',
-              current_period_start: safeTimestampToISOString(subscription.current_period_start),
-              current_period_end: safeTimestampToISOString(subscription.current_period_end),
-              cancel_at_period_end: subscription.cancel_at_period_end
-            })
-
-          if (subError) {
-            console.error('Erro ao salvar assinatura:', subError)
-          } else {
-            console.log('✅ Assinatura salva com sucesso para usuário:', user.id)
+            if (subError) {
+              console.error('Erro ao salvar assinatura:', subError)
+            } else {
+              console.log('✅ Assinatura salva com sucesso para usuário:', user.id)
+            }
           }
         }
         break
