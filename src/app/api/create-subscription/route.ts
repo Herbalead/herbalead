@@ -16,9 +16,9 @@ export async function POST(request: NextRequest) {
     
     console.log('Using plan:', plan)
 
-    // Always create test price for now (since we're using test keys)
+    // Always create a new price for test mode
     let priceId = plan.priceId
-    if (plan.priceId.startsWith('price_test_')) {
+    if (plan.priceId.startsWith('price_test_') || process.env.STRIPE_SECRET_KEY_TEST) {
       try {
         // Create product first if it doesn't exist
         const product = await stripe.products.create({
