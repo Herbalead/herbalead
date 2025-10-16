@@ -9,18 +9,14 @@ export const stripe = new Stripe(stripeSecretKey, {
 
 export const stripePlans = {
   monthly: {
-    priceId: process.env.NODE_ENV === 'production' 
-      ? 'price_1SI7BEEVE42ibKnXR2Y5XAuW'  // Production price ID
-      : 'price_test_monthly',              // Test price ID (will be created)
+    priceId: 'price_test_monthly',  // Always use test price for now
     name: 'Plano Mensal Herbalead',
     unit_amount: 6000, // R$ 60.00
     interval: 'month',
     currency: 'brl',
   },
   yearly: {
-    priceId: process.env.NODE_ENV === 'production'
-      ? 'price_1SI7CSEVE42ibKnXA0pA9OYX'  // Production price ID
-      : 'price_test_yearly',              // Test price ID (will be created)
+    priceId: 'price_test_yearly',  // Always use test price for now
     name: 'Plano Anual Herbalead',
     unit_amount: 57000, // R$ 570.00
     interval: 'year',
