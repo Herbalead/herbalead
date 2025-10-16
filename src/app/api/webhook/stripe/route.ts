@@ -17,11 +17,17 @@ const safeTimestampToISOString = (timestamp: number | null | undefined): string 
 }
 
 export async function POST(request: NextRequest) {
+  console.log('🔔 WEBHOOK RECEBIDO - Iniciando processamento...')
+  
   try {
     const body = await request.text()
     const signature = request.headers.get('stripe-signature')
     
+    console.log('📝 Webhook body length:', body.length)
+    console.log('🔑 Signature presente:', !!signature)
+    
     if (!signature) {
+      console.error('❌ Missing signature')
       return NextResponse.json({ error: 'Missing signature' }, { status: 400 })
     }
 
