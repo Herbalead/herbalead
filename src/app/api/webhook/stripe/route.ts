@@ -28,8 +28,10 @@ export async function POST(request: NextRequest) {
     let event
     
     try {
-      // Use test webhook secret if available, otherwise use production
-      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET_TEST || process.env.STRIPE_WEBHOOK_SECRET!
+      // Use test webhook secret only in development, production secret in production
+      const webhookSecret = process.env.NODE_ENV === 'development'
+        ? (process.env.STRIPE_WEBHOOK_SECRET_TEST || process.env.STRIPE_WEBHOOK_SECRET!)
+        : process.env.STRIPE_WEBHOOK_SECRET!
       
       event = stripe.webhooks.constructEvent(
         body,
