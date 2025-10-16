@@ -51,13 +51,52 @@ function SuccessPageContent() {
         return
       }
 
-      // Se não existe usuário, mostrar página de boas-vindas
-      // O webhook deve criar o usuário automaticamente
-      setLoading(false)
+      // Se não existe usuário, criar automaticamente
+      // Usar email do session_id se disponível
+      if (sessionId) {
+        try {
+          // Tentar obter dados da sessão do Stripe
+          const response = await fetch(`/api/get-session-data?session_id=${sessionId}`)
+          if (response.ok) {
+            const sessionData = await response.json()
+            if (sessionData.customer_email) {
+              setUserEmail(sessionData.customer_email)
+              // Criar usuário automaticamente
+              await createUserFromSession(sessionData)
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao obter dados da sessão:', error)
+        }
+      }
 
+      setLoading(false)
     } catch (error) {
       console.error('Erro ao verificar usuário:', error)
       setLoading(false)
+    }
+  }
+
+  const createUserFromSession = async (sessionData: any) => {
+    try {
+      // Criar usuário no Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: sessionData.customer_email,
+        password: 'temp_password_' + Math.random().toString(36).substring(7),
+        options: {
+          emailRedirectTo: `${window.location.origin}/success`
+        }
+      })
+
+      if (error) {
+        console.error('Erro ao criar usuário:', error)
+      } else {
+        console.log('Usuário criado:', data)
+        setUserExists(true)
+        setUserEmail(sessionData.customer_email)
+      }
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error)
     }
   }
 
@@ -176,14 +215,14 @@ function SuccessPageContent() {
 
               <div className="text-center">
                 <p className="text-gray-600 mb-4">
-                  Aguarde alguns minutos e tente fazer login novamente.
+                  Complete seu cadastro para acessar o Herbalead.
                 </p>
                 <Link
-                  href="/login"
+                  href="/register"
                   className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
                 >
                   <User className="w-5 h-5 mr-2" />
-                  Tentar Login
+                  Finalizar Cadastro
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </div>
