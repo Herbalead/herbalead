@@ -20,7 +20,7 @@ export const metadata = {
     siteName: 'Herbalead',
     images: [
       {
-        url: 'https://www.herbalead.com/og-images/herbalead-main-og-image.jpg',
+        url: 'https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Herbalead - Your Lead Accelerator',
@@ -34,7 +34,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Herbalead - Bem-Estar Natural e Tecnologia',
     description: 'Conquiste novos clientes todos os dias com bem-estar natural e tecnologia.',
-    images: ['https://www.herbalead.com/og-images/herbalead-main-og-image.jpg'],
+    images: ['https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg'],
     creator: '@herbalead',
   },
   robots: {
@@ -74,28 +74,28 @@ export default function RootLayout({
         <meta name="msapplication-tap-highlight" content="no" />
         
         {/* WhatsApp e redes sociais específicas - usando www para evitar redirecionamento */}
-        <meta property="og:image" content="https://www.herbalead.com/og-images/herbalead-main-og-image.jpg" />
+        <meta property="og:image" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content="Herbalead - Your Lead Accelerator" />
         <meta property="og:image:type" content="image/png" />
         
         {/* WhatsApp específico - múltiplas configurações para garantir compatibilidade */}
-        <meta property="og:image:secure_url" content="https://www.herbalead.com/og-images/herbalead-main-og-image.jpg" />
-        <meta property="og:image:url" content="https://www.herbalead.com/og-images/herbalead-main-og-image.jpg" />
+        <meta property="og:image:secure_url" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg" />
+        <meta property="og:image:url" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg" />
         
         {/* WhatsApp Business API */}
-        <meta property="og:image" content="https://www.herbalead.com/og-images/herbalead-main-og-image.jpg" />
+        <meta property="og:image" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg" />
         
         {/* Twitter Cards */}
-        <meta name="twitter:image" content="https://www.herbalead.com/og-images/herbalead-main-og-image.jpg" />
+        <meta name="twitter:image" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg" />
         <meta name="twitter:image:alt" content="Herbalead - Your Lead Accelerator" />
         
         {/* LinkedIn */}
-        <meta property="og:image:url" content="https://www.herbalead.com/og-images/herbalead-main-og-image.jpg" />
+        <meta property="og:image:url" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg" />
         
         {/* Facebook */}
-        <meta property="og:image:secure_url" content="https://www.herbalead.com/og-images/herbalead-main-og-image.jpg" />
+        <meta property="og:image:secure_url" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg" />
         
         {/* Configurações adicionais para WhatsApp */}
         <meta property="og:type" content="website" />
@@ -106,7 +106,7 @@ export default function RootLayout({
         <meta property="og:image" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.png?v=2024" />
         
         {/* Configurações específicas para WhatsApp */}
-        <meta property="og:image:secure_url" content="https://www.herbalead.com/og-images/herbalead-main-og-image.jpg" />
+        <meta property="og:image:secure_url" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
       </head>
