@@ -306,3 +306,5 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
     </div>
   )
 }
+
+export default PersonalizedLinkContent
