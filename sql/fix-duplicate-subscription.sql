@@ -61,3 +61,4 @@ SELECT
 FROM subscriptions s
 JOIN professionals p ON s.user_id = p.id
 WHERE s.stripe_subscription_id = 'sub_1SIdfDEVE42ibKnXyBFWVdZR';
+

@@ -405,6 +405,114 @@ export async function POST(request: NextRequest) {
         }
         break
 
+      case 'invoice.paid':
+        const paidInvoice = event.data.object
+        console.log('💳 Invoice paid:', {
+          invoice_id: paidInvoice.id,
+          subscription_id: paidInvoice.subscription,
+          amount: paidInvoice.amount_paid,
+          currency: paidInvoice.currency,
+          customer_email: paidInvoice.customer_email
+        })
+        
+        // Este evento é mais amplo que invoice.payment_succeeded
+        // Pode incluir pagamentos marcados manualmente como pagos
+        if (paidInvoice.subscription) {
+          const { data: subscription, error: subError } = await supabase
+            .from('subscriptions')
+            .select('id, user_id')
+            .eq('stripe_subscription_id', paidInvoice.subscription)
+            .single()
+
+          if (!subError && subscription) {
+            // Verificar se pagamento já existe (evitar duplicatas)
+            const { data: existingPayment } = await supabase
+              .from('payments')
+              .select('id')
+              .eq('stripe_invoice_id', paidInvoice.id)
+              .single()
+
+            if (existingPayment) {
+              console.log('⚠️ Pagamento já existe, ignorando:', paidInvoice.id)
+              break
+            }
+
+            const { error: paymentError } = await supabase
+              .from('payments')
+              .insert({
+                subscription_id: subscription.id,
+                stripe_payment_intent_id: paidInvoice.payment_intent as string,
+                stripe_invoice_id: paidInvoice.id,
+                amount: paidInvoice.amount_paid,
+                currency: paidInvoice.currency,
+                status: 'succeeded',
+                description: `Pagamento confirmado ${paidInvoice.currency.toUpperCase()} ${(paidInvoice.amount_paid / 100).toFixed(2)}`
+              })
+
+            if (paymentError) {
+              console.error('❌ Erro ao salvar pagamento confirmado:', paymentError)
+            } else {
+              console.log('✅ Pagamento confirmado salvo:', paidInvoice.id)
+              
+              // Atualizar status do profissional para ativo
+              const { error: updateError } = await supabase
+                .from('professionals')
+                .update({ 
+                  subscription_status: 'active',
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', subscription.user_id)
+
+              if (updateError) {
+                console.error('❌ Erro ao atualizar status do profissional:', updateError)
+              } else {
+                console.log('✅ Status do profissional atualizado para ativo:', subscription.user_id)
+              }
+            }
+          }
+        }
+        break
+
+      case 'invoice.payment_action_required':
+        const actionRequiredInvoice = event.data.object
+        console.log('⚠️ Payment action required:', {
+          invoice_id: actionRequiredInvoice.id,
+          subscription_id: actionRequiredInvoice.subscription,
+          amount: actionRequiredInvoice.amount_due,
+          currency: actionRequiredInvoice.currency,
+          customer_email: actionRequiredInvoice.customer_email
+        })
+        
+        // Salvar como pagamento pendente que requer ação
+        if (actionRequiredInvoice.subscription) {
+          const { data: subscription, error: subError } = await supabase
+            .from('subscriptions')
+            .select('id')
+            .eq('stripe_subscription_id', actionRequiredInvoice.subscription)
+            .single()
+
+          if (!subError && subscription) {
+            const { error: paymentError } = await supabase
+              .from('payments')
+              .insert({
+                subscription_id: subscription.id,
+                stripe_payment_intent_id: actionRequiredInvoice.payment_intent as string,
+                stripe_invoice_id: actionRequiredInvoice.id,
+                amount: actionRequiredInvoice.amount_due,
+                currency: actionRequiredInvoice.currency,
+                status: 'action_required',
+                description: `Pagamento requer ação ${actionRequiredInvoice.currency.toUpperCase()} ${(actionRequiredInvoice.amount_due / 100).toFixed(2)}`
+              })
+
+            if (paymentError) {
+              console.error('Erro ao salvar pagamento com ação requerida:', paymentError)
+            } else {
+              console.log('✅ Pagamento com ação requerida salvo:', actionRequiredInvoice.id)
+            }
+          }
+        }
+        break
+
       default:
         console.log(`Unhandled event type: ${event.type}`)
     }
