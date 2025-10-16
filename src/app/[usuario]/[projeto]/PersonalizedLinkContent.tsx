@@ -44,9 +44,17 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
   }
 
   useEffect(() => {
+    // TIMEOUT DE SEGURANÇA - evita travamento infinito
+    const timeoutId = setTimeout(() => {
+      console.error('⏰ TIMEOUT - Link não carregou em 10 segundos')
+      setError('Timeout - Link não carregou')
+      setLoading(false)
+    }, 10000)
+
     const loadLinkData = async () => {
       try {
-        console.log('🔍 Buscando link para:', { usuario, projeto })
+        console.log('🔍 INICIANDO BUSCA - Link para:', { usuario, projeto })
+        console.log('🔍 Timestamp:', new Date().toISOString())
         
         // Buscar todos os profissionais e comparar com o slug normalizado
         const { data: allProfessionals, error: profError } = await supabase
@@ -151,14 +159,22 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
           const finalUrl = `${toolUrl}?${params.toString()}`
           console.log('🚀 Redirecionando para:', finalUrl)
           
-          // REDIRECIONAMENTO DIRETO - sem tela intermediária
-          window.location.replace(finalUrl)
+          // REDIRECIONAMENTO SEGURO - com timeout para evitar travamento
+          setTimeout(() => {
+            try {
+              window.location.href = finalUrl
+            } catch (error) {
+              console.error('❌ Erro no redirecionamento:', error)
+              setError('Erro no redirecionamento')
+            }
+          }, 100)
           return
         }
       } catch (error) {
         console.error('❌ Erro ao carregar link:', error)
         setError('Erro interno do servidor')
       } finally {
+        clearTimeout(timeoutId) // Limpar timeout se carregou com sucesso
         setLoading(false)
       }
     }
@@ -166,6 +182,9 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
     if (usuario && projeto) {
       loadLinkData()
     }
+
+    // Cleanup do timeout
+    return () => clearTimeout(timeoutId)
   }, [usuario, projeto])
 
   const handleRedirect = () => {
