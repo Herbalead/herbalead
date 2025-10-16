@@ -63,6 +63,10 @@ export default function UserDashboard() {
   const [passwordError, setPasswordError] = useState('')
   const [passwordSuccess, setPasswordSuccess] = useState('')
   const [loading, setLoading] = useState(true)
+  
+  // Estados para validação de URL
+  const [urlSuggestions, setUrlSuggestions] = useState<string[]>([])
+  const [urlWarnings, setUrlWarnings] = useState<string[]>([])
 
   // Função para normalizar texto removendo acentos e caracteres especiais
   const normalizeText = (text: string): string => {
@@ -79,6 +83,42 @@ export default function UserDashboard() {
   // Função para gerar mensagem personalizada por ferramenta
   const getCustomMessageByTool = (): string => {
     return 'Quer uma análise mais completa?'
+  }
+
+  // Função para validar e sugerir melhorias na URL
+  const validateAndSuggestUrl = (inputName: string) => {
+    const suggestions: string[] = []
+    const warnings: string[] = []
+    
+    // Verificar problemas comuns
+    if (inputName !== inputName.toLowerCase()) {
+      warnings.push('❌ Evite letras maiúsculas')
+      suggestions.push(inputName.toLowerCase())
+    }
+    
+    if (/[àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]/.test(inputName)) {
+      warnings.push('❌ Evite acentos e caracteres especiais')
+      suggestions.push(normalizeText(inputName))
+    }
+    
+    if (/\s/.test(inputName)) {
+      warnings.push('❌ Evite espaços')
+      suggestions.push(inputName.replace(/\s+/g, '-'))
+    }
+    
+    if (/[^a-zA-Z0-9\s-]/.test(inputName)) {
+      warnings.push('❌ Evite símbolos especiais')
+      suggestions.push(inputName.replace(/[^a-zA-Z0-9\s-]/g, ''))
+    }
+    
+    // Sugestão final otimizada
+    const optimizedSuggestion = normalizeText(inputName)
+    if (optimizedSuggestion !== inputName) {
+      suggestions.push(optimizedSuggestion)
+    }
+    
+    setUrlWarnings(warnings)
+    setUrlSuggestions(suggestions)
   }
 
   useEffect(() => {
@@ -1508,10 +1548,63 @@ export default function UserDashboard() {
                     <input
                       type="text"
                       value={newLink.name}
-                      onChange={(e) => setNewLink({...newLink, name: e.target.value})}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      onChange={(e) => {
+                        setNewLink({...newLink, name: e.target.value})
+                        validateAndSuggestUrl(e.target.value)
+                      }}
+                      className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                        urlWarnings.length > 0 ? 'border-yellow-400 bg-yellow-50' : 'border-gray-300'
+                      }`}
                       placeholder="Ex: Consultoria Nutricional"
                     />
+                    
+                    {/* Avisos e Sugestões */}
+                    {urlWarnings.length > 0 && (
+                      <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <h4 className="text-sm font-medium text-yellow-800 mb-2">⚠️ Melhorias sugeridas:</h4>
+                        <ul className="text-sm text-yellow-700 space-y-1">
+                          {urlWarnings.map((warning, index) => (
+                            <li key={index}>{warning}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Sugestões de URL */}
+                    {urlSuggestions.length > 0 && (
+                      <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                        <h4 className="text-sm font-medium text-green-800 mb-2">💡 Sugestões otimizadas:</h4>
+                        <div className="space-y-2">
+                          {urlSuggestions.map((suggestion, index) => (
+                            <div key={index} className="flex items-center justify-between">
+                              <code className="text-sm bg-white px-2 py-1 rounded border text-green-700">
+                                {suggestion}
+                              </code>
+                              <button
+                                type="button"
+                                onClick={() => setNewLink({...newLink, name: suggestion})}
+                                className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                              >
+                                Usar
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-xs text-green-600 mt-2">
+                          💡 URLs otimizadas funcionam melhor e são mais fáceis de compartilhar
+                        </p>
+                      </div>
+                    )}
+                    
+                    {/* Preview da URL */}
+                    {newLink.name && (
+                      <div className="mt-2 p-2 bg-gray-50 border rounded-md">
+                        <p className="text-xs text-gray-600 mb-1">🔗 Preview da URL:</p>
+                        <code className="text-sm text-gray-800">
+                          herbalead.com/{userProfile?.name ? normalizeText(userProfile.name) : 'seu-nome'}/{normalizeText(newLink.name)}
+                        </code>
+                      </div>
+                    )}
                   </div>
 
                   <div>
