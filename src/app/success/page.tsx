@@ -117,7 +117,7 @@ export default function SuccessPage() {
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              🎉 Pagamento Confirmado!
+              🎉 Pagamento Confirmado! ✅
             </h1>
             <p className="text-gray-600">
               Sua assinatura foi ativada com sucesso. Bem-vindo ao Herbalead!
