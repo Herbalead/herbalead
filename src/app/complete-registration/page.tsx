@@ -43,6 +43,16 @@ function CompleteRegistrationContent() {
   ]
 
   useEffect(() => {
+    // Verificar se há session_id válido (após pagamento)
+    const sessionId = searchParams.get('session_id')
+    
+    if (!sessionId) {
+      // Se não há session_id, redirecionar para pagamento
+      console.log('⚠️ Acesso direto bloqueado - redirecionando para pagamento')
+      router.push('/payment')
+      return
+    }
+
     // Tentar obter email da URL ou localStorage
     const emailFromUrl = searchParams.get('email')
     const emailFromStorage = localStorage.getItem('user_email')
@@ -52,7 +62,7 @@ function CompleteRegistrationContent() {
     } else if (emailFromStorage) {
       setEmail(emailFromStorage)
     }
-  }, [searchParams])
+  }, [searchParams, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
