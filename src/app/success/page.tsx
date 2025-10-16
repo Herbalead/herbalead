@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle, ArrowRight, User, KeyRound } from 'lucide-react'
+import { CheckCircle, ArrowRight, User } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -15,19 +15,8 @@ function SuccessPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [sessionData, setSessionData] = useState<{
-    id: string
-    customer_email: string
-    subscription_id: string
-  } | null>(null)
   const [userExists, setUserExists] = useState(false)
   const [userEmail, setUserEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
   const sessionId = searchParams.get('session_id')
 
@@ -37,7 +26,7 @@ function SuccessPageContent() {
     } else {
       setLoading(false)
     }
-  }, [sessionId])
+  }, [sessionId, checkSessionAndUser])
 
   const checkSessionAndUser = async () => {
     try {
@@ -77,7 +66,7 @@ function SuccessPageContent() {
     }
   }
 
-  const createUserFromSession = async (sessionData: any) => {
+  const createUserFromSession = async (sessionData: { customer_email: string }) => {
     try {
       // Criar usuário no Supabase
       const { data, error } = await supabase.auth.signUp({
@@ -100,38 +89,6 @@ function SuccessPageContent() {
     }
   }
 
-  const handleCreatePassword = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setSuccess('')
-
-    if (password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres.')
-      return
-    }
-
-    if (password !== confirmPassword) {
-      setError('As senhas não coincidem.')
-      return
-    }
-
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: password
-      })
-
-      if (error) {
-        setError(error.message)
-      } else {
-        setSuccess('Senha criada com sucesso! Redirecionando...')
-        setTimeout(() => {
-          router.push('/user')
-        }, 2000)
-      }
-    } catch {
-      setError('Erro ao criar senha. Tente novamente.')
-    }
-  }
 
   if (loading) {
     return (
