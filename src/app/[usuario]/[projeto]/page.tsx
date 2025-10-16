@@ -16,7 +16,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   
   // Tentar determinar a ferramenta baseada no nome do projeto
   const toolName = projeto.toLowerCase().replace(/[^a-z0-9]/g, '')
-  const toolMessage = getToolMessage(toolName)
+  
+  // Mapear nomes em português para tool_name em inglês
+  const toolNameMapping: { [key: string]: string } = {
+    'imc': 'bmi',
+    'hidratacao': 'hydration',
+    'proteina': 'protein',
+    'nutricao': 'nutrition-assessment',
+    'avaliacao-nutricional': 'nutrition-assessment',
+    'plano-alimentar': 'meal-planner',
+    'calorias': 'calorie-calculator',
+    'gordura-corporal': 'body-fat',
+    'macronutrientes': 'macros',
+    'consumo-agua': 'water-intake'
+  }
+  
+  const mappedToolName = toolNameMapping[toolName] || toolName
+  const toolMessage = getToolMessage(mappedToolName)
   
   const pageTitle = toolMessage?.title || `${projeto} - HerbaLead`
   const pageDescription = toolMessage?.description || 'Acesse nossa ferramenta especializada para cuidar da sua saúde.'
