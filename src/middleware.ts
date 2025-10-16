@@ -119,12 +119,35 @@ export async function middleware(request: NextRequest) {
     }
     
     try {
-      // Buscar dados do usuário
-      const { data: professional } = await supabase
+      // Buscar dados do usuário por username OU por nome normalizado
+      let { data: professional } = await supabase
         .from('professionals')
-        .select('subscription_status, subscription_plan, grace_period_end')
+        .select('subscription_status, subscription_plan, grace_period_end, name')
         .eq('username', username)
         .single()
+      
+      // Se não encontrou por username, tentar por nome normalizado
+      if (!professional) {
+        const { data: allProfessionals } = await supabase
+          .from('professionals')
+          .select('subscription_status, subscription_plan, grace_period_end, name')
+        
+        // Função para normalizar nome
+        const normalizeName = (name: string) => {
+          return name
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9-]/g, '')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '')
+        }
+        
+        professional = allProfessionals?.find(prof => 
+          normalizeName(prof.name) === username
+        )
+      }
       
       // Verificar se período de graça/assinatura gratuita expirou
       if (professional?.subscription_status === 'active' && professional.grace_period_end) {
