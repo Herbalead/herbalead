@@ -43,6 +43,19 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
       .replace(/^-|-$/g, '') // Remove hífens do início e fim
   }
 
+  // Função alternativa para normalização mais robusta
+  const normalizeTextRobust = (text: string): string => {
+    return text
+      .toLowerCase()
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/[^a-z0-9\s]/g, '') // Remove caracteres especiais exceto espaços
+      .replace(/\s+/g, '-') // Substitui espaços por hífens
+      .replace(/-+/g, '-') // Remove hífens duplicados
+      .replace(/^-|-$/g, '') // Remove hífens do início e fim
+  }
+
   useEffect(() => {
     // TIMEOUT DE SEGURANÇA - evita travamento infinito
     const timeoutId = setTimeout(() => {
@@ -68,9 +81,20 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
         }
         
         // Encontrar o profissional cujo nome normalizado corresponde ao slug
-        const professional = allProfessionals?.find(prof => 
-          normalizeText(prof.name) === usuario
-        )
+        // Tentar múltiplas estratégias de normalização
+        const professional = allProfessionals?.find(prof => {
+          const normalized1 = normalizeText(prof.name)
+          const normalized2 = normalizeTextRobust(prof.name)
+          const normalized3 = prof.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+          
+          console.log(`🔍 Testando profissional: ${prof.name}`)
+          console.log(`  - Normalizado 1: ${normalized1}`)
+          console.log(`  - Normalizado 2: ${normalized2}`)
+          console.log(`  - Normalizado 3: ${normalized3}`)
+          console.log(`  - Slug esperado: ${usuario}`)
+          
+          return normalized1 === usuario || normalized2 === usuario || normalized3 === usuario
+        })
         
         if (!professional) {
           console.log('❌ Nenhum profissional encontrado para slug:', usuario)
@@ -93,9 +117,20 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
         }
         
         // Encontrar o link cujo nome normalizado corresponde ao slug do projeto
-        const link = allLinks?.find(linkItem => 
-          normalizeText(linkItem.name) === projeto
-        )
+        // Tentar múltiplas estratégias de normalização
+        const link = allLinks?.find(linkItem => {
+          const normalized1 = normalizeText(linkItem.name)
+          const normalized2 = normalizeTextRobust(linkItem.name)
+          const normalized3 = linkItem.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+          
+          console.log(`🔍 Testando link: ${linkItem.name}`)
+          console.log(`  - Normalizado 1: ${normalized1}`)
+          console.log(`  - Normalizado 2: ${normalized2}`)
+          console.log(`  - Normalizado 3: ${normalized3}`)
+          console.log(`  - Slug esperado: ${projeto}`)
+          
+          return normalized1 === projeto || normalized2 === projeto || normalized3 === projeto
+        })
         
         if (!link) {
           console.log('❌ Nenhum link encontrado para projeto:', projeto)
