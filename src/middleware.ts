@@ -10,14 +10,14 @@ export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone()
   const hostname = request.headers.get('host') || ''
   
+  // TEMPORÁRIO: Permitir todos os requests para resolver problema de deploy
+  if (hostname.includes('localhost') || hostname.includes('vercel.app') || hostname.includes('herbalead.com')) {
+    return NextResponse.next()
+  }
+  
   // Detectar domínio do projeto (subdomínio)
   const subdomain = hostname.split('.')[0]
   const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'ylada.com'
-  
-  // Se não é um subdomínio válido ou é o domínio principal, continuar normalmente
-  if (hostname.includes('localhost') || hostname.includes('vercel.app') || subdomain === 'www') {
-    return NextResponse.next()
-  }
   
   // Verificar se é um domínio de projeto válido
   const isValidProjectDomain = subdomain !== baseDomain.split('.')[0] && 
