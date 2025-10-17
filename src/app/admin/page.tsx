@@ -1,376 +1,454 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
 import { 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Upload, 
+  BookOpen, 
   Users, 
-  Link, 
-  BarChart3, 
-  TrendingUp, 
-  Eye, 
-  UserCheck, 
-  UserX,
-  Calendar,
-  Mail,
-  Phone,
-  ExternalLink
+  Download, 
+  Eye,
+  Settings,
+  BarChart3,
+  FileText,
+  Video,
+  Lock,
+  Unlock,
+  ChevronDown,
+  ChevronRight,
+  UserPlus,
+  Shield,
+  LogOut,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  X,
+  Edit3,
+  GripVertical
 } from 'lucide-react'
+import HerbaleadLogo from '@/components/HerbaleadLogo'
 
-interface DashboardStats {
-  totalUsers: number
-  totalLinks: number
-  activeSubscriptions: number
-  recentUsers: number
-  conversionRate: string
+interface Course {
+  id: string
+  title: string
+  description: string
+  modules: Module[]
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+interface CourseMaterial {
+  id: string
+  module_id: string
+  title: string
+  file_path: string
+  file_type: string
+  file_size: number
+  download_count: number
+  is_active: boolean
+}
+
+interface Module {
+  id: string
+  course_id: string
+  title: string
+  description: string
+  duration: string
+  video_url?: string
+  pdf_materials?: string
+  pdf_files?: string[]
+  materials: CourseMaterial[]
+  order_index: number
+  is_active: boolean
+}
+
+interface Professional {
+  id: string
+  name: string
+  email: string
+  is_active: boolean
+  is_admin: boolean
+  created_at: string
+}
+
+interface Notification {
+  id: string
+  type: 'success' | 'error' | 'warning' | 'info'
+  title: string
+  message: string
+  duration?: number
 }
 
 interface User {
   id: string
-  name: string
-  email: string
-  phone: string
-  subscription_status: string
-  subscription_plan: string
-  created_at: string
-  professional_links: Link[]
+  email: string | undefined
+  name?: string
+  is_admin?: boolean
 }
 
-interface Link {
-  id: string
-  link_name: string
-  tool_name: string
-  cta_text: string
-  created_at: string
-}
+export default function AdminDashboard() {
+  const [user, setUser] = useState<User | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [courses, setCourses] = useState<Course[]>([])
+  const [modules, setModules] = useState<Module[]>([])
+  const [materials, setMaterials] = useState<CourseMaterial[]>([])
+  const [professionals, setProfessionals] = useState<Professional[]>([])
+  const [loading, setLoading] = useState(true)
+  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set())
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [showAddUserModal, setShowAddUserModal] = useState(false)
+  const [newUserData, setNewUserData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    adminPassword: ''
+  })
+  const [showBulkEditModal, setShowBulkEditModal] = useState(false)
+  const [, setSelectedCourseForBulkEdit] = useState<string | null>(null)
+  const [editingModules, setEditingModules] = useState<Module[]>([])
+  const [showAddModuleModal, setShowAddModuleModal] = useState(false)
+  const [showEditModuleModal, setShowEditModuleModal] = useState(false)
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null)
+  const [selectedModule, setSelectedModule] = useState<Module | null>(null)
+  const [moduleFormData, setModuleFormData] = useState({
+    title: '',
+    description: '',
+    duration: '',
+    video_url: '',
+    pdf_materials: ''
+  })
+  const [uploadingPdf, setUploadingPdf] = useState(false)
+  const [selectedPdfFile, setSelectedPdfFile] = useState<File | null>(null)
 
-interface ToolStats {
-  toolStats: [string, number][]
-  totalLinks: number
-}
-
-export default function AdminPanel() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [password, setPassword] = useState('')
-  const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [users, setUsers] = useState<User[]>([])
-  const [links, setLinks] = useState<any[]>([])
-  const [toolStats, setToolStats] = useState<ToolStats | null>(null)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'links' | 'stats'>('dashboard')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-
-  // Verificar se já está autenticado
   useEffect(() => {
-    const token = localStorage.getItem('admin_token')
-    if (token) {
-      setIsAuthenticated(true)
-      loadDashboard()
-    }
-  }, [])
+    checkAdminAccess()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const authenticate = async () => {
-    if (!password) {
-      setError('Digite a senha')
-      return
-    }
+  // Função para mostrar notificações
+  const showNotification = (type: Notification['type'], title: string, message: string, duration: number = 5000) => {
+    console.log('🔔 showNotification chamada:', { type, title, message })
+    const id = Date.now().toString()
+    const notification: Notification = { id, type, title, message, duration }
+    
+    console.log('📝 Adicionando notificação:', notification)
+    setNotifications(prev => {
+      const newNotifications = [...prev, notification]
+      console.log('📋 Total de notificações:', newNotifications.length)
+      return newNotifications
+    })
+    
+    // Auto remover após o tempo especificado
+    setTimeout(() => {
+      removeNotification(id)
+    }, duration)
+  }
 
-    setLoading(true)
-    setError('')
+  const removeNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id))
+  }
 
+  const checkAdminAccess = async () => {
     try {
-      const response = await fetch('/api/admin?action=dashboard', {
-        headers: {
-          'Authorization': `Bearer ${password}`
+      // Verificar se há sessão administrativa no localStorage
+      const adminSession = localStorage.getItem('admin_session')
+      
+      if (adminSession) {
+        const session = JSON.parse(adminSession)
+        if (session.admin_login && session.user.is_admin) {
+          setUser(session.user)
+          setIsAdmin(true)
+          loadData()
+          return
         }
-      })
-
-      if (response.ok) {
-        localStorage.setItem('admin_token', password)
-        setIsAuthenticated(true)
-        loadDashboard()
-      } else {
-        setError('Senha incorreta')
       }
-    } catch (err) {
-      setError('Erro ao autenticar')
+
+      // Se não há sessão administrativa, verificar login normal
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user) {
+        setUser({
+          id: user.id,
+          email: user.email || '',
+          name: user.user_metadata?.name,
+          is_admin: false
+        })
+        
+        // Verificar se usuário é admin
+        const { data: professional } = await supabase
+          .from('professionals')
+          .select('is_active, email, is_admin')
+          .eq('id', user.id)
+          .single()
+
+        setIsAdmin(professional?.is_admin || false)
+        
+        if (professional?.is_admin) {
+          setUser({ 
+            id: user.id, 
+            email: user.email || '', 
+            name: user.user_metadata?.name,
+            is_admin: professional.is_admin 
+          })
+          loadData()
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao verificar acesso admin:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const loadDashboard = async () => {
-    const token = localStorage.getItem('admin_token')
-    if (!token) return
-
+  const loadData = async () => {
     try {
-      const response = await fetch('/api/admin?action=dashboard', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      console.log('=== CARREGANDO DADOS DO SUPABASE ===')
+      
+      // Carregar cursos
+      console.log('Carregando cursos...')
+      const { data: coursesData, error: coursesError } = await supabase
+        .from('courses')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-      if (response.ok) {
-        const data = await response.json()
-        setStats(data)
+      if (coursesError) {
+        console.error('ERRO AO CARREGAR CURSOS:', coursesError)
+        alert('ERRO: Não foi possível carregar os cursos')
+        return
       }
-    } catch (err) {
-      console.error('Erro ao carregar dashboard:', err)
+
+      console.log('CURSOS CARREGADOS:', coursesData?.length || 0, coursesData)
+      setCourses(coursesData || [])
+
+      // Carregar módulos
+      console.log('Carregando módulos...')
+      const { data: modulesData, error: modulesError } = await supabase
+        .from('course_modules')
+        .select('*')
+        .order('order_index', { ascending: true })
+
+      if (modulesError) {
+        console.error('ERRO AO CARREGAR MÓDULOS:', modulesError)
+        alert('ERRO: Não foi possível carregar os módulos')
+        return
+      }
+
+      console.log('MÓDULOS CARREGADOS:', modulesData?.length || 0, modulesData)
+      setModules(modulesData || [])
+
+      // Carregar materiais
+      console.log('Carregando materiais...')
+      const { data: materialsData, error: materialsError } = await supabase
+        .from('course_materials')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (materialsError) {
+        console.error('ERRO AO CARREGAR MATERIAIS:', materialsError)
+        alert('ERRO: Não foi possível carregar os materiais')
+        return
+      }
+
+      console.log('MATERIAIS CARREGADOS:', materialsData?.length || 0, materialsData)
+      setMaterials(materialsData || [])
+
+      // Carregar profissionais
+      console.log('Carregando profissionais...')
+      const { data: professionalsData, error: professionalsError } = await supabase
+        .from('professionals')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (professionalsError) {
+        console.error('ERRO AO CARREGAR PROFISSIONAIS:', professionalsError)
+        alert('ERRO: Não foi possível carregar os profissionais')
+        return
+      }
+
+      console.log('PROFISSIONAIS CARREGADOS:', professionalsData?.length || 0, professionalsData)
+      setProfessionals(professionalsData || [])
+      
+      console.log('=== TODOS OS DADOS CARREGADOS COM SUCESSO ===')
+    } catch (error) {
+      console.error('ERRO GERAL AO CARREGAR DADOS:', error)
+      alert('ERRO GERAL: ' + (error as Error).message)
     }
   }
 
-  const loadUsers = async () => {
-    const token = localStorage.getItem('admin_token')
-    if (!token) return
-
-    try {
-      const response = await fetch('/api/admin?action=users', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setUsers(data.users)
-      }
-    } catch (err) {
-      console.error('Erro ao carregar usuários:', err)
-    }
-  }
-
-  const loadLinks = async () => {
-    const token = localStorage.getItem('admin_token')
-    if (!token) return
-
-    try {
-      const response = await fetch('/api/admin?action=links', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setLinks(data.links)
-      }
-    } catch (err) {
-      console.error('Erro ao carregar links:', err)
-    }
-  }
-
-  const loadStats = async () => {
-    const token = localStorage.getItem('admin_token')
-    if (!token) return
-
-    try {
-      const response = await fetch('/api/admin?action=stats', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setToolStats(data)
-      }
-    } catch (err) {
-      console.error('Erro ao carregar estatísticas:', err)
-    }
-  }
-
-  const handleTabChange = (tab: 'dashboard' | 'users' | 'links' | 'stats') => {
-    setActiveTab(tab)
+  const handleLogout = async () => {
+    // Limpar sessão administrativa
+    localStorage.removeItem('admin_session')
     
-    if (tab === 'users') loadUsers()
-    if (tab === 'links') loadLinks()
-    if (tab === 'stats') loadStats()
+    // Fazer logout do Supabase Auth se estiver logado
+    await supabase.auth.signOut()
+    
+    // Redirecionar para login administrativo
+    window.location.href = '/admin/login'
   }
 
-  const logout = () => {
-    localStorage.removeItem('admin_token')
-    setIsAuthenticated(false)
-    setPassword('')
-  }
-
-  const getToolDisplayName = (toolName: string) => {
-    const toolNames: Record<string, string> = {
-      'bmi': 'Calculadora IMC',
-      'protein': 'Calculadora de Proteína',
-      'hydration': 'Calculadora de Hidratação',
-      'body-composition': 'Composição Corporal',
-      'meal-planner': 'Planejador de Refeições',
-      'nutrition-assessment': 'Avaliação Nutricional',
-      'wellness-profile': 'Quiz: Perfil de Bem-Estar',
-      'daily-wellness': 'Tabela: Bem-Estar Diário',
-      'healthy-eating': 'Quiz: Alimentação Saudável'
-    }
-    return toolNames[toolName] || toolName
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
-  if (!isAuthenticated) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
-            <p className="text-gray-600 mt-2">HerbaLead</p>
-          </div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando área administrativa...</p>
+        </div>
+      </div>
+    )
+  }
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Senha de Administrador
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && authenticate()}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Digite a senha"
-              />
+  if (!user || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between py-6">
+              <HerbaleadLogo size="lg" variant="horizontal" responsive={true} />
+              <button 
+                onClick={() => window.location.href = '/admin/login'}
+                className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+              >
+                Fazer Login
+              </button>
             </div>
+          </div>
+        </header>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p className="text-red-700 text-sm">{error}</p>
-              </div>
-            )}
-
-            <button
-              onClick={authenticate}
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">
+            <Shield className="w-16 h-16 text-gray-400 mx-auto mb-6" />
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              Acesso Restrito
+            </h1>
+            <p className="text-xl text-gray-600 mb-8">
+              Esta área é restrita a administradores.
+            </p>
+            <button 
+              onClick={() => window.location.href = '/admin/login'}
+              className="px-8 py-4 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors"
             >
-              {loading ? 'Autenticando...' : 'Entrar'}
+              Fazer Login
             </button>
           </div>
-        </div>
+        </main>
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
-              <p className="text-gray-600">HerbaLead - Gestão de Usuários e Links</p>
+          <div className="flex items-center justify-between py-6">
+            <HerbaleadLogo size="lg" variant="horizontal" responsive={true} />
+            <div className="flex items-center space-x-4">
+              <span className="text-gray-700">{user?.email}</span>
+              <button 
+                onClick={handleLogout}
+                className="flex items-center text-gray-500 hover:text-gray-700"
+              >
+                <LogOut className="w-4 h-4 mr-1" />
+                Sair
+              </button>
             </div>
-            <button
-              onClick={logout}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Sair
-            </button>
           </div>
         </div>
       </header>
 
-      {/* Navigation */}
-      <nav className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
-            {[
-              { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-              { id: 'users', label: 'Usuários', icon: Users },
-              { id: 'links', label: 'Links', icon: Link },
-              { id: 'stats', label: 'Estatísticas', icon: TrendingUp }
-            ].map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => handleTabChange(id as any)}
-                className={`flex items-center px-3 py-4 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <Icon className="w-4 h-4 mr-2" />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </nav>
-
-      {/* Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'dashboard' && stats && (
-          <div className="space-y-8">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <Users className="w-8 h-8 text-blue-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total de Usuários</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
-                  </div>
-                </div>
+        <div className="mb-8">
+          <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl p-8 text-white shadow-lg">
+            <h1 className="text-4xl font-bold mb-2">
+              🛠️ Painel Administrativo
+            </h1>
+            <p className="text-emerald-100 text-lg">
+              Gerencie cursos, usuários e configurações do sistema
+            </p>
+            <div className="mt-4 flex items-center space-x-4">
+              <div className="bg-white/20 rounded-lg px-4 py-2">
+                <span className="text-sm font-medium">Sistema Ativo</span>
               </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <Link className="w-8 h-8 text-green-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total de Links</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.totalLinks}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <UserCheck className="w-8 h-8 text-purple-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Assinaturas Ativas</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.activeSubscriptions}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <TrendingUp className="w-8 h-8 text-orange-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Taxa de Conversão</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.conversionRate}%</p>
-                  </div>
-                </div>
+              <div className="bg-white/20 rounded-lg px-4 py-2">
+                <span className="text-sm font-medium">Versão 2.0</span>
               </div>
             </div>
+          </div>
+        </div>
 
-            {/* Recent Activity */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">Resumo da Plataforma</h3>
-              </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Tabs */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8 overflow-hidden">
+          <nav className="flex">
+            {[
+              { id: 'dashboard', name: 'Dashboard', icon: BarChart3 },
+              { id: 'courses', name: 'Cursos', icon: BookOpen },
+              { id: 'materials', name: 'Materiais', icon: Upload },
+              { id: 'users', name: 'Usuários', icon: Users },
+              { id: 'settings', name: 'Configurações', icon: Settings }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center py-4 px-6 font-medium text-sm transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? 'bg-emerald-50 text-emerald-700 border-b-2 border-emerald-500'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <tab.icon className="w-5 h-5 mr-2" />
+                {tab.name}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Dashboard */}
+        {activeTab === 'dashboard' && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">Visão Geral</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <div className="flex items-center">
+                  <BookOpen className="w-8 h-8 text-emerald-600 mr-3" />
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Usuários Recentes</h4>
-                    <p className="text-3xl font-bold text-blue-600">{stats.recentUsers}</p>
-                    <p className="text-sm text-gray-600">Últimos 7 dias</p>
+                    <p className="text-sm font-medium text-gray-500">Total de Cursos</p>
+                    <p className="text-2xl font-bold text-gray-900">{courses.length}</p>
                   </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <div className="flex items-center">
+                  <FileText className="w-8 h-8 text-blue-600 mr-3" />
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Links por Usuário</h4>
-                    <p className="text-3xl font-bold text-green-600">
-                      {stats.totalUsers > 0 ? (stats.totalLinks / stats.totalUsers).toFixed(1) : 0}
+                    <p className="text-sm font-medium text-gray-500">Total de Módulos</p>
+                    <p className="text-2xl font-bold text-gray-900">{modules.length}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <div className="flex items-center">
+                  <Users className="w-8 h-8 text-purple-600 mr-3" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Total de Usuários</p>
+                    <p className="text-2xl font-bold text-gray-900">{professionals.length}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <div className="flex items-center">
+                  <Download className="w-8 h-8 text-orange-600 mr-3" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Total de Downloads</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {materials.reduce((sum, m) => sum + m.download_count, 0)}
                     </p>
-                    <p className="text-sm text-gray-600">Média por usuário</p>
                   </div>
                 </div>
               </div>
@@ -378,64 +456,101 @@ export default function AdminPanel() {
           </div>
         )}
 
-        {activeTab === 'users' && (
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Usuários e Seus Links</h3>
+        {/* Cursos */}
+        {activeTab === 'courses' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Cursos</h2>
+              <button
+                onClick={() => alert('Funcionalidade de criar curso será implementada')}
+                className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Curso
+              </button>
             </div>
-            <div className="overflow-x-auto">
+
+            <div className="grid gap-6">
+              {courses.map((course) => (
+                <div key={course.id} className="bg-white rounded-lg shadow-sm border p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center mb-2">
+                        <h3 className="text-xl font-semibold text-gray-900 mr-3">
+                          {course.title}
+                        </h3>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          course.is_active 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {course.is_active ? 'Ativo' : 'Inativo'}
+                        </span>
+                      </div>
+                      <p className="text-gray-600 mb-4">{course.description}</p>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <BookOpen className="w-4 h-4 mr-1" />
+                        {modules.filter(m => m.course_id === course.id).length} módulos
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Usuários */}
+        {activeTab === 'users' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Usuários</h2>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Usuário
+                      Nome
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Links Criados
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cadastro
+                      Admin
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map((user) => (
-                    <tr key={user.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                          <div className="text-sm text-gray-500">{user.email}</div>
-                          {user.phone && (
-                            <div className="text-sm text-gray-500">{user.phone}</div>
-                          )}
-                        </div>
+                  {professionals.map((professional) => (
+                    <tr key={professional.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {professional.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {professional.email}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          user.subscription_status === 'active' 
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          professional.is_active 
                             ? 'bg-green-100 text-green-800' 
                             : 'bg-red-100 text-red-800'
                         }`}>
-                          {user.subscription_status === 'active' ? 'Ativo' : 'Inativo'}
+                          {professional.is_active ? 'Ativo' : 'Inativo'}
                         </span>
-                        {user.subscription_plan && (
-                          <div className="text-xs text-gray-500 mt-1">{user.subscription_plan}</div>
-                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{user.professional_links?.length || 0} links</div>
-                        {user.professional_links && user.professional_links.length > 0 && (
-                          <div className="text-xs text-gray-500">
-                            {user.professional_links.slice(0, 2).map(link => getToolDisplayName(link.tool_name)).join(', ')}
-                            {user.professional_links.length > 2 && ` +${user.professional_links.length - 2} mais`}
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(user.created_at)}
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          professional.is_admin 
+                            ? 'bg-purple-100 text-purple-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {professional.is_admin ? 'Admin' : 'Usuário'}
+                        </span>
                       </td>
                     </tr>
                   ))}
@@ -445,101 +560,42 @@ export default function AdminPanel() {
           </div>
         )}
 
-        {activeTab === 'links' && (
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Todos os Links Criados</h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Link
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Ferramenta
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Criado por
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Data
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {links.map((link) => (
-                    <tr key={link.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{link.link_name}</div>
-                          <div className="text-sm text-gray-500">{link.cta_text}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {getToolDisplayName(link.tool_name)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{link.professionals?.name}</div>
-                          <div className="text-sm text-gray-500">{link.professionals?.email}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(link.created_at)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'stats' && toolStats && (
-          <div className="space-y-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Ferramentas Mais Utilizadas</h3>
+        {/* Configurações */}
+        {activeTab === 'settings' && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">Configurações</h2>
+            
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Sistema</h3>
               <div className="space-y-4">
-                {toolStats.toolStats.map(([tool, count], index) => (
-                  <div key={tool} className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-600 mr-4">#{index + 1}</span>
-                      <span className="text-sm font-medium text-gray-900">{getToolDisplayName(tool)}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                        <div 
-                          className="bg-blue-600 h-2 rounded-full" 
-                          style={{ width: `${(count / toolStats.totalLinks) * 100}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-sm font-medium text-gray-900">{count}</span>
-                    </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-gray-900">Versão do Sistema</p>
+                    <p className="text-sm text-gray-500">HerbaLead v2.0.0</p>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Resumo das Estatísticas</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600">{toolStats.totalLinks}</div>
-                  <div className="text-sm text-gray-600">Total de Links</div>
+                  <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                    Ativo
+                  </span>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600">{toolStats.toolStats.length}</div>
-                  <div className="text-sm text-gray-600">Ferramentas Diferentes</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-600">
-                    {toolStats.totalLinks > 0 ? (toolStats.totalLinks / toolStats.toolStats.length).toFixed(1) : 0}
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-gray-900">Banco de Dados</p>
+                    <p className="text-sm text-gray-500">Supabase PostgreSQL</p>
                   </div>
-                  <div className="text-sm text-gray-600">Média por Ferramenta</div>
+                  <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                    Conectado
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-gray-900">Storage</p>
+                    <p className="text-sm text-gray-500">Supabase Storage</p>
+                  </div>
+                  <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                    Ativo
+                  </span>
                 </div>
               </div>
             </div>
