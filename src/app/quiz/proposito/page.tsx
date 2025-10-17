@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ArrowLeft, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react'
 
-export default function QuizProposito() {
+function QuizPropositoContent() {
   const searchParams = useSearchParams()
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<number[]>([])
@@ -235,5 +235,13 @@ export default function QuizProposito() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function QuizProposito() {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <QuizPropositoContent />
+    </Suspense>
   )
 }
