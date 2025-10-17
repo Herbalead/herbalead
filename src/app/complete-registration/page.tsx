@@ -25,6 +25,10 @@ function CompleteRegistrationContent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [showRecoveryForm, setShowRecoveryForm] = useState(false)
+  const [recoveryEmail, setRecoveryEmail] = useState('')
+  const [recoveryLoading, setRecoveryLoading] = useState(false)
+  const [recoveryError, setRecoveryError] = useState('')
 
   // Lista de países com códigos
   const countries = [
@@ -46,23 +50,68 @@ function CompleteRegistrationContent() {
     // Verificar se há session_id válido (após pagamento)
     const sessionId = searchParams.get('session_id')
     
-    if (!sessionId) {
-      // Se não há session_id, redirecionar para pagamento
-      console.log('⚠️ Acesso direto bloqueado - redirecionando para pagamento')
-      router.push('/payment')
-      return
-    }
-
-    // Tentar obter email da URL ou localStorage
-    const emailFromUrl = searchParams.get('email')
-    const emailFromStorage = localStorage.getItem('user_email')
-    
-    if (emailFromUrl) {
-      setEmail(emailFromUrl)
-    } else if (emailFromStorage) {
-      setEmail(emailFromStorage)
+    if (sessionId) {
+      // Se há session_id, tentar obter email da sessão
+      fetchSessionEmail(sessionId)
+    } else {
+      // Se não há session_id, tentar obter email da URL ou localStorage
+      const emailFromUrl = searchParams.get('email')
+      const emailFromStorage = localStorage.getItem('user_email')
+      
+      if (emailFromUrl) {
+        setEmail(emailFromUrl)
+      } else if (emailFromStorage) {
+        setEmail(emailFromStorage)
+      } else {
+        // Se não há email, mostrar interface de recuperação
+        setShowRecoveryForm(true)
+      }
     }
   }, [searchParams, router])
+
+  const fetchSessionEmail = async (sessionId: string) => {
+    try {
+      const response = await fetch(`/api/get-session-data?session_id=${sessionId}`)
+      if (response.ok) {
+        const sessionData = await response.json()
+        if (sessionData.customer_email) {
+          setEmail(sessionData.customer_email)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao obter email da sessão:', error)
+    }
+  }
+
+  const handleRecovery = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setRecoveryError('')
+    setRecoveryLoading(true)
+
+    try {
+      const response = await fetch('/api/recover-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: recoveryEmail }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.found) {
+        setEmail(recoveryEmail)
+        setShowRecoveryForm(false)
+        setSuccess('Pagamento encontrado! Complete seu cadastro abaixo.')
+      } else {
+        setRecoveryError(data.error || 'Erro ao recuperar pagamento')
+      }
+    } catch (error) {
+      setRecoveryError('Erro de conexão. Tente novamente.')
+    } finally {
+      setRecoveryLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -243,7 +292,59 @@ function CompleteRegistrationContent() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {showRecoveryForm ? (
+            <div className="space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h2 className="text-xl font-semibold text-blue-800 mb-2">
+                  🔍 Recuperar Acesso
+                </h2>
+                <p className="text-blue-700 mb-4">
+                  Digite o email usado no pagamento para recuperar seu acesso e completar o cadastro.
+                </p>
+                
+                <form onSubmit={handleRecovery} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email usado no pagamento *
+                    </label>
+                    <input
+                      type="email"
+                      value={recoveryEmail}
+                      onChange={(e) => setRecoveryEmail(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="seu@email.com"
+                      required
+                    />
+                  </div>
+                  
+                  {recoveryError && (
+                    <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                      <p className="text-red-700 text-sm">{recoveryError}</p>
+                    </div>
+                  )}
+                  
+                  <button
+                    type="submit"
+                    disabled={recoveryLoading}
+                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {recoveryLoading ? 'Buscando...' : 'Recuperar Acesso'}
+                  </button>
+                </form>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-gray-600 mb-2">Não fez nenhum pagamento?</p>
+                <Link
+                  href="/payment"
+                  className="text-green-600 hover:text-green-700 font-medium"
+                >
+                  Fazer pagamento agora
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Nome Completo *
@@ -379,6 +480,7 @@ function CompleteRegistrationContent() {
               )}
             </button>
           </form>
+          )}
 
           {/* Footer */}
           <div className="mt-6 pt-6 border-t border-gray-200 text-center">

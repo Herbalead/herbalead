@@ -68,6 +68,744 @@ export default function UserDashboard() {
   const [urlSuggestions, setUrlSuggestions] = useState<string[]>([])
   const [urlWarnings, setUrlWarnings] = useState<string[]>([])
 
+  // Função para obter nome da ferramenta
+  const getToolDisplayName = (toolName: string) => {
+    const toolNames: Record<string, string> = {
+      'bmi': 'Calculadora IMC',
+      'protein': 'Calculadora de Proteína',
+      'hydration': 'Calculadora de Hidratação',
+      'body-composition': 'Composição Corporal',
+      'meal-planner': 'Planejador de Refeições',
+      'nutrition-assessment': 'Avaliação Nutricional',
+      'wellness-profile': 'Quiz: Perfil de Bem-Estar',
+      'daily-wellness': 'Tabela: Bem-Estar Diário',
+      'healthy-eating': 'Quiz: Alimentação Saudável'
+    }
+    return toolNames[toolName] || 'Ferramenta'
+  }
+
+  // Função para renderizar preview da ferramenta
+  const renderToolPreview = (toolName: string) => {
+    switch (toolName) {
+      case 'bmi':
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+            <h5 className="font-semibold text-gray-800">📊 Calculadora de IMC</h5>
+            
+            {/* Formulário real da calculadora */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Idade *</label>
+                  <input type="number" placeholder="25" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Gênero *</label>
+                  <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                    <option>Masculino</option>
+                    <option>Feminino</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Peso (kg) *</label>
+                  <input type="number" placeholder="70.5" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Altura (cm) *</label>
+                  <input type="number" placeholder="175" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Nível de Atividade *</label>
+                <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                  <option>Sedentário</option>
+                  <option>Leve</option>
+                  <option>Moderado</option>
+                  <option>Intenso</option>
+                  <option>Muito Intenso</option>
+                </select>
+              </div>
+              
+              <button className="w-full bg-emerald-600 text-white py-2 rounded text-xs" disabled>Calcular IMC</button>
+            </div>
+
+            {/* Resultado exemplo */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 space-y-2">
+              <h6 className="font-medium text-green-800 text-sm">📊 Resultado</h6>
+              <div className="text-xs text-green-700">
+                <p><strong>IMC:</strong> 22.9 kg/m²</p>
+                <p><strong>Classificação:</strong> Peso normal</p>
+                <p><strong>Status:</strong> ✅ Saudável</p>
+              </div>
+            </div>
+
+            {/* Disclaimer */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+              <div className="flex items-start">
+                <div className="text-yellow-600 mr-2">⚠️</div>
+                <div className="text-xs text-yellow-700">
+                  <strong>Importante:</strong> O IMC é uma ferramenta de triagem e não substitui uma avaliação médica completa.
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Final */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <button className="w-full bg-green-600 text-white py-2 rounded text-xs" disabled>
+                💬 Consultar Especialista
+              </button>
+            </div>
+          </div>
+        )
+
+      case 'protein':
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+            <h5 className="font-semibold text-gray-800">🥩 Calculadora de Proteína</h5>
+            
+            {/* Formulário real da calculadora */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Idade *</label>
+                  <input type="number" placeholder="25" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Gênero *</label>
+                  <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                    <option>Masculino</option>
+                    <option>Feminino</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Peso (kg) *</label>
+                  <input type="number" placeholder="70.5" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Altura (cm) *</label>
+                  <input type="number" placeholder="175" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Nível de Atividade *</label>
+                <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                  <option>Sedentário</option>
+                  <option>Leve</option>
+                  <option>Moderado</option>
+                  <option>Intenso</option>
+                  <option>Muito Intenso</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Objetivo *</label>
+                <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                  <option>Manter peso</option>
+                  <option>Perder peso</option>
+                  <option>Ganhar massa</option>
+                </select>
+              </div>
+              
+              <button className="w-full bg-emerald-600 text-white py-2 rounded text-xs" disabled>Calcular Proteína</button>
+            </div>
+
+            {/* Resultado exemplo */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 space-y-2">
+              <h6 className="font-medium text-green-800 text-sm">🥩 Resultado</h6>
+              <div className="text-xs text-green-700">
+                <p><strong>Proteína recomendada:</strong> 140g/dia</p>
+                <p><strong>Distribuição:</strong> 35g por refeição</p>
+                <p><strong>Fontes:</strong> Carne, ovos, leguminosas</p>
+              </div>
+            </div>
+
+            {/* CTA Final */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <button className="w-full bg-green-600 text-white py-2 rounded text-xs" disabled>
+                💬 Consultar Especialista
+              </button>
+            </div>
+          </div>
+        )
+
+      case 'hydration':
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+            <h5 className="font-semibold text-gray-800">💧 Calculadora de Hidratação</h5>
+            
+            {/* Formulário real da calculadora */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Idade *</label>
+                  <input type="number" placeholder="25" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Gênero *</label>
+                  <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                    <option>Masculino</option>
+                    <option>Feminino</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Peso (kg) *</label>
+                <input type="number" placeholder="70.5" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Nível de Atividade *</label>
+                <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                  <option>Sedentário</option>
+                  <option>Leve</option>
+                  <option>Moderado</option>
+                  <option>Intenso</option>
+                  <option>Muito Intenso</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Clima *</label>
+                <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                  <option>Frio</option>
+                  <option>Temperado</option>
+                  <option>Quente</option>
+                </select>
+              </div>
+              
+              <button className="w-full bg-emerald-600 text-white py-2 rounded text-xs" disabled>Calcular Hidratação</button>
+            </div>
+
+            {/* Resultado exemplo */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 space-y-2">
+              <h6 className="font-medium text-green-800 text-sm">💧 Resultado</h6>
+              <div className="text-xs text-green-700">
+                <p><strong>Água recomendada:</strong> 2.5L/dia</p>
+                <p><strong>Copos de 200ml:</strong> 12-13 copos</p>
+                <p><strong>Horários:</strong> Distribuir ao longo do dia</p>
+              </div>
+            </div>
+
+            {/* CTA Final */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <button className="w-full bg-green-600 text-white py-2 rounded text-xs" disabled>
+                💬 Consultar Especialista
+              </button>
+            </div>
+          </div>
+        )
+
+      case 'body-composition':
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+            <h5 className="font-semibold text-gray-800">🏋️ Composição Corporal</h5>
+            
+            {/* Formulário real da calculadora */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Idade *</label>
+                  <input type="number" placeholder="25" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Gênero *</label>
+                  <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                    <option>Masculino</option>
+                    <option>Feminino</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Peso (kg) *</label>
+                  <input type="number" placeholder="70.5" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Altura (cm) *</label>
+                  <input type="number" placeholder="175" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Cintura (cm) *</label>
+                  <input type="number" placeholder="85" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Quadril (cm) *</label>
+                  <input type="number" placeholder="95" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Pescoço (cm) *</label>
+                <input type="number" placeholder="38" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+              </div>
+              
+              <button className="w-full bg-emerald-600 text-white py-2 rounded text-xs" disabled>Calcular Composição</button>
+            </div>
+
+            {/* Resultado exemplo */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 space-y-2">
+              <h6 className="font-medium text-green-800 text-sm">🏋️ Resultado</h6>
+              <div className="text-xs text-green-700">
+                <p><strong>IMC:</strong> 22.9 kg/m²</p>
+                <p><strong>% Gordura:</strong> 15.2%</p>
+                <p><strong>Massa Magra:</strong> 59.8kg</p>
+                <p><strong>Relação C/Q:</strong> 0.89</p>
+              </div>
+            </div>
+
+            {/* CTA Final */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <button className="w-full bg-green-600 text-white py-2 rounded text-xs" disabled>
+                💬 Consultar Especialista
+              </button>
+            </div>
+          </div>
+        )
+
+      case 'meal-planner':
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+            <h5 className="font-semibold text-gray-800">🍽️ Planejador de Refeições</h5>
+            
+            {/* Formulário real da calculadora */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Idade *</label>
+                  <input type="number" placeholder="25" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Gênero *</label>
+                  <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                    <option>Masculino</option>
+                    <option>Feminino</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Peso (kg) *</label>
+                  <input type="number" placeholder="70.5" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Altura (cm) *</label>
+                  <input type="number" placeholder="175" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Nível de Atividade *</label>
+                <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                  <option>Sedentário</option>
+                  <option>Leve</option>
+                  <option>Moderado</option>
+                  <option>Intenso</option>
+                  <option>Muito Intenso</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Objetivo *</label>
+                <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                  <option>Manutenção do peso</option>
+                  <option>Perda de peso</option>
+                  <option>Ganho de peso</option>
+                </select>
+              </div>
+              
+              <button className="w-full bg-orange-600 text-white py-2 rounded text-xs" disabled>Criar Plano de Refeições</button>
+            </div>
+
+            {/* Resultado exemplo */}
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 space-y-2">
+              <h6 className="font-medium text-orange-800 text-sm">🍽️ Plano Nutricional</h6>
+              <div className="text-xs text-orange-700">
+                <p><strong>Calorias:</strong> 2.200 kcal/dia</p>
+                <p><strong>Proteína:</strong> 140g (25%)</p>
+                <p><strong>Carboidratos:</strong> 248g (45%)</p>
+                <p><strong>Gorduras:</strong> 73g (30%)</p>
+                <p><strong>Refeições:</strong> 5 distribuições</p>
+              </div>
+            </div>
+
+            {/* Disclaimer */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+              <div className="flex items-start">
+                <div className="text-yellow-600 mr-2">⚠️</div>
+                <div className="text-xs text-yellow-700">
+                  <strong>Importante:</strong> Baseado na equação de Mifflin-St Jeor. Consulte um especialista.
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Final */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <button className="w-full bg-green-600 text-white py-2 rounded text-xs" disabled>
+                💬 Consultar Especialista
+              </button>
+            </div>
+          </div>
+        )
+
+      case 'nutrition-assessment':
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+            <h5 className="font-semibold text-gray-800">🥗 Avaliação Nutricional</h5>
+            
+            {/* Formulário real da calculadora */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Nome *</label>
+                  <input type="text" placeholder="Seu nome" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Email *</label>
+                  <input type="email" placeholder="seu@email.com" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Telefone</label>
+                  <input type="tel" placeholder="(11) 99999-9999" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Idade *</label>
+                  <input type="number" placeholder="25" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Peso (kg) *</label>
+                  <input type="number" placeholder="70.5" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Altura (cm) *</label>
+                  <input type="number" placeholder="175" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Sexo *</label>
+                <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                  <option>Masculino</option>
+                  <option>Feminino</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Sintomas (múltipla escolha)</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button className="p-2 border border-gray-300 rounded text-xs text-left" disabled>Cansaço</button>
+                  <button className="p-2 border border-gray-300 rounded text-xs text-left" disabled>Fraqueza</button>
+                  <button className="p-2 border border-gray-300 rounded text-xs text-left" disabled>Dores</button>
+                  <button className="p-2 border border-gray-300 rounded text-xs text-left" disabled>Outros</button>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Qualidade da alimentação *</label>
+                <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                  <option>Excelente</option>
+                  <option>Boa</option>
+                  <option>Moderada</option>
+                  <option>Ruim</option>
+                  <option>Muito ruim</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Estilo de vida *</label>
+                <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                  <option>Excelente</option>
+                  <option>Bom</option>
+                  <option>Moderado</option>
+                  <option>Ruim</option>
+                  <option>Muito ruim</option>
+                </select>
+              </div>
+              
+              <button className="w-full bg-emerald-600 text-white py-2 rounded text-xs" disabled>Iniciar Avaliação</button>
+            </div>
+
+            {/* Resultado exemplo */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 space-y-2">
+              <h6 className="font-medium text-emerald-800 text-sm">🥗 Avaliação Completa</h6>
+              <div className="text-xs text-emerald-700">
+                <p><strong>Pontuação:</strong> 85/100</p>
+                <p><strong>Nível de Risco:</strong> Baixo</p>
+                <p><strong>Deficiências:</strong> Nenhuma</p>
+                <p><strong>Recomendações:</strong> Manter hábitos</p>
+                <p><strong>Próximos Passos:</strong> Consulta especializada</p>
+              </div>
+            </div>
+
+            {/* CTA Final */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <button className="w-full bg-green-600 text-white py-2 rounded text-xs" disabled>
+                💬 Consultar Especialista
+              </button>
+            </div>
+          </div>
+        )
+
+      case 'wellness-profile':
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+            <h5 className="font-semibold text-gray-800">🧠 Quiz: Perfil de Bem-Estar</h5>
+            
+            {/* Progresso do Quiz */}
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-medium text-gray-600">Pergunta 1 de 6</span>
+                <span className="text-xs text-gray-500">17%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-indigo-600 h-2 rounded-full w-1/6"></div>
+              </div>
+              
+              <h6 className="text-sm font-semibold text-gray-800">Como você avalia sua qualidade de sono?</h6>
+              
+              <div className="space-y-2">
+                <button className="w-full p-2 text-left rounded border border-gray-300 text-xs" disabled>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full border border-gray-300 mr-2"></div>
+                    Durmo muito bem, 7-9 horas por noite
+                  </div>
+                </button>
+                <button className="w-full p-2 text-left rounded border border-gray-300 text-xs" disabled>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full border border-gray-300 mr-2"></div>
+                    Durmo bem na maioria das noites
+                  </div>
+                </button>
+                <button className="w-full p-2 text-left rounded border border-gray-300 text-xs" disabled>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full border border-gray-300 mr-2"></div>
+                    Tenho dificuldades ocasionais
+                  </div>
+                </button>
+                <button className="w-full p-2 text-left rounded border border-gray-300 text-xs" disabled>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full border border-gray-300 mr-2"></div>
+                    Frequentemente tenho problemas
+                  </div>
+                </button>
+              </div>
+              
+              <div className="flex justify-between">
+                <button className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs" disabled>Anterior</button>
+                <button className="px-3 py-1 bg-indigo-600 text-white rounded text-xs" disabled>Próxima</button>
+              </div>
+            </div>
+
+            {/* Resultado exemplo */}
+            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 space-y-2">
+              <h6 className="font-medium text-indigo-800 text-sm">🧠 Perfil de Bem-Estar</h6>
+              <div className="text-xs text-indigo-700">
+                <p><strong>Pontuação:</strong> 85%</p>
+                <p><strong>Categoria:</strong> Excelente</p>
+                <p><strong>Perfil:</strong> Equilibrado e saudável</p>
+                <p><strong>Melhorias:</strong> Manter hábitos atuais</p>
+                <p><strong>Dicas:</strong> Continue assim!</p>
+              </div>
+            </div>
+
+            {/* CTA Final */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <button className="w-full bg-green-600 text-white py-2 rounded text-xs" disabled>
+                💬 Consultar Especialista
+              </button>
+            </div>
+          </div>
+        )
+
+      case 'daily-wellness':
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+            <h5 className="font-semibold text-gray-800">📊 Tabela: Bem-Estar Diário</h5>
+            
+            {/* Formulário real da calculadora */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Idade *</label>
+                  <input type="number" placeholder="25" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Gênero *</label>
+                  <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                    <option>Masculino</option>
+                    <option>Feminino</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Peso (kg) *</label>
+                  <input type="number" placeholder="70.5" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Altura (cm) *</label>
+                  <input type="number" placeholder="175" className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Nível de Atividade *</label>
+                <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                  <option>Sedentário</option>
+                  <option>Leve</option>
+                  <option>Moderado</option>
+                  <option>Intenso</option>
+                  <option>Muito Intenso</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Objetivo *</label>
+                <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                  <option>Manter peso</option>
+                  <option>Perder peso</option>
+                  <option>Ganhar massa</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Restrições Alimentares</label>
+                <select className="w-full px-2 py-1 border border-gray-300 rounded text-xs" disabled>
+                  <option>Nenhuma</option>
+                  <option>Vegetariano</option>
+                  <option>Vegano</option>
+                  <option>Sem glúten</option>
+                  <option>Sem lactose</option>
+                </select>
+              </div>
+              
+              <button className="w-full bg-emerald-600 text-white py-2 rounded text-xs" disabled>Iniciar Tabela</button>
+            </div>
+
+            {/* Resultado exemplo */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 space-y-2">
+              <h6 className="font-medium text-green-800 text-sm">📊 Tabela de Bem-Estar</h6>
+              <div className="text-xs text-green-700">
+                <p><strong>IMC:</strong> 22.9 kg/m²</p>
+                <p><strong>Necessidade Calórica:</strong> 2.200 kcal</p>
+                <p><strong>Macronutrientes:</strong> Balanceados</p>
+                <p><strong>Micronutrientes:</strong> Adequados</p>
+                <p><strong>Recomendações:</strong> Personalizadas</p>
+              </div>
+            </div>
+
+            {/* CTA Final */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <button className="w-full bg-green-600 text-white py-2 rounded text-xs" disabled>
+                💬 Consultar Especialista
+              </button>
+            </div>
+          </div>
+        )
+
+      case 'healthy-eating':
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+            <h5 className="font-semibold text-gray-800">🍎 Quiz: Alimentação Saudável</h5>
+            
+            {/* Progresso do Quiz */}
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-medium text-gray-600">Pergunta 1 de 7</span>
+                <span className="text-xs text-gray-500">14%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-green-600 h-2 rounded-full w-1/7"></div>
+              </div>
+              
+              <h6 className="text-sm font-semibold text-gray-800">Com que frequência você consome frutas e vegetais?</h6>
+              
+              <div className="space-y-2">
+                <button className="w-full p-2 text-left rounded border border-gray-300 text-xs" disabled>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full border border-gray-300 mr-2"></div>
+                    Todos os dias, em todas as refeições
+                  </div>
+                </button>
+                <button className="w-full p-2 text-left rounded border border-gray-300 text-xs" disabled>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full border border-gray-300 mr-2"></div>
+                    Maioria dos dias, em algumas refeições
+                  </div>
+                </button>
+                <button className="w-full p-2 text-left rounded border border-gray-300 text-xs" disabled>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full border border-gray-300 mr-2"></div>
+                    Alguns dias da semana
+                  </div>
+                </button>
+                <button className="w-full p-2 text-left rounded border border-gray-300 text-xs" disabled>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full border border-gray-300 mr-2"></div>
+                    Raramente ou nunca
+                  </div>
+                </button>
+              </div>
+              
+              <div className="flex justify-between">
+                <button className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs" disabled>Anterior</button>
+                <button className="px-3 py-1 bg-green-600 text-white rounded text-xs" disabled>Próxima</button>
+              </div>
+            </div>
+
+            {/* Resultado exemplo */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 space-y-2">
+              <h6 className="font-medium text-green-800 text-sm">🍎 Quiz de Alimentação</h6>
+              <div className="text-xs text-green-700">
+                <p><strong>Pontuação:</strong> 78/100</p>
+                <p><strong>Categoria:</strong> Boa alimentação</p>
+                <p><strong>Pontos fortes:</strong> Frutas e vegetais</p>
+                <p><strong>Melhorias:</strong> Reduzir processados</p>
+                <p><strong>Recomendações:</strong> Mais água</p>
+              </div>
+            </div>
+
+            {/* CTA Final */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <button className="w-full bg-green-600 text-white py-2 rounded text-xs" disabled>
+                💬 Consultar Especialista
+              </button>
+            </div>
+          </div>
+        )
+
+      default:
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <h5 className="font-semibold text-gray-800 mb-2">🔧 {getToolDisplayName(toolName)}</h5>
+            <p className="text-sm text-gray-600">
+              Preview da ferramenta será exibido aqui quando você selecionar uma ferramenta específica.
+            </p>
+          </div>
+        )
+    }
+  }
+
   // Função para normalizar texto removendo acentos e caracteres especiais
   const normalizeText = (text: string): string => {
     return text
@@ -1544,7 +2282,7 @@ export default function UserDashboard() {
                 {/* Coluna esquerda - Formulário */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Nome do Projeto</label>
+                    <label className="block text-sm font-medium text-gray-700">Nome da Ferramenta</label>
                     <input
                       type="text"
                       value={newLink.name}
@@ -1555,7 +2293,7 @@ export default function UserDashboard() {
                       className={`mt-1 block w-full border rounded-md px-3 py-2 ${
                         urlWarnings.length > 0 ? 'border-yellow-400 bg-yellow-50' : 'border-gray-300'
                       }`}
-                      placeholder="Ex: Consultoria Nutricional"
+                      placeholder={`Ex: ${getToolDisplayName(newLink.tool_name)}`}
                     />
                     
                     {/* Avisos e Sugestões */}
@@ -1722,6 +2460,14 @@ export default function UserDashboard() {
                         💬 {newLink.button_text || 'Consultar Especialista'}
                       </button>
                     </div>
+                  </div>
+
+                  {/* Preview da Ferramenta */}
+                  <div className="space-y-4">
+                    <h4 className="text-md font-medium text-gray-700 mb-4">🔧 Preview da Ferramenta</h4>
+                    
+                    {/* Preview dinâmico baseado na ferramenta selecionada */}
+                    {renderToolPreview(newLink.tool_name)}
                   </div>
 
                   {/* Informações do Link */}
