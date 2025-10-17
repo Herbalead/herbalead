@@ -34,11 +34,12 @@ export function useUserData() {
       } else {
         console.log('⚠️ Nenhum dado de usuário encontrado na URL')
         console.log('⚠️ Usando fallback padrão')
-        // Fallback para dados padrão
+        // Fallback para dados padrão - SEM TELEFONE FIXO
+        console.log('⚠️ Usando fallback SEM telefone fixo')
         setUserData({
           userId: 'default',
           userName: 'Especialista',
-          userPhone: '19981868000', // Removido o 55 fixo
+          userPhone: '', // SEM telefone fixo - deve ser fornecido pela URL
           linkId: 'default',
           customMessage: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
         })
@@ -46,11 +47,11 @@ export function useUserData() {
     } catch (error) {
       console.error('❌ Erro ao carregar dados do usuário:', error)
       console.log('❌ Usando fallback de erro')
-      // Fallback para dados padrão
+      // Fallback para dados padrão - SEM TELEFONE FIXO
       setUserData({
         userId: 'default',
         userName: 'Especialista',
-        userPhone: '19981868000', // Removido o 55 fixo
+        userPhone: '', // SEM telefone fixo - deve ser fornecido pela URL
         linkId: 'default',
         customMessage: 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
       })
@@ -70,8 +71,8 @@ export function useUserData() {
     console.log('  - finalMessage:', finalMessage)
     
     if (!userData?.userPhone) {
-      console.log('⚠️ Usando telefone fixo (fallback)')
-      return `https://wa.me/5519981868000?text=${encodeURIComponent(finalMessage)}`
+      console.log('⚠️ SEM TELEFONE - não é possível gerar URL do WhatsApp')
+      return '#'
     }
     
     // Usar o telefone exatamente como está no banco (já com código do país)
