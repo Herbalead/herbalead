@@ -71,6 +71,7 @@ interface Professional {
   id: string
   name: string
   email: string
+  phone: string | null
   is_active: boolean
   is_admin: boolean
   created_at: string
@@ -261,7 +262,7 @@ export default function AdminDashboard() {
       console.log('Carregando profissionais...')
       const { data: professionalsData, error: professionalsError } = await supabase
         .from('professionals')
-        .select('*')
+        .select('id, name, email, phone, is_active, is_admin, created_at')
         .order('created_at', { ascending: false })
 
       if (professionalsError) {
@@ -1812,6 +1813,9 @@ export default function AdminDashboard() {
                       Email
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Telefone
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1830,6 +1834,9 @@ export default function AdminDashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {professional.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {professional.phone || 'Não informado'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${
