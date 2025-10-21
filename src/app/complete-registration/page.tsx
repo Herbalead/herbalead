@@ -61,10 +61,13 @@ function CompleteRegistrationContent() {
       
       if (emailFromUrl) {
         setEmail(emailFromUrl)
+        console.log('📧 Email obtido da URL:', emailFromUrl)
       } else if (emailFromStorage) {
         setEmail(emailFromStorage)
+        console.log('📧 Email obtido do localStorage:', emailFromStorage)
       } else {
         // Se não há email, mostrar interface de recuperação
+        console.log('⚠️ Nenhum email encontrado, mostrando formulário de recuperação')
         setShowRecoveryForm(true)
       }
     }

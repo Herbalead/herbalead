@@ -57,10 +57,16 @@ function SuccessPageContent() {
         return
       }
 
-      // Usuário não está logado ou não existe
+      // Usuário não está logado - SEMPRE redirecionar para cadastro
+      console.log('🔄 Usuário não logado, redirecionando para cadastro...')
       setUserExists(false)
       setUserEmail(sessionEmail)
       setLoading(false)
+      
+      // Redirecionar automaticamente para complete-registration
+      setTimeout(() => {
+        router.push(`/complete-registration?email=${encodeURIComponent(sessionEmail)}`)
+      }, 2000)
     } catch (error) {
       console.error('Erro ao verificar usuário:', error)
       setLoading(false)
