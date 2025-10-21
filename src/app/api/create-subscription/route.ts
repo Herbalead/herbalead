@@ -16,38 +16,12 @@ export async function POST(request: NextRequest) {
     
     console.log('Using plan:', plan)
 
-    // Always create a new price for test mode
-    let priceId = plan.priceId
-    if (plan.priceId.startsWith('price_test_') || process.env.STRIPE_SECRET_KEY_TEST) {
-      try {
-        // Create product first if it doesn't exist
-        const product = await stripe.products.create({
-          name: plan.name,
-          description: `Teste - ${plan.name}`,
-        })
-        
-        // Create price
-        const price = await stripe.prices.create({
-          unit_amount: plan.unit_amount,
-          currency: plan.currency,
-          recurring: { interval: plan.interval as 'month' | 'year' },
-          product: product.id,
-        })
-        
-        priceId = price.id
-        console.log('Created test price:', priceId)
-      } catch (error) {
-        console.error('Error creating test price:', error)
-        return NextResponse.json({ error: 'Erro ao criar preço de teste' }, { status: 500 })
-      }
-    }
-
     // Create subscription checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          price: priceId,
+          price: plan.priceId,
           quantity: 1,
         },
       ],
