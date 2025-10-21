@@ -93,7 +93,7 @@ function QuizBuilderContent() {
       customButtonText: 'Próxima Questão',
       congratulationsMessage: 'Parabéns!',
       specialistButtonText: 'Consultar Profissional de Bem-Estar',
-      specialistRedirectUrl: 'https://wa.me/5519981868000?text=Olá! Gostaria de mais informações.'
+      specialistRedirectUrl: 'https://wa.me/5511999999999?text=Olá! Gostaria de mais informações.'
     },
     questions: [],
     is_active: true
@@ -1559,7 +1559,7 @@ function QuizBuilderContent() {
                         settings: {...quiz.settings, specialistRedirectUrl: e.target.value}
                       })}
                       className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                      placeholder="Ex: https://wa.me/5519981868000?text=Olá! Gostaria de consultar..."
+                      placeholder="Ex: https://wa.me/5511999999999?text=Olá! Gostaria de consultar..."
                     />
                     <p className="text-xs text-gray-500">
                       🔗 Link completo do WhatsApp com mensagem pré-definida

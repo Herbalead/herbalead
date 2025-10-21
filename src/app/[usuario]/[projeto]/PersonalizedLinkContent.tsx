@@ -226,11 +226,18 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
             return
           }
           
+          // Verificar se o usuário tem telefone cadastrado
+          if (!professional?.phone) {
+            console.error('❌ Usuário sem telefone cadastrado:', professional)
+            setError('Telefone não cadastrado. Por favor, atualize seu perfil com um número de WhatsApp válido.')
+            return
+          }
+
           // Passar dados do usuário via URL para a calculadora
           const userData = {
             userId: link.user_id,
             userName: link.name,
-            userPhone: professional?.phone || '5519981868000', // Usar telefone do profissional ou fallback
+            userPhone: professional.phone, // Usar telefone do profissional (já validado acima)
             linkId: link.id,
             customMessage: link.page_greeting || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!', // Mensagem personalizada do link (page_greeting)
             pageTitle: link.page_title || 'Quer uma análise mais completa?', // Título personalizado

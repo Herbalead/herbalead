@@ -1446,6 +1446,13 @@ export default function UserDashboard() {
         return
       }
 
+      // Validar se o usuário tem telefone cadastrado
+      if (!userProfile.phone || userProfile.phone.trim() === '') {
+        setErrorMessage('Você precisa cadastrar seu telefone no perfil para criar links. Por favor, vá em "Perfil" e adicione seu número de WhatsApp.')
+        setShowErrorModal(true)
+        return
+      }
+
       // Verificar se já existe um projeto com o mesmo nome para este usuário
       const { data: existingLinks, error: checkError } = await supabase
         .from('links')
