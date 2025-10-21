@@ -3,7 +3,9 @@ import { preference, paymentConfig, plans } from '../../../../lib/mercadopago'
 
 export async function POST(request: NextRequest) {
   try {
-    const { planType } = await request.json()
+    const { planType, email } = await request.json()
+    
+    console.log('💳 Criando pagamento Mercado Pago:', { planType, email })
     
     // Get plan configuration
     const plan = plans[planType as keyof typeof plans]
@@ -22,6 +24,9 @@ export async function POST(request: NextRequest) {
           description: plan.description
         }
       ],
+      payer: {
+        email: email // Adicionar email do pagador
+      },
       payment_methods: {
         installments: paymentConfig.maxInstallments,
         excluded_payment_methods: [],
@@ -29,9 +34,9 @@ export async function POST(request: NextRequest) {
         default_installments: 1
       },
       back_urls: {
-        success: `${request.headers.get('origin')}/success`,
-        failure: `${request.headers.get('origin')}/failure`,
-        pending: `${request.headers.get('origin')}/pending`
+        success: `${request.headers.get('origin')}/success?gateway=mercadopago`,
+        failure: `${request.headers.get('origin')}/failure?gateway=mercadopago`,
+        pending: `${request.headers.get('origin')}/pending?gateway=mercadopago`
       },
       auto_return: 'approved',
       notification_url: `${request.headers.get('origin')}/api/webhook/mercadopago`,
@@ -39,7 +44,8 @@ export async function POST(request: NextRequest) {
       metadata: {
         plan: planType,
         plan_name: plan.name,
-        plan_price: plan.price.toString()
+        plan_price: plan.price.toString(),
+        customer_email: email
       }
     }
 

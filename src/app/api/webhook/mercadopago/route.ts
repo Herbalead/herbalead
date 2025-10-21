@@ -37,25 +37,98 @@ export async function POST(request: NextRequest) {
       // Process approved payments
       if (paymentData.status === 'approved') {
         // Extract plan information from metadata
-        const { plan, plan_name, plan_price } = paymentData.metadata || {}
+        const { plan, plan_name, plan_price, customer_email } = paymentData.metadata || {}
         
-        // TODO: Activate user subscription
-        // TODO: Send confirmation email
-        // TODO: Save payment to database
-        
-        console.log('Payment approved:', {
+        console.log('💳 Pagamento aprovado Mercado Pago:', {
           plan,
           plan_name,
           plan_price,
+          customer_email,
           payment_id: paymentData.id,
           external_reference: paymentData.external_reference
         })
         
-        // Here you would:
-        // 1. Find user by external_reference
-        // 2. Activate their subscription
-        // 3. Send confirmation email
-        // 4. Log the transaction
+        // Criar/atualizar profissional no Supabase
+        if (customer_email) {
+          const { createClient } = await import('@supabase/supabase-js')
+          const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+          )
+          
+          // Verificar se profissional já existe
+          const { data: existingProfessional } = await supabase
+            .from('professionals')
+            .select('id')
+            .eq('email', customer_email)
+            .single()
+          
+          let professionalId = existingProfessional?.id
+          
+          if (!professionalId) {
+            // Criar novo profissional
+            const { data: newProfessional, error: createError } = await supabase
+              .from('professionals')
+              .insert({
+                email: customer_email,
+                name: customer_email.split('@')[0], // Nome baseado no email
+                phone: '',
+                specialty: '',
+                company: '',
+                subscription_status: 'active',
+                is_active: true,
+                max_leads: 1000
+              })
+              .select()
+              .single()
+            
+            if (createError) {
+              console.error('❌ Erro ao criar profissional:', createError)
+            } else {
+              professionalId = newProfessional.id
+              console.log('✅ Profissional criado:', professionalId)
+            }
+          } else {
+            // Atualizar status do profissional existente
+            const { error: updateError } = await supabase
+              .from('professionals')
+              .update({ 
+                subscription_status: 'active',
+                is_active: true
+              })
+              .eq('id', professionalId)
+            
+            if (updateError) {
+              console.error('❌ Erro ao atualizar profissional:', updateError)
+            } else {
+              console.log('✅ Profissional atualizado:', professionalId)
+            }
+          }
+          
+          // Criar assinatura no Supabase
+          if (professionalId) {
+            const { error: subError } = await supabase
+              .from('subscriptions')
+              .insert({
+                user_id: professionalId,
+                stripe_customer_id: `mp_${paymentData.id}`, // Usar ID do Mercado Pago
+                stripe_subscription_id: `mp_sub_${paymentData.id}`,
+                stripe_price_id: `mp_price_${plan}`,
+                customer_email: customer_email,
+                status: 'active',
+                plan_type: plan,
+                current_period_start: new Date().toISOString(),
+                current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 dias
+                cancel_at_period_end: false
+              })
+            
+            if (subError) {
+              console.error('❌ Erro ao criar assinatura:', subError)
+            } else {
+              console.log('✅ Assinatura criada com sucesso')
+            }
+          }
+        }
       }
       
       // Handle other payment statuses
