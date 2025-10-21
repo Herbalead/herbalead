@@ -28,14 +28,14 @@ export const paymentConfig = {
 export const plans = {
   monthly: {
     id: 'monthly',
-    name: 'Plano Mensal',
-    price: 97,
+    name: 'Plano Mensal Herbalead',
+    price: 60, // R$ 60.00
     description: 'Acesso completo por 30 dias'
   },
   yearly: {
     id: 'yearly', 
-    name: 'Plano Anual',
-    price: 804,
-    description: 'Economize 30% pagando anualmente'
+    name: 'Plano Anual Herbalead',
+    price: 570, // R$ 570.00 (economia de 5%)
+    description: 'Economize 5% pagando anualmente'
   }
 }
