@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ArrowLeft, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react'
 
@@ -10,6 +10,23 @@ function QuizGanhosContent() {
   const [answers, setAnswers] = useState<number[]>([])
   const [showResult, setShowResult] = useState(false)
   const [totalScore, setTotalScore] = useState(0)
+  const [userPhone, setUserPhone] = useState<string>('5511999999999')
+
+  // Receber telefone do usuário via URL
+  useEffect(() => {
+    const userParam = searchParams.get('user')
+    if (userParam) {
+      try {
+        const user = JSON.parse(userParam)
+        if (user.userPhone) {
+          setUserPhone(user.userPhone)
+          console.log('📱 Telefone recebido (ganhos):', user.userPhone)
+        }
+      } catch (error) {
+        console.error('Erro ao parsear dados do usuário:', error)
+      }
+    }
+  }, [searchParams])
 
   const questions = [
     {
@@ -156,7 +173,7 @@ function QuizGanhosContent() {
           {/* CTA Button */}
           <div className="text-center mb-6">
             <a
-              href={`https://wa.me/5511999999999?text=${encodeURIComponent(result.whatsappMessage)}`}
+              href={`https://wa.me/${userPhone}?text=${encodeURIComponent(result.whatsappMessage)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
