@@ -63,19 +63,19 @@ export const toolMessages = {
     title: 'Calculadora de Gordura Corporal',
     description: 'Estime seu percentual de gordura corporal com nossa calculadora especializada.',
     shortMessage: 'Estime seu percentual de gordura corporal 📊',
-    image: 'https://www.herbalead.com/logos/herbalead/body-fat-og-image.jpg'
+    image: 'https://www.herbalead.com/logos/herbalead/wellness-profile-og-image.jpg'
   },
   'macros': {
     title: 'Calculadora de Macronutrientes',
     description: 'Calcule a distribuição ideal de carboidratos, proteínas e gorduras para sua dieta.',
     shortMessage: 'Calcule seus macronutrientes ideais ⚖️',
-    image: 'https://www.herbalead.com/logos/herbalead/macros-og-image.jpg'
+    image: 'https://www.herbalead.com/logos/herbalead/daily-wellness-og-image.jpg'
   },
   'water-intake': {
     title: 'Calculadora de Consumo de Água',
     description: 'Descubra quanta água você deve beber por dia para manter-se hidratado.',
     shortMessage: 'Calcule seu consumo ideal de água 💧',
-    image: 'https://www.herbalead.com/logos/herbalead/water-intake-og-image.jpg'
+    image: 'https://www.herbalead.com/logos/herbalead/healthy-eating-og-image.jpg'
   },
   'recruitment-potencial': {
     title: 'Descubra Seu Potencial de Liderança',

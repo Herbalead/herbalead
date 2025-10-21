@@ -131,6 +131,24 @@ const ogImages = {
     subtitle: 'Descubra seu verdadeiro propósito de vida',
     icon: '🎯',
     gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+  },
+  'wellness-profile': {
+    title: 'Quiz: Perfil de Bem-Estar',
+    subtitle: 'Descubra o perfil de bem-estar dos seus leads',
+    icon: '🌟',
+    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  },
+  'daily-wellness': {
+    title: 'Tabela: Bem-Estar Diário',
+    subtitle: 'Acompanhe métricas de bem-estar diárias',
+    icon: '📊',
+    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+  },
+  'healthy-eating': {
+    title: 'Quiz: Alimentação Saudável',
+    subtitle: 'Avalie hábitos alimentares e oriente nutricionalmente',
+    icon: '🥗',
+    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
   }
 };
 
