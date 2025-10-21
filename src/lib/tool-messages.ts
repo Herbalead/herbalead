@@ -51,31 +51,49 @@ export const toolMessages = {
     title: 'Planejador de Refeições Inteligente',
     description: 'Crie um plano alimentar personalizado baseado nas suas necessidades nutricionais.',
     shortMessage: 'Crie seu plano alimentar personalizado 🍽️',
-    image: 'https://www.herbalead.com/logos/herbalead/nutricao-og-image.jpg'
+    image: 'https://www.herbalead.com/logos/herbalead/meal-planner-og-image.jpg'
   },
   'calorie-calculator': {
     title: 'Calculadora de Calorias Diárias',
     description: 'Descubra quantas calorias você precisa consumir por dia para atingir seus objetivos.',
     shortMessage: 'Calcule suas calorias diárias ideais 🔥',
-    image: 'https://www.herbalead.com/logos/herbalead/nutricao-og-image.jpg'
+    image: 'https://www.herbalead.com/logos/herbalead/calorie-calculator-og-image.jpg'
   },
   'body-fat': {
     title: 'Calculadora de Gordura Corporal',
     description: 'Estime seu percentual de gordura corporal com nossa calculadora especializada.',
     shortMessage: 'Estime seu percentual de gordura corporal 📊',
-    image: 'https://www.herbalead.com/logos/herbalead/imc-og-image.jpg'
+    image: 'https://www.herbalead.com/logos/herbalead/body-fat-og-image.jpg'
   },
   'macros': {
     title: 'Calculadora de Macronutrientes',
     description: 'Calcule a distribuição ideal de carboidratos, proteínas e gorduras para sua dieta.',
     shortMessage: 'Calcule seus macronutrientes ideais ⚖️',
-    image: 'https://www.herbalead.com/logos/herbalead/proteina-og-image.jpg'
+    image: 'https://www.herbalead.com/logos/herbalead/macros-og-image.jpg'
   },
   'water-intake': {
     title: 'Calculadora de Consumo de Água',
     description: 'Descubra quanta água você deve beber por dia para manter-se hidratado.',
     shortMessage: 'Calcule seu consumo ideal de água 💧',
-    image: 'https://www.herbalead.com/logos/herbalead/hidratacao-og-image.jpg'
+    image: 'https://www.herbalead.com/logos/herbalead/water-intake-og-image.jpg'
+  },
+  'recruitment-potencial': {
+    title: 'Descubra Seu Potencial de Liderança',
+    description: 'Faça nosso teste e descubra seu potencial para liderar e inspirar pessoas.',
+    shortMessage: 'Descubra seu potencial de liderança 🌟',
+    image: 'https://www.herbalead.com/logos/herbalead/recruitment-potencial-og-image.jpg'
+  },
+  'recruitment-ganhos': {
+    title: 'Calcule Seus Ganhos Potenciais',
+    description: 'Descubra quanto você pode ganhar com nosso programa de oportunidades.',
+    shortMessage: 'Calcule seus ganhos potenciais 💰',
+    image: 'https://www.herbalead.com/logos/herbalead/recruitment-ganhos-og-image.jpg'
+  },
+  'recruitment-proposito': {
+    title: 'Encontre Seu Propósito de Vida',
+    description: 'Descubra qual é o seu verdadeiro propósito e como realizá-lo.',
+    shortMessage: 'Encontre seu propósito de vida 🎯',
+    image: 'https://www.herbalead.com/logos/herbalead/recruitment-proposito-og-image.jpg'
   }
 }
 

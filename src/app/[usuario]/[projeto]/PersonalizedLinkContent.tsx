@@ -193,7 +193,7 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
 
         setLinkData(link)
         
-        // REDIRECIONAMENTO AUTOMÁTICO para a ferramenta baseada no tool_name
+        // REDIRECIONAMENTO AUTOMÁTICO para a ferramenta baseada no Eu já estou tentando alterar o linktool_name
         if (link.tool_name) {
           console.log('🚀 Redirecionando para ferramenta:', link.tool_name)
           console.log('🔍 Link completo:', link)

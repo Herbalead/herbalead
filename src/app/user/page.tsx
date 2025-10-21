@@ -1500,11 +1500,7 @@ export default function UserDashboard() {
         } else if (error.message.includes('redirect_url')) {
           userFriendlyMessage += 'Verifique se a URL de redirecionamento está correta.'
         } else if (error.message.includes('schema cache')) {
-          userFriendlyMessage += 'Houve um problema técnico. Tente novamente em alguns segundos.'
-          // Tentar novamente automaticamente após 3 segundos
-          setTimeout(() => {
-            createLink()
-          }, 3000)
+          userFriendlyMessage += 'Houve um problema técnico. Tente novamente.'
         } else if (error.message.includes('permission')) {
           userFriendlyMessage += 'Você não tem permissão para criar links. Faça login novamente.'
         } else {
