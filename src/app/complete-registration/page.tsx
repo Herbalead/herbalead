@@ -6,12 +6,6 @@ import Link from 'next/link'
 import { ArrowRight, User, KeyRound, Eye, EyeOff, Phone } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
-// Cliente para operações admin (atualização de senha)
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 // Cliente para operações normais
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -106,15 +100,16 @@ function CompleteRegistrationContent() {
 
       const data = await response.json()
 
-      if (response.ok && data.found) {
+      if (data.found) {
         setEmail(recoveryEmail)
         setShowRecoveryForm(false)
-        setSuccess('Pagamento encontrado! Complete seu cadastro abaixo.')
+        setRecoveryError('')
       } else {
-        setRecoveryError(data.error || 'Erro ao recuperar pagamento')
+        setRecoveryError('Email não encontrado. Verifique se digitou corretamente.')
       }
     } catch (error) {
-      setRecoveryError('Erro de conexão. Tente novamente.')
+      console.error('Erro na recuperação:', error)
+      setRecoveryError('Erro ao verificar email. Tente novamente.')
     } finally {
       setRecoveryLoading(false)
     }
@@ -151,392 +146,253 @@ function CompleteRegistrationContent() {
       return
     }
 
-            try {
-              // Primeiro, verificar se usuário já existe na tabela professionals
-              const { data: existingUser, error: checkError } = await supabase
-                .from('professionals')
-                .select('id, email')
-                .eq('email', email)
-                .single()
+    try {
+      // Chamar API para criar/atualizar conta
+      const response = await fetch('/api/create-auth-account', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+          phone,
+          countryCode
+        })
+      })
 
-              if (existingUser && !checkError) {
-                // Usuário já existe - verificar se tem conta de auth
-                console.log('Usuário já existe, verificando conta de auth...')
-                
-                // Verificar se existe na tabela auth.users
-                const { data: authUser, error: authCheckError } = await supabaseAdmin.auth.admin.getUserById(existingUser.id)
-                
-                if (authCheckError || !authUser) {
-                  // Não tem conta de auth - criar uma
-                  console.log('Criando conta de autenticação...')
-                  const { data: newAuthUser, error: createAuthError } = await supabaseAdmin.auth.admin.createUser({
-                    email: email,
-                    password: password,
-                    user_metadata: {
-                      full_name: name,
-                      phone: `${countryCode}${phone}`,
-                    }
-                  })
-                  
-                  if (createAuthError) {
-                    console.error('Erro ao criar conta de auth:', createAuthError)
-                    setError('Erro ao criar conta. Entre em contato.')
-                    return
-                  }
-                  
-                  console.log('Conta de auth criada:', newAuthUser.user?.id)
-                } else {
-                  // Tem conta de auth - apenas atualizar senha
-                  console.log('Atualizando senha...')
-                  const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-                    existingUser.id,
-                    {
-                      password: password,
-                      user_metadata: {
-                        full_name: name,
-                        phone: `${countryCode}${phone}`,
-                      }
-                    }
-                  )
+      const data = await response.json()
 
-                  if (updateError) {
-                    console.error('Erro ao atualizar senha:', updateError)
-                    setError('Erro ao atualizar senha. Entre em contato.')
-                    return
-                  }
-                }
+      if (!response.ok) {
+        setError(data.error || 'Erro ao processar cadastro')
+        return
+      }
 
-                // Atualizar perfil na tabela professionals
-                const { error: profileError } = await supabase
-                  .from('professionals')
-                  .update({
-                    name: name,
-                    phone: `${countryCode}${phone}`,
-                    is_active: true,
-                    updated_at: new Date().toISOString()
-                  })
-                  .eq('email', email)
+      setSuccess(data.message + ' Redirecionando...')
+      localStorage.setItem('user_email', email)
+      localStorage.setItem('user_name', name)
+      
+      setTimeout(() => {
+        router.push('/user')
+      }, 2000)
 
-                if (profileError) {
-                  console.error('Erro ao atualizar perfil:', profileError)
-                  setError('Erro ao atualizar perfil. Entre em contato.')
-                } else {
-                  setSuccess('Perfil atualizado com sucesso! Redirecionando...')
-                  localStorage.setItem('user_email', email)
-                  localStorage.setItem('user_name', name)
-                  
-                  setTimeout(() => {
-                    router.push('/user')
-                  }, 2000)
-                }
-              } else {
-                // Usuário não existe - criar novo
-                console.log('Usuário não existe, criando novo...')
-                
-                const { data: authData, error: authError } = await supabase.auth.signUp({
-                  email: email,
-                  password: password,
-                  options: {
-                    emailRedirectTo: `${window.location.origin}/success`,
-                    data: {
-                      full_name: name,
-                      phone: `${countryCode}${phone}`,
-                    }
-                  }
-                })
-
-                if (authError) {
-                  console.error('Erro ao criar usuário:', authError)
-                  setError(authError.message)
-                  return
-                }
-
-                // Criar perfil na tabela professionals
-                if (authData.user) {
-                  const { error: profileError } = await supabase
-                    .from('professionals')
-                    .insert({
-                      id: authData.user.id,
-                      name: name,
-                      email: email,
-                      phone: `${countryCode}${phone}`,
-                      is_active: true,
-                      is_admin: false
-                    })
-
-                  if (profileError) {
-                    console.error('Erro ao criar perfil:', profileError)
-                    setError('Usuário criado, mas erro ao salvar perfil. Entre em contato.')
-                  } else {
-                    // Tentar vincular assinatura usando endpoint dedicado
-                    try {
-                      const linkResponse = await fetch('/api/link-subscription', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ email: email })
-                      })
-
-                      if (linkResponse.ok) {
-                        const linkResult = await linkResponse.json()
-                        console.log('✅ Assinatura vinculada:', linkResult.message)
-                      } else {
-                        console.log('⚠️ Não foi possível vincular assinatura automaticamente')
-                      }
-                    } catch (linkError) {
-                      console.error('❌ Erro ao vincular assinatura:', linkError)
-                    }
-
-                    setSuccess('Cadastro realizado com sucesso! Redirecionando...')
-                    localStorage.setItem('user_email', email)
-                    localStorage.setItem('user_name', name)
-                    
-                    setTimeout(() => {
-                      router.push('/user')
-                    }, 2000)
-                  }
-                }
-              }
-            } catch (error) {
-              console.error('Erro geral:', error)
-              setError('Erro ao processar cadastro. Tente novamente.')
-            }
-
-    setLoading(false)
+    } catch (error) {
+      console.error('Erro geral:', error)
+      setError('Erro interno. Entre em contato.')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
-      <div className="max-w-md mx-auto px-4 py-8">
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          {/* Header */}
+  if (showRecoveryForm) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <User className="w-8 h-8 text-green-600" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Complete seu Cadastro
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Recuperar Acesso
             </h1>
             <p className="text-gray-600">
-              Defina sua senha para acessar o Herbalead
+              Digite o email usado no pagamento para continuar
             </p>
           </div>
 
-          {/* Form */}
-          {showRecoveryForm ? (
-            <div className="space-y-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-blue-800 mb-2">
-                  🔍 Recuperar Acesso
-                </h2>
-                <p className="text-blue-700 mb-4">
-                  Digite o email usado no pagamento para recuperar seu acesso e completar o cadastro.
-                </p>
-                
-                <form onSubmit={handleRecovery} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email usado no pagamento *
-                    </label>
-                    <input
-                      type="email"
-                      value={recoveryEmail}
-                      onChange={(e) => setRecoveryEmail(e.target.value)}
-                      className="w-full px-3 py-2 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base font-medium"
-                      placeholder="seu@email.com"
-                      required
-                    />
-                  </div>
-                  
-                  {recoveryError && (
-                    <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                      <p className="text-red-700 text-sm">{recoveryError}</p>
-                    </div>
-                  )}
-                  
-                  <button
-                    type="submit"
-                    disabled={recoveryLoading}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {recoveryLoading ? 'Buscando...' : 'Recuperar Acesso'}
-                  </button>
-                </form>
-              </div>
-              
-              <div className="text-center">
-                <p className="text-gray-600 mb-2">Não fez nenhum pagamento?</p>
-                <Link
-                  href="/payment"
-                  className="text-green-600 hover:text-green-700 font-medium"
-                >
-                  Fazer pagamento agora
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleRecovery} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nome Completo *
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
-                  placeholder="Seu nome completo"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email *
+                Email usado no pagamento
               </label>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
+                value={recoveryEmail}
+                onChange={(e) => setRecoveryEmail(e.target.value)}
+                className="w-full px-3 py-2 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base font-medium"
                 placeholder="seu@email.com"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Telefone *
-              </label>
-              <div className="flex">
-                <select
-                  value={countryCode}
-                  onChange={(e) => setCountryCode(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
-                >
-                  {countries.map((country) => (
-                    <option key={country.code + country.name} value={country.code}>
-                      {country.flag} {country.code}
-                    </option>
-                  ))}
-                </select>
-                <div className="relative flex-1">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 text-gray-900 bg-white border-2 border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
-                    placeholder="11999999999"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Senha *
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 pr-10 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
-                  placeholder="Digite sua senha"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Confirmar Senha *
-              </label>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-3 py-2 pr-10 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
-                  placeholder="Confirme sua senha"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
-                >
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {error && (
+            {recoveryError && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-                {success}
+                {recoveryError}
               </div>
             )}
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center justify-center disabled:opacity-50"
+              disabled={recoveryLoading}
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              ) : (
-                <>
-                  <KeyRound className="w-5 h-5 mr-2" />
-                  Criar Conta
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </>
-              )}
+              {recoveryLoading ? 'Verificando...' : 'Continuar'}
             </button>
           </form>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Complete seu Cadastro
+          </h1>
+          <p className="text-gray-600">
+            Defina sua senha para acessar o Herbalead
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Nome Completo */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Nome Completo *
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full pl-10 pr-3 py-2 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
+                placeholder="Seu nome completo"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email *
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
+              placeholder="seu@email.com"
+              required
+            />
+          </div>
+
+          {/* Telefone */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Telefone *
+            </label>
+            <div className="flex">
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                className="px-3 py-2 text-gray-900 bg-white border-2 border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
+              >
+                {countries.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.flag} {country.code}
+                  </option>
+                ))}
+              </select>
+              <div className="relative flex-1">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 text-gray-900 bg-white border-2 border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
+                  placeholder="11999999999"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Senha */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Senha *
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-2 pr-10 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
+                placeholder="Digite sua senha"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirmar Senha */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Confirmar Senha *
+            </label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-3 py-2 pr-10 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
+                placeholder="Confirme sua senha"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+              >
+                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
           )}
 
-          {/* Footer */}
-          <div className="mt-6 pt-6 border-t border-gray-200 text-center">
-            <p className="text-sm text-gray-500 mb-4">
-              Já tem uma conta?{' '}
-              <Link href="/login" className="text-green-600 hover:text-green-700 font-medium">
-                Fazer Login
-              </Link>
-            </p>
-            
-            {/* Botão WhatsApp */}
-            <a
-              href="https://api.whatsapp.com/send?phone=5519996049800&text=Acabei%20de%20fazer%20a%20minha%20inscri%C3%A7%C3%A3o%20e%20estou%20com%20duvida"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
-              </svg>
-              Suporte no WhatsApp
-            </a>
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+              {success}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Processando...
+              </>
+            ) : (
+              <>
+                Confirmar
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </>
+            )}
+          </button>
+
+          <div className="text-center">
+            <Link href="/auth/login" className="text-green-600 hover:text-green-700 text-sm">
+              Já tem uma conta? Fazer Login
+            </Link>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   )

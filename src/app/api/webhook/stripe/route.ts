@@ -75,30 +75,48 @@ export async function POST(request: NextRequest) {
             .single()
 
           if (userError || !existingUser) {
-            console.log('⚠️ Usuário não encontrado - criando assinatura órfã')
+            console.log('⚠️ Usuário não encontrado - criando profissional automaticamente')
             console.log('Email:', session.customer_email)
             console.log('Customer ID:', subscription.customer)
             
-            // Criar assinatura órfã (sem usuário) para vincular depois
-            const { error: orphanSubError } = await supabase
-              .from('subscriptions')
+            // Criar profissional automaticamente
+            const { data: newProfessional, error: createProfError } = await supabase
+              .from('professionals')
               .insert({
-                user_id: null, // Sem usuário por enquanto
-                stripe_customer_id: subscription.customer as string,
-                stripe_subscription_id: subscription.id,
-                stripe_price_id: subscription.items.data[0].price.id,
-                customer_email: customerEmail, // Email do pagador
-                status: subscription.status,
-                plan_type: subscription.items.data[0].price.recurring?.interval === 'year' ? 'yearly' : 'monthly',
-                current_period_start: safeTimestampToISOString(subscription.current_period_start),
-                current_period_end: safeTimestampToISOString(subscription.current_period_end),
-                cancel_at_period_end: subscription.cancel_at_period_end
+                email: session.customer_email,
+                name: session.customer_email?.split('@')[0] || 'Usuário',
+                phone: '',
+                specialty: '',
+                company: '',
+                subscription_status: 'active',
+                is_active: true,
+                max_leads: 1000,
+                stripe_customer_id: subscription.customer as string
               })
+              .select()
+              .single()
 
-            if (orphanSubError) {
-              console.error('Erro ao criar assinatura órfã:', orphanSubError)
+            if (createProfError) {
+              console.error('❌ Erro ao criar profissional:', createProfError)
+              // Fallback: criar assinatura órfã
+              const { error: orphanSubError } = await supabase
+                .from('subscriptions')
+                .insert({
+                  user_id: null,
+                  stripe_customer_id: subscription.customer as string,
+                  stripe_subscription_id: subscription.id,
+                  stripe_price_id: subscription.items.data[0].price.id,
+                  customer_email: customerEmail,
+                  status: subscription.status,
+                  plan_type: subscription.items.data[0].price.recurring?.interval === 'year' ? 'yearly' : 'monthly',
+                  current_period_start: safeTimestampToISOString(subscription.current_period_start),
+                  current_period_end: safeTimestampToISOString(subscription.current_period_end),
+                  cancel_at_period_end: subscription.cancel_at_period_end
+                })
+              console.log('✅ Assinatura órfã criada como fallback')
             } else {
-              console.log('✅ Assinatura órfã criada - será vinculada quando usuário se cadastrar')
+              console.log('✅ Profissional criado:', newProfessional.id)
+              user = newProfessional
             }
           } else {
             user = existingUser
