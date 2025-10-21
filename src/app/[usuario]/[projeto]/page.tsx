@@ -15,24 +15,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // Importar Supabase dinamicamente
     const { supabase } = await import('@/lib/supabase')
     
-    // Buscar dados reais do link no banco de dados
-    // 1. Primeiro buscar o professional pelo username OU pelo name
-    const { data: professional, error: profError } = await supabase
-      .from('professionals')
-      .select('id')
-      .or(`username.eq.${usuario},name.ilike.%${usuario}%`)
-      .single()
-    
-    if (profError || !professional) {
-      console.log('⚠️ Professional não encontrado:', profError?.message)
-    }
-    
-    // 2. Buscar o link pelo user_id do professional
+    // Buscar apenas o tool_name do link (muito mais simples)
     const { data: link, error } = await supabase
       .from('links')
       .select('tool_name, page_title, custom_message, page_greeting')
       .eq('name', projeto)
-      .eq('user_id', professional?.id)
       .single()
     
     if (error || !link) {
@@ -42,43 +29,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // Importar mensagens de ferramentas
     const { getToolMessage } = await import('@/lib/tool-messages')
     
-    // Usar tool_name do banco se disponível, senão tentar mapear pelo nome do projeto
-    let toolName = link?.tool_name
-    
-    if (!toolName) {
-      const projectName = projeto.toLowerCase().replace(/[^a-z0-9]/g, '')
-      
-      // Mapear nomes em português para tool_name em inglês
-      const toolNameMapping: { [key: string]: string } = {
-        'imc': 'bmi',
-        'hidratacao': 'hydration',
-        'proteina': 'protein',
-        'nutricao': 'nutrition-assessment',
-        'avaliacao-nutricional': 'nutrition-assessment',
-        'plano-alimentar': 'meal-planner',
-        'calorias': 'calorie-calculator',
-        'gordura-corporal': 'body-fat',
-        'composicao-corporal': 'body-fat',
-        'macronutrientes': 'macros',
-        'consumo-agua': 'water-intake',
-        'agua': 'hydration',
-        'agua3': 'hydration',
-        'potencial': 'recruitment-potencial',
-        'ganhos': 'recruitment-ganhos',
-        'proposito': 'recruitment-proposito'
-      }
-      
-      toolName = toolNameMapping[projectName] || projectName
-    }
-    
+    // Usar tool_name diretamente (muito mais simples!)
+    const toolName = link?.tool_name || projeto.toLowerCase().replace(/[^a-z0-9]/g, '')
     const toolMessage = getToolMessage(toolName)
     
-    // Usar dados personalizados do link se disponíveis, senão usar dados da ferramenta
     const pageTitle = link?.page_title || toolMessage?.title || `${projeto} - HerbaLead`
     const pageDescription = link?.custom_message || link?.page_greeting || toolMessage?.description || 'Acesse nossa ferramenta especializada para cuidar da sua saúde.'
     const pageImage = toolMessage?.image || 'https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg'
     
-    console.log('🔍 Metadados gerados:', {
+    console.log('🔍 Metadados gerados (simplificado):', {
       toolName,
       pageTitle,
       pageDescription,
