@@ -1973,7 +1973,6 @@ export default function UserDashboard() {
             {[
               { id: 'overview', name: 'Visão Geral' },
               { id: 'links', name: 'Meus Links' },
-              { id: 'leads', name: 'Leads' },
               { id: 'quizzes', name: 'Meus Quizzes' },
               { id: 'profile', name: 'Perfil' },
               { id: 'settings', name: 'Configurações' }
