@@ -17,11 +17,13 @@ export async function POST(request: NextRequest) {
     const paymentData = {
       items: [
         {
+          id: `herbalead_${planType}_${Date.now()}`, // Código único do item
           title: `Herbalead - ${plan.name}`,
           quantity: 1,
           unit_price: plan.price,
           currency_id: paymentConfig.currency,
-          description: plan.description
+          description: plan.description,
+          category_id: 'services' // Categoria: serviços digitais
         }
       ],
       payer: {
