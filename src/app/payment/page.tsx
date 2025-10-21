@@ -8,6 +8,7 @@ import Image from 'next/image'
 export default function PaymentPage() {
   const [selectedPlan, setSelectedPlan] = useState('monthly')
   const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState('')
 
   const plans = {
         monthly: {
@@ -43,6 +44,11 @@ export default function PaymentPage() {
   const currentPlan = plans[selectedPlan as keyof typeof plans]
 
   const handlePayment = async () => {
+    if (!email) {
+      alert('Por favor, insira seu email')
+      return
+    }
+    
     setLoading(true)
     
     try {
@@ -51,7 +57,10 @@ export default function PaymentPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ planType: selectedPlan })
+        body: JSON.stringify({ 
+          planType: selectedPlan,
+          email: email 
+        })
       })
       
       if (!response.ok) {
@@ -152,6 +161,18 @@ export default function PaymentPage() {
                 )}
                 <div className="text-base md:text-lg text-gray-500 mb-6">
                   {currentPlan.description}
+                </div>
+                
+                {/* Email Input */}
+                <div className="mb-8">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Seu email para receber o acesso"
+                    className="w-full max-w-md px-6 py-4 text-lg border-2 border-gray-300 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
+                    required
+                  />
                 </div>
                 <div className="mb-8">
                   <button

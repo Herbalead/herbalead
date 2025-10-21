@@ -87,12 +87,12 @@ export async function POST(request: NextRequest) {
                 stripe_customer_id: subscription.customer as string,
                 stripe_subscription_id: subscription.id,
                 stripe_price_id: subscription.items.data[0].price.id,
+                customer_email: customerEmail, // Email do pagador
                 status: subscription.status,
                 plan_type: subscription.items.data[0].price.recurring?.interval === 'year' ? 'yearly' : 'monthly',
                 current_period_start: safeTimestampToISOString(subscription.current_period_start),
                 current_period_end: safeTimestampToISOString(subscription.current_period_end),
-                cancel_at_period_end: subscription.cancel_at_period_end,
-                customer_email: session.customer_email // Salvar email para vincular depois
+                cancel_at_period_end: subscription.cancel_at_period_end
               })
 
             if (orphanSubError) {
@@ -112,6 +112,7 @@ export async function POST(request: NextRequest) {
                 stripe_customer_id: subscription.customer as string,
                 stripe_subscription_id: subscription.id,
                 stripe_price_id: subscription.items.data[0].price.id,
+                customer_email: customerEmail, // Email do pagador
                 status: subscription.status,
                 plan_type: subscription.items.data[0].price.recurring?.interval === 'year' ? 'yearly' : 'monthly',
                 current_period_start: safeTimestampToISOString(subscription.current_period_start),
@@ -134,6 +135,13 @@ export async function POST(request: NextRequest) {
         
         // Buscar usuário pelo customer ID ou email
         let user
+        let customerEmail = ''
+        
+        // Primeiro, buscar o email do customer no Stripe
+        const customer = await stripe.customers.retrieve(subscription.customer as string)
+        customerEmail = customer.email || ''
+        console.log('📧 Email do customer:', customerEmail)
+        
         const { data: existingUser, error: userError } = await supabase
           .from('professionals')
           .select('id, email')
@@ -142,10 +150,6 @@ export async function POST(request: NextRequest) {
 
         if (userError || !existingUser) {
           console.log('Usuário não encontrado pelo customer ID, buscando pelo email...')
-          
-          // Buscar pelo email do customer no Stripe
-          const customer = await stripe.customers.retrieve(subscription.customer as string)
-          const customerEmail = customer.email
           
           if (customerEmail) {
             const { data: userByEmail, error: emailError } = await supabase
@@ -189,6 +193,7 @@ export async function POST(request: NextRequest) {
             stripe_customer_id: subscription.customer as string,
             stripe_subscription_id: subscription.id,
             stripe_price_id: subscription.items.data[0].price.id,
+            customer_email: customerEmail, // Email do pagador
             status: subscription.status,
             plan_type: subscription.items.data[0].price.recurring?.interval === 'year' ? 'yearly' : 'monthly',
             current_period_start: safeTimestampToISOString(subscription.current_period_start),
