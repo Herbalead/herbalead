@@ -311,7 +311,7 @@ function CompleteRegistrationContent() {
                       type="email"
                       value={recoveryEmail}
                       onChange={(e) => setRecoveryEmail(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base font-medium"
                       placeholder="seu@email.com"
                       required
                     />
@@ -355,7 +355,7 @@ function CompleteRegistrationContent() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full pl-10 pr-3 py-2 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
                   placeholder="Seu nome completo"
                   required
                 />
@@ -370,7 +370,7 @@ function CompleteRegistrationContent() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
                 placeholder="seu@email.com"
                 required
               />
@@ -398,7 +398,7 @@ function CompleteRegistrationContent() {
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full pl-10 pr-3 py-2 text-gray-900 bg-white border-2 border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
                     placeholder="11999999999"
                     required
                   />
@@ -415,7 +415,7 @@ function CompleteRegistrationContent() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 pr-10 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
                   placeholder="Digite sua senha"
                   required
                 />
@@ -438,7 +438,7 @@ function CompleteRegistrationContent() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 pr-10 text-gray-900 bg-white border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base font-medium"
                   placeholder="Confirme sua senha"
                   required
                 />
