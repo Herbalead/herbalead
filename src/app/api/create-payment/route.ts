@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Plano inválido' }, { status: 400 })
     }
 
-    // Create payment preference
+    // Create payment preference with recurrence
     const paymentData = {
       items: [
         {
@@ -26,6 +26,12 @@ export async function POST(request: NextRequest) {
       ],
       payer: {
         email: email // Adicionar email do pagador
+      },
+      // Configuração de recorrência
+      recurring: {
+        frequency: planType === 'yearly' ? 'yearly' : 'monthly',
+        frequency_type: planType === 'yearly' ? 'years' : 'months',
+        repetitions: planType === 'yearly' ? 1 : 12 // 1 ano ou 12 meses
       },
       payment_methods: {
         installments: paymentConfig.maxInstallments,
@@ -45,7 +51,8 @@ export async function POST(request: NextRequest) {
         plan: planType,
         plan_name: plan.name,
         plan_price: plan.price.toString(),
-        customer_email: email
+        customer_email: email,
+        is_recurring: true
       }
     }
 
