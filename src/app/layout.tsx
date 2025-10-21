@@ -4,8 +4,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Herbalead - Bem-Estar Natural e Tecnologia',
-  description: 'Conquiste novos clientes todos os dias com bem-estar natural e tecnologia. Ferramentas profissionais para gerar leads qualificados.',
+  title: 'Herbalead, seu acelerador de leads',
+  description: 'Conquiste novos clientes todos os dias com Herbalead, ferramenta profissional para gerar leads qualificados.',
   keywords: 'leads, bem-estar, qualidade de vida, herbalife, distribuidores, profissionais, marketing, herbalead',
   authors: [{ name: 'Herbalead Team' }],
   manifest: '/manifest.json',
@@ -14,8 +14,8 @@ export const metadata = {
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'Herbalead - Bem-Estar Natural e Tecnologia',
-    description: 'Conquiste novos clientes todos os dias com bem-estar natural e tecnologia. Ferramentas profissionais para gerar leads qualificados.',
+    title: 'Herbalead, seu acelerador de leads',
+    description: 'Conquiste novos clientes todos os dias com Herbalead, ferramenta profissional para gerar leads qualificados.',
     url: 'https://www.herbalead.com',
     siteName: 'Herbalead',
     images: [
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Herbalead - Bem-Estar Natural e Tecnologia',
-    description: 'Conquiste novos clientes todos os dias com bem-estar natural e tecnologia.',
+    title: 'Herbalead, seu acelerador de leads',
+    description: 'Conquiste novos clientes todos os dias com Herbalead, ferramenta profissional para gerar leads qualificados.',
     images: ['https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg'],
     creator: '@herbalead',
   },
