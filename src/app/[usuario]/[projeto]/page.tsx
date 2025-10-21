@@ -16,11 +16,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const { supabase } = await import('@/lib/supabase')
     
     // Buscar dados reais do link no banco de dados
+    // 1. Primeiro buscar o professional pelo username
+    const { data: professional, error: profError } = await supabase
+      .from('professionals')
+      .select('id')
+      .eq('username', usuario)
+      .single()
+    
+    if (profError || !professional) {
+      console.log('⚠️ Professional não encontrado:', profError?.message)
+    }
+    
+    // 2. Buscar o link pelo user_id do professional
     const { data: link, error } = await supabase
       .from('links')
       .select('tool_name, page_title, custom_message, page_greeting')
       .eq('name', projeto)
-      .eq('user_id', (await supabase.from('professionals').select('id').eq('username', usuario).single()).data?.id)
+      .eq('user_id', professional?.id)
       .single()
     
     if (error || !link) {
