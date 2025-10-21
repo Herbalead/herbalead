@@ -6,6 +6,13 @@ import Link from 'next/link'
 import { ArrowRight, User, KeyRound, Eye, EyeOff, Phone } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
+// Cliente para operações admin (atualização de senha)
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+// Cliente para operações normais
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -153,25 +160,50 @@ function CompleteRegistrationContent() {
                 .single()
 
               if (existingUser && !checkError) {
-                // Usuário já existe - apenas atualizar senha e perfil
-                console.log('Usuário já existe, atualizando senha...')
+                // Usuário já existe - verificar se tem conta de auth
+                console.log('Usuário já existe, verificando conta de auth...')
                 
-                // Atualizar senha usando admin API
-                const { error: updateError } = await supabase.auth.admin.updateUserById(
-                  existingUser.id,
-                  {
+                // Verificar se existe na tabela auth.users
+                const { data: authUser, error: authCheckError } = await supabaseAdmin.auth.admin.getUserById(existingUser.id)
+                
+                if (authCheckError || !authUser) {
+                  // Não tem conta de auth - criar uma
+                  console.log('Criando conta de autenticação...')
+                  const { data: newAuthUser, error: createAuthError } = await supabaseAdmin.auth.admin.createUser({
+                    email: email,
                     password: password,
                     user_metadata: {
                       full_name: name,
                       phone: `${countryCode}${phone}`,
                     }
+                  })
+                  
+                  if (createAuthError) {
+                    console.error('Erro ao criar conta de auth:', createAuthError)
+                    setError('Erro ao criar conta. Entre em contato.')
+                    return
                   }
-                )
+                  
+                  console.log('Conta de auth criada:', newAuthUser.user?.id)
+                } else {
+                  // Tem conta de auth - apenas atualizar senha
+                  console.log('Atualizando senha...')
+                  const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+                    existingUser.id,
+                    {
+                      password: password,
+                      user_metadata: {
+                        full_name: name,
+                        phone: `${countryCode}${phone}`,
+                      }
+                    }
+                  )
 
-                if (updateError) {
-                  console.error('Erro ao atualizar senha:', updateError)
-                  setError('Erro ao atualizar senha. Entre em contato.')
-                  return
+                  if (updateError) {
+                    console.error('Erro ao atualizar senha:', updateError)
+                    setError('Erro ao atualizar senha. Entre em contato.')
+                    return
+                  }
                 }
 
                 // Atualizar perfil na tabela professionals
