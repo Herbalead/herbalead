@@ -4,13 +4,11 @@ import { useState } from 'react'
 import { Zap, Shield, ArrowRight, CreditCard, Smartphone, Globe } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useCountryDetection } from '../../hooks/useCountryDetection'
 
 export default function PaymentPage() {
   const [selectedPlan, setSelectedPlan] = useState('monthly')
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
-  const { country, loading: countryLoading, isBrazil } = useCountryDetection()
 
   const plans = {
         monthly: {
@@ -54,13 +52,10 @@ export default function PaymentPage() {
     setLoading(true)
     
     try {
-      // Escolher API baseada no país
-      const apiEndpoint = isBrazil ? '/api/create-payment' : '/api/create-subscription'
-      const gateway = isBrazil ? 'mercadopago' : 'stripe'
+      // PRIORIZAR MERCADO PAGO - sempre usar Mercado Pago primeiro
+      console.log('🇧🇷 Priorizando Mercado Pago para todos os usuários')
       
-      console.log('🌍 País detectado:', country, '| Gateway:', gateway)
-      
-      const response = await fetch(apiEndpoint, {
+      const response = await fetch('/api/create-payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,29 +67,20 @@ export default function PaymentPage() {
       })
       
       if (!response.ok) {
-        throw new Error('Erro ao criar assinatura')
+        throw new Error('Erro ao criar pagamento Mercado Pago')
       }
       
       const data = await response.json()
       
-      if (isBrazil) {
-        // Mercado Pago - redirecionar para init_point
-        if (data.init_point) {
-          window.location.href = data.init_point
-        } else {
-          throw new Error('Erro ao criar pagamento Mercado Pago')
-        }
+      // Mercado Pago - redirecionar para init_point
+      if (data.init_point) {
+        window.location.href = data.init_point
       } else {
-        // Stripe - redirecionar para url
-        if (data.url) {
-          window.location.href = data.url
-        } else {
-          throw new Error('Erro ao criar sessão Stripe')
-        }
+        throw new Error('Erro ao criar pagamento Mercado Pago')
       }
     } catch (error) {
-      console.error('Subscription error:', error)
-      alert('Erro ao processar assinatura. Tente novamente.')
+      console.error('Payment error:', error)
+      alert('Erro ao processar pagamento. Tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -224,50 +210,27 @@ export default function PaymentPage() {
               Formas de Pagamento Aceitas
             </h3>
             
-            {countryLoading ? (
-              <div className="text-center mb-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Detectando seu país...</p>
+            <div className="flex justify-center space-x-6 mb-12">
+              {/* Métodos do Mercado Pago */}
+              <div className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                <CreditCard className="w-6 h-6 text-blue-600" />
+                <span className="text-blue-800 font-semibold">Cartão</span>
               </div>
-            ) : (
-              <div className="flex justify-center space-x-6 mb-12">
-                {isBrazil ? (
-                  // Métodos para Brasil (Mercado Pago)
-                  <>
-                    <div className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
-                      <CreditCard className="w-6 h-6 text-blue-600" />
-                      <span className="text-blue-800 font-semibold">Cartão</span>
-                    </div>
-                    <div className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border border-purple-200">
-                      <Smartphone className="w-6 h-6 text-purple-600" />
-                      <span className="text-purple-800 font-semibold">PIX</span>
-                    </div>
-                    <div className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200">
-                      <Globe className="w-6 h-6 text-green-600" />
-                      <span className="text-green-800 font-semibold">Boleto</span>
-                    </div>
-                  </>
-                ) : (
-                  // Métodos para Internacional (Stripe)
-                  <>
-                    <div className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
-                      <CreditCard className="w-6 h-6 text-blue-600" />
-                      <span className="text-blue-800 font-semibold">Cartão Internacional</span>
-                    </div>
-                    <div className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-                      <Globe className="w-6 h-6 text-gray-600" />
-                      <span className="text-gray-800 font-semibold">PayPal</span>
-                    </div>
-                  </>
-                )}
+              <div className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+                <Smartphone className="w-6 h-6 text-purple-600" />
+                <span className="text-purple-800 font-semibold">PIX</span>
               </div>
-            )}
+              <div className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200">
+                <Globe className="w-6 h-6 text-green-600" />
+                <span className="text-green-800 font-semibold">Boleto</span>
+              </div>
+            </div>
             
-            {/* Indicador de país */}
+            {/* Indicador de gateway */}
             <div className="text-center mb-8">
               <div className="inline-flex items-center px-4 py-2 bg-emerald-50 rounded-lg border border-emerald-200">
                 <span className="text-emerald-700 font-medium">
-                  🌍 {isBrazil ? 'Brasil - Pagamento via Mercado Pago' : `${country || 'Internacional'} - Pagamento via Stripe`}
+                  🇧🇷 Pagamento via Mercado Pago
                 </span>
               </div>
             </div>
