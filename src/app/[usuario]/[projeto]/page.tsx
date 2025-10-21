@@ -17,10 +17,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     
     // Buscar dados reais do link no banco de dados
     const { data: link, error } = await supabase
-      .from('professional_links')
+      .from('links')
       .select('tool_name, page_title, custom_message, page_greeting')
       .eq('name', projeto)
-      .eq('user_id', usuario)
+      .eq('user_id', (await supabase.from('professionals').select('id').eq('username', usuario).single()).data?.id)
       .single()
     
     if (error || !link) {
@@ -46,6 +46,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         'plano-alimentar': 'meal-planner',
         'calorias': 'calorie-calculator',
         'gordura-corporal': 'body-fat',
+        'composicao-corporal': 'body-fat',
         'macronutrientes': 'macros',
         'consumo-agua': 'water-intake',
         'agua': 'hydration',
