@@ -1442,6 +1442,12 @@ export default function UserDashboard() {
       // Validar se o usuário tem telefone cadastrado
       // Verificar se o telefone existe (pode estar sem código do país no userProfile)
       const hasPhone = userProfile.phone && userProfile.phone.trim() !== ''
+      console.log('📞 Validação do telefone:', {
+        userProfilePhone: userProfile.phone,
+        hasPhone: hasPhone,
+        phoneLength: userProfile.phone ? userProfile.phone.length : 0
+      })
+      
       if (!hasPhone) {
         setErrorMessage('Você precisa cadastrar seu telefone no perfil para criar links. Por favor, vá em "Perfil" e adicione seu número de WhatsApp.')
         setShowErrorModal(true)
@@ -1472,29 +1478,34 @@ export default function UserDashboard() {
       const toolImage = getToolImage(newLink.tool_name)
       console.log('🖼️ Imagem da ferramenta:', toolImage)
 
+      // Preparar dados para inserção
+      const insertData = {
+        user_id: professional.id,
+        name: newLink.name.trim(),
+        tool_name: newLink.tool_name,
+        cta_text: newLink.cta_text,
+        redirect_url: newLink.redirect_url.trim(),
+        custom_url: newLink.custom_url.trim(),
+        custom_message: newLink.page_greeting, // Usar page_greeting em vez de custom_message
+        capture_type: newLink.capture_type,
+        material_title: newLink.material_title || '',
+        material_description: newLink.material_description || '',
+        // Novos campos
+        page_title: newLink.page_title || 'Quer uma análise mais completa?',
+        page_greeting: newLink.page_greeting || 'Gostaria de saber mais',
+        button_text: newLink.button_text || 'Consultar Especialista',
+        // Campo para imagem OG
+        og_image: toolImage,
+        status: 'active',
+        clicks: 0,
+        leads: 0
+      }
+
+      console.log('📋 Dados para inserção:', insertData)
+
       const { data, error } = await supabase
         .from('links')
-        .insert({
-          user_id: professional.id,
-          name: newLink.name.trim(),
-          tool_name: newLink.tool_name,
-          cta_text: newLink.cta_text,
-          redirect_url: newLink.redirect_url.trim(),
-          custom_url: newLink.custom_url.trim(),
-          custom_message: newLink.page_greeting, // Usar page_greeting em vez de custom_message
-          capture_type: newLink.capture_type,
-          material_title: newLink.material_title || '',
-          material_description: newLink.material_description || '',
-          // Novos campos
-          page_title: newLink.page_title || 'Quer uma análise mais completa?',
-          page_greeting: newLink.page_greeting || 'Gostaria de saber mais',
-          button_text: newLink.button_text || 'Consultar Especialista',
-          // Campo para imagem OG
-          og_image: toolImage,
-          status: 'active',
-          clicks: 0,
-          leads: 0
-        })
+        .insert(insertData)
         .select()
 
       if (error) {
