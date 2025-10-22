@@ -48,11 +48,12 @@ function CompleteRegistrationContent() {
   ]
 
   useEffect(() => {
-    // Verificar se há session_id válido (após pagamento)
+    // Verificar se há session_id válido (após pagamento Stripe)
     const sessionId = searchParams.get('session_id')
+    const gateway = searchParams.get('gateway')
     
     if (sessionId) {
-      // Se há session_id, tentar obter email da sessão
+      // Se há session_id, tentar obter email da sessão Stripe
       fetchSessionEmail(sessionId)
     } else {
       // Se não há session_id, tentar obter email da URL ou localStorage
@@ -62,6 +63,9 @@ function CompleteRegistrationContent() {
       if (emailFromUrl) {
         setEmail(emailFromUrl)
         console.log('📧 Email obtido da URL:', emailFromUrl)
+        if (gateway === 'mercadopago') {
+          console.log('🇧🇷 Mercado Pago - Email confirmado')
+        }
       } else if (emailFromStorage) {
         setEmail(emailFromStorage)
         console.log('📧 Email obtido do localStorage:', emailFromStorage)
@@ -93,13 +97,25 @@ function CompleteRegistrationContent() {
     setRecoveryLoading(true)
 
     try {
-      const response = await fetch('/api/recover-payment', {
+      // Tentar primeiro Mercado Pago, depois Stripe
+      let response = await fetch('/api/recover-payment-mercadopago', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email: recoveryEmail }),
       })
+
+      // Se não encontrou no Mercado Pago, tentar Stripe
+      if (!response.ok) {
+        response = await fetch('/api/recover-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: recoveryEmail }),
+        })
+      }
 
       const data = await response.json()
 

@@ -19,12 +19,21 @@ function SuccessPageContent() {
   const [userEmail, setUserEmail] = useState('')
 
   const sessionId = searchParams.get('session_id')
+  const gateway = searchParams.get('gateway')
+  const email = searchParams.get('email')
 
   const checkSessionAndUser = async () => {
     try {
-      // Primeiro, tentar obter dados da sessão do Stripe
+      // Primeiro, tentar obter dados da sessão
       let sessionEmail = ''
-      if (sessionId) {
+      
+      if (gateway === 'mercadopago' && email) {
+        // Mercado Pago - usar email diretamente
+        sessionEmail = email
+        setUserEmail(sessionEmail)
+        console.log('🇧🇷 Mercado Pago - Email:', sessionEmail)
+      } else if (sessionId) {
+        // Stripe - buscar dados da sessão
         try {
           const response = await fetch(`/api/get-session-data?session_id=${sessionId}`)
           if (response.ok) {
@@ -65,7 +74,11 @@ function SuccessPageContent() {
       
       // Redirecionar automaticamente para complete-registration
       setTimeout(() => {
-        router.push(`/complete-registration?email=${encodeURIComponent(sessionEmail)}`)
+        if (gateway === 'mercadopago') {
+          router.push(`/complete-registration?email=${encodeURIComponent(sessionEmail)}&gateway=mercadopago`)
+        } else {
+          router.push(`/complete-registration?email=${encodeURIComponent(sessionEmail)}`)
+        }
       }, 2000)
     } catch (error) {
       console.error('Erro ao verificar usuário:', error)
@@ -97,12 +110,12 @@ function SuccessPageContent() {
   }
 
   useEffect(() => {
-    if (sessionId) {
+    if (sessionId || (gateway === 'mercadopago' && email)) {
       checkSessionAndUser()
     } else {
       setLoading(false)
     }
-  }, [sessionId])
+  }, [sessionId, gateway, email])
 
   if (loading) {
     return (

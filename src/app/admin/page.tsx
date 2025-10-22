@@ -27,7 +27,8 @@ import {
   AlertCircle,
   X,
   Edit3,
-  GripVertical
+  GripVertical,
+  Phone
 } from 'lucide-react'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 
@@ -291,23 +292,28 @@ export default function AdminDashboard() {
       console.log(`📚 Criando curso: ${title}`)
       showNotification('info', 'Criando Curso...', `Adicionando "${title}" ao banco de dados...`)
       
-      const { data, error } = await supabase
-        .from('courses')
-        .insert({
+      // Usar API em vez de chamar Supabase diretamente
+      const response = await fetch('/api/courses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           title,
           description,
           modules: [],
           is_active: true
         })
-        .select()
-        .single()
+      })
 
-      if (error) {
-        console.error('❌ Erro ao criar curso:', error)
-        throw error
+      const result = await response.json()
+
+      if (!response.ok) {
+        console.error('❌ Erro ao criar curso:', result)
+        throw new Error(result.error || result.details || 'Erro desconhecido')
       }
       
-      console.log(`✅ Curso ${title} criado com sucesso:`, data)
+      console.log(`✅ Curso ${title} criado com sucesso:`, result.data)
       
       // Recarregar dados para garantir sincronização
       await loadData()
@@ -709,7 +715,19 @@ export default function AdminDashboard() {
     const targetModule = modules.find(m => m.id === moduleId)
     if (!targetModule) return
     
-    if (!confirm(`Tem certeza que deseja excluir o módulo "${targetModule.title}"?\n\n⚠️ ATENÇÃO: Todos os arquivos (PDFs e vídeos) também serão deletados permanentemente!`)) return
+    // Proteção extra: confirmar 2 vezes para evitar exclusões acidentais
+    const firstConfirm = confirm(`⚠️ ATENÇÃO: Você está prestes a EXCLUIR PERMANENTEMENTE o módulo "${targetModule.title}"!\n\nIsso incluirá:\n• Todos os PDFs\n• Todos os vídeos\n• Todas as configurações\n\nTem certeza que deseja continuar?`)
+    if (!firstConfirm) return
+    
+    const secondConfirm = confirm(`🚨 CONFIRMAÇÃO FINAL 🚨\n\nVocê está prestes a DELETAR DEFINITIVAMENTE:\n\n"${targetModule.title}"\n\nEsta ação NÃO PODE ser desfeita!\n\nDigite OK para confirmar ou CANCELAR para abortar.`)
+    if (!secondConfirm) return
+    
+    // Terceira confirmação com texto específico
+    const finalConfirm = prompt(`Para confirmar a exclusão, digite exatamente: CONFIRMAR EXCLUSÃO\n\nMódulo: "${targetModule.title}"`)
+    if (finalConfirm !== 'CONFIRMAR EXCLUSÃO') {
+      showNotification('info', 'Exclusão Cancelada', 'Módulo não foi excluído.')
+      return
+    }
 
     try {
       console.log(`🗑️ Excluindo módulo: ${targetModule.title} (ID: ${moduleId})`)
@@ -858,9 +876,9 @@ export default function AdminDashboard() {
       if (!file) return
 
       try {
-        // Validar tamanho do arquivo (100MB máximo)
-        if (file.size > 100 * 1024 * 1024) {
-          alert('Arquivo muito grande. Máximo 100MB.')
+        // Validar tamanho do arquivo (500MB máximo)
+        if (file.size > 500 * 1024 * 1024) {
+          alert('Arquivo muito grande. Máximo 500MB.')
           return
         }
 
@@ -975,11 +993,11 @@ export default function AdminDashboard() {
           return
         }
         
-        // Validar tamanho (100MB máximo por arquivo)
-        if (file.size > 100 * 1024 * 1024) {
+        // Validar tamanho (500MB máximo por arquivo)
+        if (file.size > 500 * 1024 * 1024) {
           console.warn('⚠️ Arquivo muito grande:', file.size)
           const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1)
-          showNotification('error', 'Arquivo Muito Grande', `Arquivo de ${fileSizeMB}MB excede o limite de 100MB. Por favor, reduza o tamanho do vídeo.`)
+          showNotification('error', 'Arquivo Muito Grande', `Arquivo de ${fileSizeMB}MB excede o limite de 500MB. Por favor, reduza o tamanho do vídeo.`)
           return
         }
 
@@ -1115,26 +1133,33 @@ export default function AdminDashboard() {
         if (uploadedFiles.length > 0) {
           console.log('💾 Salvando PDFs no banco de dados...', uploadedFiles)
           
-          // Atualizar módulo com os PDFs
-          const targetModule = modules.find(m => m.id === moduleId)
-          if (targetModule) {
-            const currentPdfs = targetModule.pdf_files || []
-            const newPdfs = [...currentPdfs, ...uploadedFiles]
-            
-            console.log('📝 Atualizando módulo:', { moduleId, currentPdfs, newPdfs })
-            
-            const { data: updateData, error } = await supabase
-              .from('course_modules')
-              .update({ pdf_files: newPdfs })
-              .eq('id', moduleId)
-              .select()
+            // Atualizar módulo com os PDFs via API
+            const targetModule = modules.find(m => m.id === moduleId)
+            if (targetModule) {
+              const currentPdfs = targetModule.pdf_files || []
+              const newPdfs = [...currentPdfs, ...uploadedFiles]
+              
+              console.log('📝 Atualizando módulo via API:', { moduleId, currentPdfs, newPdfs })
+              
+              const response = await fetch('/api/course-modules', {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  id: moduleId,
+                  pdf_files: newPdfs
+                })
+              })
 
-            if (error) {
-              console.error('❌ Erro ao salvar no banco:', error)
-              throw error
-            }
+              if (!response.ok) {
+                const errorData = await response.json()
+                console.error('❌ Erro ao salvar no banco:', errorData)
+                throw new Error(errorData.error || 'Erro ao atualizar módulo')
+              }
 
-            console.log('✅ Banco atualizado com sucesso:', updateData)
+              const updateData = await response.json()
+              console.log('✅ Banco atualizado com sucesso:', updateData)
 
             // Atualizar estado local
             setModules(modules.map(m => 
@@ -1457,6 +1482,7 @@ export default function AdminDashboard() {
               { id: 'courses', name: 'Cursos', icon: BookOpen },
               { id: 'materials', name: 'Materiais', icon: Upload },
               { id: 'users', name: 'Usuários', icon: Users },
+              { id: 'phones', name: 'Telefones', icon: Phone },
               { id: 'settings', name: 'Configurações', icon: Settings }
             ].map((tab) => (
               <button
@@ -1884,6 +1910,57 @@ export default function AdminDashboard() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* Telefones */}
+        {activeTab === 'phones' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <Phone className="w-8 h-8 text-green-600 mr-3" />
+                Telefones de Usuários Pagantes
+              </h2>
+              <a
+                href="/admin/paid-users-phones"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 flex items-center"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Abrir em Nova Aba
+              </a>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <div className="text-center py-12">
+                <Phone className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Visualização de Telefones
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Acesse a página dedicada para visualizar todos os telefones de usuários que realizaram pagamentos.
+                </p>
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-blue-900 mb-2">🔒 Segurança</h4>
+                    <p className="text-sm text-blue-800">
+                      Os telefones são informações sensíveis e são protegidos. Use apenas quando necessário.
+                    </p>
+                  </div>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-green-900 mb-2">📊 Funcionalidades</h4>
+                    <ul className="text-sm text-green-800 space-y-1">
+                      <li>• Visualizar telefones de todos os usuários pagantes</li>
+                      <li>• Filtrar por plano (mensal/anual)</li>
+                      <li>• Buscar por nome, email ou telefone</li>
+                      <li>• Exportar dados para CSV</li>
+                      <li>• Mostrar/ocultar telefones conforme necessário</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
