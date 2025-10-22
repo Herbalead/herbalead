@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 import HelpButton from '@/components/HelpButton'
 import WhatsAppLinkGenerator from '@/components/WhatsAppLinkGenerator'
+import { getToolImage } from '@/lib/tool-image-mapping'
 
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -1463,6 +1464,10 @@ export default function UserDashboard() {
         return
       }
 
+      // Obter imagem da ferramenta automaticamente
+      const toolImage = getToolImage(newLink.tool_name)
+      console.log('🖼️ Imagem da ferramenta:', toolImage)
+
       const { data, error } = await supabase
         .from('links')
         .insert({
@@ -1480,6 +1485,8 @@ export default function UserDashboard() {
           page_title: newLink.page_title || 'Quer uma análise mais completa?',
           page_greeting: newLink.page_greeting || 'Gostaria de saber mais',
           button_text: newLink.button_text || 'Consultar Especialista',
+          // Campo para imagem OG
+          og_image: toolImage,
           status: 'active',
           clicks: 0,
           leads: 0

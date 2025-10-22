@@ -73,18 +73,10 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#10B981" />
         <meta name="msapplication-tap-highlight" content="no" />
         
-        {/* Fallback para páginas sem imagem específica - apenas uma tag para não sobrescrever */}
-        <meta property="og:image" content="https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="Herbalead - Your Lead Accelerator" />
-        
         {/* Configurações adicionais para WhatsApp */}
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Herbalead" />
         <meta property="og:locale" content="pt_BR" />
-        
-        {/* Cache busting removido - permite imagens específicas */}
       </head>
       <body className={inter.className}>
         {children}

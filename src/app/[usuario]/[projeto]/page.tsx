@@ -15,10 +15,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // Importar Supabase dinamicamente
     const { supabase } = await import('@/lib/supabase')
     
-    // Buscar apenas o tool_name do link (muito mais simples)
+    // Buscar dados do link incluindo a imagem OG
     const { data: link, error } = await supabase
       .from('links')
-      .select('tool_name, page_title, custom_message, page_greeting')
+      .select('tool_name, page_title, custom_message, page_greeting, og_image')
       .eq('name', projeto)
       .single()
     
@@ -35,7 +35,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     
     const pageTitle = link?.page_title || toolMessage?.title || `${projeto} - HerbaLead`
     const pageDescription = link?.custom_message || link?.page_greeting || toolMessage?.description || 'Acesse nossa ferramenta especializada para cuidar da sua saúde.'
-    const pageImage = toolMessage?.image || 'https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg'
+    // Usar imagem salva no banco ou fallback da ferramenta
+    const pageImage = link?.og_image || toolMessage?.image || 'https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg'
     
     console.log('🔍 Metadados gerados (simplificado):', {
       toolName,
