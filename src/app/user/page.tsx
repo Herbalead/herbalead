@@ -1231,63 +1231,38 @@ export default function UserDashboard() {
         console.log('🔍 Carregando links para usuário:', user.id)
         console.log('📧 Email do usuário:', user.email)
         
-        // Primeiro, vamos ver TODOS os links para debug
-        const { data: allLinks, error: allLinksError } = await supabase
-          .from('links')
-          .select('*')
-          .order('created_at', { ascending: false })
+        // Buscar o professional.id correspondente ao auth.users.id
+        const { data: professional, error: profError } = await supabase
+          .from('professionals')
+          .select('id')
+          .eq('email', user.email)
+          .single()
+
+        if (profError || !professional) {
+          console.error('❌ Erro ao buscar professional:', profError)
+          setUserLinks([])
+          return
+        }
+
+        console.log('👤 Professional ID encontrado:', professional.id)
         
-        console.log('📊 TODOS os links no banco:', allLinks)
-        console.log('❌ Erro ao buscar todos os links:', allLinksError)
-        
-        // Agora buscar apenas os links do usuário atual
+        // Buscar links usando o professional.id
           const { data: links, error } = await supabase
             .from('links')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('user_id', professional.id)
             .order('created_at', { ascending: false })
 
         console.log('🔍 Links do usuário atual:', links)
         console.log('❌ Erro ao buscar links do usuário:', error)
 
-        // Se não encontrou links pelo user_id, tentar buscar pelo email do usuário
-        if (!links || links.length === 0) {
-          console.log('🔄 Nenhum link encontrado pelo user_id, tentando buscar pelo email...')
-          
-          // Buscar o professional_id pelo email
-          const { data: professional, error: profError } = await supabase
-            .from('professionals')
-            .select('id')
-            .eq('email', user.email)
-            .single()
-          
-          console.log('👤 Professional encontrado:', professional)
-          console.log('❌ Erro ao buscar professional:', profError)
-          
-          if (professional) {
-            // Buscar links pelo professional_id
-            const { data: linksByProf, error: linksError } = await supabase
-              .from('links')
-              .select('*')
-              .eq('user_id', professional.id)
-              .order('created_at', { ascending: false })
-            
-            console.log('🔍 Links pelo professional_id:', linksByProf)
-            console.log('❌ Erro ao buscar links pelo professional:', linksError)
-            
-            if (linksByProf && linksByProf.length > 0) {
-              setUserLinks(linksByProf)
-            return
-            }
-          }
-        }
-
         if (error) {
           console.error('❌ Erro ao carregar links:', error)
+          setUserLinks([])
         } else {
           console.log('✅ Links carregados:', links)
           setUserLinks(links || [])
-          }
+        }
         }
       } catch (error) {
       console.error('❌ Erro ao carregar links:', error)
@@ -1430,7 +1405,22 @@ export default function UserDashboard() {
         return
       }
 
+      // Buscar o professional.id correspondente ao auth.users.id
+      const { data: professional, error: profError } = await supabase
+        .from('professionals')
+        .select('id')
+        .eq('email', user.email)
+        .single()
+
+      if (profError || !professional) {
+        console.error('❌ Erro ao buscar professional:', profError)
+        setErrorMessage('Erro ao buscar dados do usuário. Tente fazer logout e login novamente.')
+        setShowErrorModal(true)
+        return
+      }
+
       console.log('🚀 Criando link para usuário:', user.id)
+      console.log('👤 Professional ID:', professional.id)
       console.log('📋 Dados do link:', newLink)
 
       // Validar campos obrigatórios
@@ -1457,7 +1447,7 @@ export default function UserDashboard() {
       const { data: existingLinks, error: checkError } = await supabase
         .from('links')
         .select('id, name')
-        .eq('user_id', user.id)
+        .eq('user_id', professional.id)
         .ilike('name', newLink.name.trim())
 
       if (checkError) {
@@ -1476,7 +1466,7 @@ export default function UserDashboard() {
       const { data, error } = await supabase
         .from('links')
         .insert({
-          user_id: user.id,
+          user_id: professional.id,
           name: newLink.name.trim(),
           tool_name: newLink.tool_name,
           cta_text: newLink.cta_text,
@@ -1598,11 +1588,25 @@ export default function UserDashboard() {
         return
       }
 
+      // Buscar o professional.id correspondente ao auth.users.id
+      const { data: professional, error: profError } = await supabase
+        .from('professionals')
+        .select('id')
+        .eq('email', user.email)
+        .single()
+
+      if (profError || !professional) {
+        console.error('❌ Erro ao buscar professional:', profError)
+        setErrorMessage('Erro ao buscar dados do usuário. Tente fazer logout e login novamente.')
+        setShowErrorModal(true)
+        return
+      }
+
       // Verificar se já existe outro projeto com o mesmo nome para este usuário (excluindo o atual)
       const { data: existingLinks, error: checkError } = await supabase
         .from('links')
         .select('id, name')
-        .eq('user_id', user.id)
+        .eq('user_id', professional.id)
         .ilike('name', newLink.name.trim())
         .neq('id', editingLink.id)
 
@@ -1748,13 +1752,28 @@ export default function UserDashboard() {
         return
       }
 
+      // Buscar o professional.id correspondente ao auth.users.id
+      const { data: professional, error: profError } = await supabase
+        .from('professionals')
+        .select('id')
+        .eq('email', user.email)
+        .single()
+
+      if (profError || !professional) {
+        console.error('❌ Erro ao buscar professional:', profError)
+        setErrorMessage('Erro ao buscar dados do usuário. Tente fazer logout e login novamente.')
+        setShowErrorModal(true)
+        return
+      }
+
       console.log('🗑️ Deletando link:', linkName, '(ID:', linkId, ')')
+      console.log('👤 Professional ID:', professional.id)
 
       const { error } = await supabase
         .from('links')
         .delete()
         .eq('id', linkId)
-        .eq('user_id', user.id)
+        .eq('user_id', professional.id)
 
       if (error) {
         console.error('❌ Erro ao deletar link:', error)
