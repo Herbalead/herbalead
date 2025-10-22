@@ -47,7 +47,8 @@ interface User {
     id: string
     status: string
     plan_type: string
-    current_period_end: string
+    end_date: string
+    next_billing_date: string
     cancel_at_period_end: boolean
   }>
 }
@@ -731,12 +732,12 @@ export default function AdminDashboard() {
                             <div className="text-xs text-purple-600">Período de graça</div>
                             <div className="text-xs">{formatDate(user.grace_period_end)}</div>
                           </div>
-                        ) : user.subscriptions?.[0]?.current_period_end ? (
+                        ) : user.subscriptions?.[0]?.end_date ? (
                           <div>
                             <div className="text-xs text-blue-600">Assinatura</div>
-                            <div className="text-xs">{formatDate(user.subscriptions[0].current_period_end)}</div>
+                            <div className="text-xs">{formatDate(user.subscriptions[0].end_date)}</div>
                             {(() => {
-                              const endDate = new Date(user.subscriptions[0].current_period_end)
+                              const endDate = new Date(user.subscriptions[0].end_date)
                               const now = new Date()
                               const daysLeft = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
                               return daysLeft > 0 ? (
