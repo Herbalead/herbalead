@@ -141,3 +141,4 @@ JOIN professionals p ON l.user_id = p.id
 ORDER BY l.created_at DESC
 LIMIT 10;
 
+

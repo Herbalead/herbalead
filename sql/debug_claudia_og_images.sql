@@ -47,3 +47,4 @@ WHERE (p.username = 'claudiavitto' OR p.name ILIKE '%claudia%')
   AND l.name = 'composicao-corporal'
 ORDER BY l.created_at DESC;
 
+
