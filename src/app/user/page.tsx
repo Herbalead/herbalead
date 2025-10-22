@@ -1423,6 +1423,8 @@ export default function UserDashboard() {
       console.log('🚀 Criando link para usuário:', user.id)
       console.log('👤 Professional ID:', professional.id)
       console.log('📋 Dados do link:', newLink)
+      console.log('📞 Telefone do usuário:', userProfile.phone)
+      console.log('🌍 Código do país:', countryCode)
 
       // Validar campos obrigatórios
       if (!newLink.name.trim()) {
@@ -1438,7 +1440,9 @@ export default function UserDashboard() {
       }
 
       // Validar se o usuário tem telefone cadastrado
-      if (!userProfile.phone || userProfile.phone.trim() === '') {
+      // Verificar se o telefone existe (pode estar sem código do país no userProfile)
+      const hasPhone = userProfile.phone && userProfile.phone.trim() !== ''
+      if (!hasPhone) {
         setErrorMessage('Você precisa cadastrar seu telefone no perfil para criar links. Por favor, vá em "Perfil" e adicione seu número de WhatsApp.')
         setShowErrorModal(true)
         return
@@ -1495,6 +1499,12 @@ export default function UserDashboard() {
 
       if (error) {
         console.error('❌ Erro ao criar link:', error)
+        console.error('❌ Detalhes do erro:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
         
         // Mensagens amigáveis para o usuário
         let userFriendlyMessage = 'Não foi possível criar o link. '
@@ -1507,8 +1517,10 @@ export default function UserDashboard() {
           userFriendlyMessage += 'Houve um problema técnico. Tente novamente.'
         } else if (error.message.includes('permission')) {
           userFriendlyMessage += 'Você não tem permissão para criar links. Faça login novamente.'
+        } else if (error.message.includes('foreign key')) {
+          userFriendlyMessage += 'Erro de conexão com o banco de dados. Tente novamente.'
         } else {
-          userFriendlyMessage += 'Tente novamente ou entre em contato com o suporte se o problema persistir.'
+          userFriendlyMessage += `Erro técnico: ${error.message}. Tente novamente ou entre em contato com o suporte.`
         }
         
         setErrorMessage(userFriendlyMessage)
