@@ -66,10 +66,11 @@ export default function CoursePage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setUser(user)
+        // CORREÇÃO: Usar email em vez de ID para compatibilidade com Mercado Pago
         const { data: professional } = await supabase
           .from('professionals')
           .select('is_active, name, email')
-          .eq('id', user.id)
+          .eq('email', user.email)
           .single()
         if (professional) {
           setHasAccess(professional.is_active)
@@ -103,14 +104,23 @@ export default function CoursePage() {
     if (!user) return
     
     try {
-      const { data: enrollmentsData, error } = await supabase
-        .from('course_enrollments')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
+      // CORREÇÃO: Buscar professional.id usando email para compatibilidade
+      const { data: professional } = await supabase
+        .from('professionals')
+        .select('id')
+        .eq('email', user.email)
+        .single()
+      
+      if (professional) {
+        const { data: enrollmentsData, error } = await supabase
+          .from('course_enrollments')
+          .select('*')
+          .eq('user_id', professional.id)
+          .eq('is_active', true)
 
-      if (error) throw error
-      setEnrolledCourses(enrollmentsData || [])
+        if (error) throw error
+        setEnrolledCourses(enrollmentsData || [])
+      }
     } catch (error) {
       console.error('Erro ao carregar inscrições:', error)
     }
@@ -120,11 +130,23 @@ export default function CoursePage() {
     if (!user) return
 
     try {
+      // CORREÇÃO: Buscar professional.id usando email para compatibilidade
+      const { data: professional } = await supabase
+        .from('professionals')
+        .select('id')
+        .eq('email', user.email)
+        .single()
+      
+      if (!professional) {
+        console.error('Professional não encontrado')
+        return
+      }
+
       // Registrar início do curso diretamente
       await supabase
         .from('user_course_progress')
         .insert({
-          user_id: user.id,
+          user_id: professional.id,
           course_id: courseId,
           progress_type: 'course_started'
         })
@@ -133,7 +155,7 @@ export default function CoursePage() {
       const { data, error } = await supabase
         .from('course_enrollments')
         .insert({
-          user_id: user.id,
+          user_id: professional.id,
           course_id: courseId,
           progress_percentage: 0,
           is_active: true
