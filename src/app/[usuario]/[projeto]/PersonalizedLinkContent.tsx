@@ -211,7 +211,8 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
             'healthy-eating': '/calculators/healthy-eating',
             'recruitment-potencial': '/quiz/potencial',
             'recruitment-ganhos': '/quiz/ganhos',
-            'recruitment-proposito': '/quiz/proposito'
+            'recruitment-proposito': '/quiz/proposito',
+            'parasite': '/parasite'
           }
           
           const toolUrl = toolUrls[link.tool_name]

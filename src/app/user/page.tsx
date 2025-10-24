@@ -102,7 +102,8 @@ export default function UserDashboard() {
       'healthy-eating': 'Consultar Especialista',
       'recruitment-potencial': 'Quero despertar meu potencial 🌱',
       'recruitment-ganhos': 'Quero multiplicar minha renda 💰',
-      'recruitment-proposito': 'Quero multiplicar meu impacto 💚'
+      'recruitment-proposito': 'Quero multiplicar meu impacto 💚',
+      'parasite': 'Consultar Especialista'
     }
     return buttonTexts[toolName] || 'Consultar Especialista'
   }
@@ -121,7 +122,8 @@ export default function UserDashboard() {
       'healthy-eating': 'Quer uma análise mais completa?',
       'recruitment-potencial': '🌱 Descobriu seu potencial real?',
       'recruitment-ganhos': '💰 Quer ganhar mais do que imagina?',
-      'recruitment-proposito': '💫 Pronto para viver com propósito?'
+      'recruitment-proposito': '💫 Pronto para viver com propósito?',
+      'parasite': '🦠 Descubra se você tem parasitas'
     }
     return titles[toolName] || 'Quer uma análise mais completa?'
   }
@@ -140,7 +142,8 @@ export default function UserDashboard() {
       'healthy-eating': 'Quer uma análise mais completa?',
       'recruitment-potencial': 'Veja como transformar suas habilidades em crescimento real',
       'recruitment-ganhos': 'Descubra formas validadas de aumentar sua renda',
-      'recruitment-proposito': 'Encontre o equilíbrio entre propósito e resultados'
+      'recruitment-proposito': 'Encontre o equilíbrio entre propósito e resultados',
+      'parasite': 'Descubra se você tem parasitas que estão afetando sua saúde'
     }
     return descriptions[toolName] || 'Quer uma análise mais completa?'
   }
@@ -2688,6 +2691,7 @@ export default function UserDashboard() {
                       <option value="recruitment-potencial">Quiz: Potencial e Crescimento</option>
                       <option value="recruitment-ganhos">Quiz: Ganhos e Prosperidade</option>
                       <option value="recruitment-proposito">Quiz: Propósito e Equilíbrio</option>
+                      <option value="parasite">Quiz: Diagnostico de Parasitas</option>
                     </select>
                   </div>
 
@@ -2906,7 +2910,9 @@ export default function UserDashboard() {
                       page_greeting: getDescriptionForTool(e.target.value)
                     })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    size={13}
                   >
+                    <option value="parasite">Quiz: Diagnostico de Parasitas</option>
                     <option value="bmi">Calculadora IMC</option>
                     <option value="protein">Calculadora de Proteína</option>
                     <option value="hydration">Calculadora de Hidratação</option>

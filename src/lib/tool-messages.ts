@@ -94,6 +94,12 @@ export const toolMessages = {
     description: 'Descubra qual é o seu verdadeiro propósito e como realizá-lo.',
     shortMessage: 'Encontre seu propósito de vida 🎯',
     image: 'https://www.herbalead.com/logos/herbalead/recruitment-proposito-og-image.jpg'
+  },
+  'parasite': {
+    title: 'Quiz: Descubra se você tem parasitas',
+    description: 'Faça nosso quiz e descubra se você pode ter parasitas que estão afetando sua saúde e absorção de nutrientes.',
+    shortMessage: 'Descubra se você tem parasitas 🦠',
+    image: 'https://www.herbalead.com/logos/herbalead/parasite-og-image.jpg'
   }
 }
 

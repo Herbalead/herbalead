@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Calculator, Globe, ArrowRight, Users, TrendingUp, Star, Shield, Play, Target, Award, Zap, Heart, DollarSign, Sparkles } from 'lucide-react'
+import { Calculator, Globe, ArrowRight, Users, TrendingUp, Star, Shield, Play, Target, Award, Zap, Heart, DollarSign, Sparkles, Bug } from 'lucide-react'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 
 export default function HerbaleadLandingPage() {
@@ -78,6 +78,9 @@ export default function HerbaleadLandingPage() {
         break
       case 'healthy-eating':
         router.push('/demo/healthy-eating')
+        break
+      case 'parasite':
+        router.push('/demo/parasite')
         break
       case 'recruitment-potencial':
         router.push('/quiz/potencial')
@@ -173,6 +176,15 @@ export default function HerbaleadLandingPage() {
       description: 'Avalie hábitos alimentares e oriente nutricionalmente',
       icon: Calculator,
       color: 'bg-lime-500',
+      category: 'Ferramentas MVP',
+      tag: 'Demo disponível'
+    },
+    {
+      id: 'parasite',
+      title: 'Quiz: Diagnóstico de Parasitas',
+      description: 'Descubra se você tem parasitas que estão afetando sua saúde',
+      icon: Bug,
+      color: 'bg-green-600',
       category: 'Ferramentas MVP',
       tag: 'Demo disponível'
     },
