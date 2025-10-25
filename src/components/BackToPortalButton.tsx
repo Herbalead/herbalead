@@ -14,7 +14,7 @@ export default function BackToPortalButton({
   toolId, 
   showWhatsAppButton = true 
 }: BackToPortalButtonProps) {
-  const { getWhatsAppUrl, getButtonText } = useUserData()
+  const { userData, getWhatsAppUrl, getButtonText } = useUserData()
 
   const handleBackToPortal = () => {
     if (portalUrl) {
@@ -25,21 +25,90 @@ export default function BackToPortalButton({
       }
       window.location.href = url.toString()
     } else {
-      // Fallback: voltar para a página anterior
-      window.history.back()
+      // Fallback: redirecionar para o Portal de Saúde
+      // Extrair informações do usuário da URL atual
+      const currentUrl = new URL(window.location.href)
+      const userParam = currentUrl.searchParams.get('user')
+      
+      if (userParam) {
+        try {
+          const userData = JSON.parse(userParam)
+          // Construir URL do Portal de Saúde com os dados do usuário
+          const portalUrl = `/portal-saude?user=${encodeURIComponent(userParam)}`
+          if (toolId) {
+            const url = new URL(portalUrl, window.location.origin)
+            url.searchParams.set('completedTool', toolId)
+            window.location.href = url.toString()
+          } else {
+            window.location.href = portalUrl
+          }
+        } catch (error) {
+          console.error('Erro ao processar dados do usuário:', error)
+          // Fallback final: ir para página inicial
+          window.location.href = '/'
+        }
+      } else {
+        // Se não há dados do usuário, ir para página inicial
+        window.location.href = '/'
+      }
     }
   }
 
   const handleWhatsAppClick = () => {
-    const whatsappUrl = getWhatsAppUrl()
-    console.log('📱 Abrindo WhatsApp:', whatsappUrl)
-    window.open(whatsappUrl, '_blank')
+    console.log('🔍 DEBUG: handleWhatsAppClick chamado')
+    console.log('  - toolId:', toolId)
+    console.log('  - userData:', userData)
+    
+    // Priorizar mensagem específica do link, senão usar mensagem baseada na ferramenta
+    const getToolSpecificMessage = (toolId?: string) => {
+      const toolMessages = {
+        'bmi': 'Olá! Fiz o teste de IMC e gostaria de saber mais sobre meus resultados. Poderia me ajudar?',
+        'protein': 'Olá! Fiz o teste de proteína e gostaria de entender melhor minhas necessidades nutricionais.',
+        'hydration': 'Olá! Fiz o teste de hidratação e gostaria de saber como melhorar minha hidratação diária.',
+        'parasite': 'Olá! Fiz o teste de parasitas e gostaria de saber mais sobre minha saúde intestinal.',
+        'wellness-profile': 'Olá! Fiz o teste de bem-estar e gostaria de receber orientações para melhorar minha qualidade de vida.',
+        'meal-planner': 'Olá! Fiz o teste de planejamento alimentar e gostaria de receber orientações nutricionais.',
+        'nutrition-assessment': 'Olá! Fiz o teste nutricional e gostaria de saber como melhorar minha alimentação.',
+        'body-composition': 'Olá! Fiz o teste de composição corporal e gostaria de entender melhor meus resultados.',
+        'daily-wellness': 'Olá! Fiz o teste de bem-estar diário e gostaria de receber orientações para melhorar minha rotina.',
+        'healthy-eating': 'Olá! Fiz o teste de alimentação saudável e gostaria de saber como melhorar meus hábitos alimentares.',
+        'recruitment-potencial': 'Olá! Fiz o teste de potencial e gostaria de saber mais sobre oportunidades de crescimento.',
+        'recruitment-ganhos': 'Olá! Fiz o teste de ganhos e gostaria de saber como multiplicar minha renda.',
+        'recruitment-proposito': 'Olá! Fiz o teste de propósito e gostaria de saber como viver com mais equilíbrio.',
+        'default': 'Olá! Fiz um teste de saúde e gostaria de saber mais sobre os resultados.'
+      }
+      
+      return toolMessages[toolId as keyof typeof toolMessages] || toolMessages.default
+    }
+    
+    // Usar mensagem específica baseada na ferramenta (não mais personalizada)
+    const specificMessage = getToolSpecificMessage(toolId)
+    console.log('🔍 Debug BackToPortalButton:')
+    console.log('  - toolId:', toolId)
+    console.log('  - specificMessage:', specificMessage)
+    
+    try {
+      const whatsappUrl = getWhatsAppUrl(specificMessage)
+      console.log('📱 Abrindo WhatsApp com mensagem específica:', whatsappUrl)
+      
+      if (whatsappUrl === '#') {
+        console.error('❌ ERRO: WhatsApp URL é inválida (#)')
+        alert('Erro: Não foi possível gerar o link do WhatsApp. Verifique se o telefone está configurado.')
+        return
+      }
+      
+      window.open(whatsappUrl, '_blank')
+      console.log('✅ WhatsApp aberto com sucesso')
+    } catch (error) {
+      console.error('❌ ERRO ao abrir WhatsApp:', error)
+      alert('Erro ao abrir WhatsApp: ' + error.message)
+    }
   }
 
   // Função para gerar texto motivacional baseado na ferramenta
   const getMotivationalText = (toolId?: string) => {
     const motivationalTexts = {
-      'bmi': '🚀 Descobrir Mais Sobre Sua Saúde',
+      'bmi': '🚀 Fazer Mais Testes de Saúde',
       'protein': '💪 Explorar Outras Avaliações',
       'hydration': '💧 Fazer Mais Testes de Saúde',
       'parasite': '🦠 Continuar Investigando',

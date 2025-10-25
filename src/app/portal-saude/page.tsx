@@ -118,8 +118,15 @@ export default function PortalSaudePage() {
     }
   ]
 
-  // Filtrar ferramentas baseado nas selecionadas (por enquanto todas)
-  const availableTools = allTools
+  // Filtrar ferramentas baseado nas selecionadas
+  const getSelectedTools = () => {
+    // Por enquanto, vamos usar todas as ferramentas básicas de saúde
+    // TODO: Implementar sistema de seleção baseado no link criado
+    const basicHealthTools = ['bmi', 'protein', 'hydration', 'body-composition', 'meal-planner', 'nutrition-assessment', 'wellness-profile', 'daily-wellness', 'healthy-eating', 'parasite']
+    return allTools.filter(tool => basicHealthTools.includes(tool.id))
+  }
+  
+  const availableTools = getSelectedTools()
 
   // Verificar se todas as ferramentas foram completadas
   const allToolsCompleted = completedTools.length === availableTools.length
@@ -160,7 +167,7 @@ export default function PortalSaudePage() {
         {/* Header Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-6">
-            🏥 {getPageTitle()}
+            💚 {getPageTitle()}
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
             {getCustomMessage()}

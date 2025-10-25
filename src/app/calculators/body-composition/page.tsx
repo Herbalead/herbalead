@@ -380,8 +380,9 @@ export default function BodyCompositionCalculatorPage() {
             </p>
             <button 
               onClick={() => {
-                const whatsappUrl = getWhatsAppUrl()
-                console.log('📱 Abrindo WhatsApp:', whatsappUrl)
+                const specificMessage = 'Olá! Fiz o teste de composição corporal e gostaria de entender melhor meus resultados. Poderia me ajudar?'
+                const whatsappUrl = getWhatsAppUrl(specificMessage)
+                console.log('📱 Abrindo WhatsApp com mensagem específica:', whatsappUrl)
                 console.log('👤 Dados do usuário:', userData)
                 window.open(whatsappUrl, '_blank')
               }}

@@ -273,8 +273,9 @@ export default function ProteinCalculatorPage() {
             </p>
             <button 
               onClick={() => {
-                const whatsappUrl = getWhatsAppUrl()
-                console.log('📱 Abrindo WhatsApp:', whatsappUrl)
+                const specificMessage = 'Olá! Fiz o teste de proteína e gostaria de entender melhor minhas necessidades nutricionais. Poderia me ajudar?'
+                const whatsappUrl = getWhatsAppUrl(specificMessage)
+                console.log('📱 Abrindo WhatsApp com mensagem específica:', whatsappUrl)
                 console.log('👤 Dados do usuário:', userData)
                 window.open(whatsappUrl, '_blank')
               }}

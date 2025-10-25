@@ -61,8 +61,8 @@ export function useUserData() {
   }, [])
 
   const getWhatsAppUrl = (message?: string) => {
-    // Usar mensagem personalizada se disponível, senão usar a mensagem passada como parâmetro
-    const finalMessage = userData?.customMessage || message || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
+    // SEMPRE priorizar mensagem específica passada como parâmetro, senão usar customMessage
+    const finalMessage = message || userData?.customMessage || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
     
     console.log('🔍 Debug getWhatsAppUrl:')
     console.log('  - userData:', userData)

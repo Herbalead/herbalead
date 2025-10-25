@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Plus, Link as LinkIcon, Users, TrendingUp, Settings, BookOpen, KeyRound, Eye, EyeOff, Heart } from 'lucide-react'
+import { Plus, Link as LinkIcon, Users, TrendingUp, Settings, BookOpen, KeyRound, Eye, EyeOff, Heart, Info } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 import HelpButton from '@/components/HelpButton'
@@ -12,7 +12,29 @@ import { getToolImage } from '@/lib/tool-image-mapping'
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedTools, setSelectedTools] = useState<string[]>(['bmi', 'wellness-profile', 'parasite'])
-  const [showCreateLinkModal, setShowCreateLinkModal] = useState(false)
+  // Componente para tooltip informativo
+  const InfoTooltip = ({ children, content }: { children: React.ReactNode, content: string }) => {
+    const [showTooltip, setShowTooltip] = useState(false)
+    
+    return (
+      <div className="relative inline-block">
+        <div 
+          className="inline-flex items-center cursor-help"
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
+          {children}
+          <Info className="w-4 h-4 ml-1 text-gray-400 hover:text-gray-600" />
+        </div>
+        {showTooltip && (
+          <div className="absolute z-50 px-3 py-2 text-sm text-white bg-gray-800 rounded-lg shadow-lg bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64">
+            {content}
+            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+          </div>
+        )}
+      </div>
+    )
+  }
   const [newLink, setNewLink] = useState({
     name: '',
     tool_name: 'bmi',
@@ -34,6 +56,7 @@ export default function UserDashboard() {
   const [errorMessage, setErrorMessage] = useState('')
   const [editingLink, setEditingLink] = useState<Record<string, unknown> | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showCreateLinkModal, setShowCreateLinkModal] = useState(false) // NOVO ESTADO
   const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null)
   const [userLinks, setUserLinks] = useState<Record<string, unknown>[]>([])
   const [userQuizzes, setUserQuizzes] = useState<Record<string, unknown>[]>([])
@@ -126,7 +149,7 @@ export default function UserDashboard() {
       'recruitment-ganhos': '💰 Quer ganhar mais do que imagina?',
       'recruitment-proposito': '💫 Pronto para viver com propósito?',
       'parasite': '🦠 Descubra se você tem parasitas',
-      'portal-saude': '🏥 Vamos cuidar da sua saúde!'
+             'portal-saude': '💚 Vamos cuidar da sua saúde!'
     }
     return titles[toolName] || 'Quer uma análise mais completa?'
   }
@@ -1418,7 +1441,7 @@ export default function UserDashboard() {
       capture_type: 'direct',
       material_title: '',
       material_description: '',
-      page_title: '🏥 Vamos cuidar da sua saúde!',
+      page_title: '💚 Vamos cuidar da sua saúde!',
       page_greeting: 'Que tal fazermos alguns testes rápidos para ver como está seu corpo hoje?',
       button_text: 'Falar com Especialista'
     })
@@ -1611,6 +1634,13 @@ export default function UserDashboard() {
       page_greeting: String(link.page_greeting || 'Olá!'),
       button_text: String(link.button_text || 'Consultar Especialista')
     })
+    
+    // Se for Portal de Saúde, carregar ferramentas selecionadas
+    if (link.tool_name === 'portal-saude') {
+      // Por enquanto, usar ferramentas padrão. TODO: Salvar ferramentas selecionadas no banco
+      setSelectedTools(['bmi', 'wellness-profile', 'parasite'])
+    }
+    
     setShowEditModal(true)
   }
 
@@ -1726,7 +1756,7 @@ export default function UserDashboard() {
       } else {
         console.log('✅ Link atualizado com sucesso:', data)
         setUserLinks(userLinks.map(link => 
-          link.id === editingLink.id ? data[0] : link
+          link?.id === editingLink?.id ? data[0] : link
         ))
         setShowEditModal(false)
         setEditingLink(null)
@@ -1765,7 +1795,7 @@ export default function UserDashboard() {
       await navigator.clipboard.writeText(personalizedUrl)
       
       // Mostrar feedback visual
-      setCopiedLinkId(String(link.id || ''))
+      setCopiedLinkId(String(link?.id || ''))
       setTimeout(() => {
         setCopiedLinkId(null)
       }, 2000)
@@ -1785,7 +1815,7 @@ export default function UserDashboard() {
       document.execCommand('copy')
       document.body.removeChild(textArea)
       
-      setCopiedLinkId(String(link.id || ''))
+      setCopiedLinkId(String(link?.id || ''))
       setTimeout(() => {
         setCopiedLinkId(null)
       }, 2000)
@@ -1794,7 +1824,7 @@ export default function UserDashboard() {
 
   const deleteLink = async (linkId: string) => {
     // Encontrar o link para mostrar o nome na confirmação
-    const linkToDelete = userLinks.find(link => link.id === linkId)
+    const linkToDelete = userLinks.find(link => link?.id === linkId)
     const linkName = linkToDelete?.name || 'este link'
     
     // Confirmação antes de deletar
@@ -1851,7 +1881,7 @@ export default function UserDashboard() {
         setShowErrorModal(true)
       } else {
         console.log('✅ Link deletado com sucesso:', linkName)
-        setUserLinks(userLinks.filter(link => link.id !== linkId))
+        setUserLinks(userLinks.filter(link => link?.id !== linkId))
         
         // Mostrar mensagem de sucesso específica para deleção
         setShowDeleteSuccessModal(true)
@@ -2134,7 +2164,7 @@ export default function UserDashboard() {
                 title={(!userProfile.subscription_status || userProfile.subscription_status !== 'active') ? 'Ative sua assinatura para criar portal de saúde' : ''}
               >
                 <Heart className="w-5 h-5" />
-                <span>Portal de Saúde</span>
+                <span>💚 Portal de Saúde</span>
             </button>
               
         </div>
@@ -2145,7 +2175,7 @@ export default function UserDashboard() {
               {userLinks.length > 0 ? (
                 <div className="space-y-3">
                   {userLinks.slice(0, 3).map((link) => (
-                    <div key={String(link.id || '')} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={String(link?.id || '')} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div>
                         <p className="font-medium text-gray-900">{String(link.project_name || '')}</p>
                         <p className="text-sm text-gray-500">{String(link.tool_name || '')}</p>
@@ -2223,26 +2253,26 @@ export default function UserDashboard() {
               {userLinks.length > 0 ? (
               <div className="space-y-4">
                 {userLinks.map((link) => (
-                    <div key={String(link.id)} className="border border-gray-200 rounded-lg p-4">
+                    <div key={String(link?.id || 'unknown')} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{String(link.name)}</h4>
-                          <p className="text-sm text-gray-500 mt-1">{String(link.tool_name)}</p>
-                          <p className="text-sm text-gray-600 mt-2">{String(link.custom_message)}</p>
+                        <h4 className="font-medium text-gray-900">{String(link?.name || 'Nome não definido')}</h4>
+                          <p className="text-sm text-gray-500 mt-1">{String(link?.tool_name || 'Ferramenta não definida')}</p>
+                          <p className="text-sm text-gray-600 mt-2">{String(link?.custom_message || 'Mensagem não definida')}</p>
                           <div className="mt-2 space-y-2">
                             <div className="flex space-x-2">
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {String(link.id).slice(0, 8)}...
+                                {String(link?.id || 'unknown').slice(0, 8)}...
                         </span>
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                {String(link.clicks || 0)} cliques
+                                {String(link?.clicks || 0)} cliques
                               </span>
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                {String(link.leads || 0)} leads
+                                {String(link?.leads || 0)} leads
                               </span>
                             </div>
                             <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded border">
-                              <strong>URL do Link:</strong> {window.location.origin}/{normalizeText(userProfile.name)}/{normalizeText(String(link.name))}
+                              <strong>URL do Link:</strong> {window.location.origin}/{normalizeText(userProfile.name)}/{normalizeText(String(link?.name || 'unknown'))}
                             </div>
                           </div>
                         </div>
@@ -2250,12 +2280,12 @@ export default function UserDashboard() {
                         <button 
                             onClick={() => copyLink(link)}
                             className={`text-sm px-3 py-1 rounded-md transition-colors ${
-                              copiedLinkId === link.id
+                              copiedLinkId === link?.id
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
                             }`}
                           >
-                            {copiedLinkId === link.id ? '✓ Copiado!' : '📋 Copiar Link'}
+                            {copiedLinkId === link?.id ? '✓ Copiado!' : '📋 Copiar Link'}
                         </button>
                         <button 
                           onClick={() => openWhatsAppGenerator(link)}
@@ -2270,7 +2300,7 @@ export default function UserDashboard() {
                           Editar
                         </button>
                         <button 
-                          onClick={() => deleteLink(String(link.id))}
+                          onClick={() => deleteLink(String(link?.id || ''))}
                           className="text-red-600 hover:text-red-800 text-sm"
                         >
                             Deletar
@@ -2634,7 +2664,7 @@ export default function UserDashboard() {
       {/* Modal para criar link com preview */}
         {showCreateLinkModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
+          <div className="relative top-5 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white max-h-[95vh] overflow-y-auto">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Criar Novo Link</h3>
               
@@ -2722,10 +2752,7 @@ export default function UserDashboard() {
                           { id: 'wellness-profile', name: '🧘 Quiz Bem-estar', description: 'Testar bem-estar' },
                           { id: 'daily-wellness', name: '📅 Bem-Estar Diário', description: 'Acompanhar bem-estar' },
                           { id: 'healthy-eating', name: '🥗 Alimentação Saudável', description: 'Quiz alimentação' },
-                          { id: 'parasite', name: '🦠 Diagnóstico Parasitas', description: 'Verificar saúde' },
-                          { id: 'recruitment-potencial', name: '🌱 Potencial Crescimento', description: 'Descobrir potencial' },
-                          { id: 'recruitment-ganhos', name: '💰 Ganhos Prosperidade', description: 'Multiplicar renda' },
-                          { id: 'recruitment-proposito', name: '💫 Propósito Equilíbrio', description: 'Viver com propósito' }
+                          { id: 'parasite', name: '🦠 Diagnóstico Parasitas', description: 'Verificar saúde' }
                         ].map((tool) => (
                           <label key={tool.id} className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                             <input
@@ -2765,9 +2792,7 @@ export default function UserDashboard() {
                         page_greeting: getDescriptionForTool(e.target.value)
                       })}
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                      size={15}
                     >
-                      <option value="portal-saude">🏥 Portal de Saúde</option>
                       <option value="bmi">Calculadora IMC</option>
                       <option value="protein">Calculadora de Proteína</option>
                       <option value="hydration">Calculadora de Hidratação</option>
@@ -2780,13 +2805,12 @@ export default function UserDashboard() {
                       <option value="recruitment-potencial">Quiz: Potencial e Crescimento</option>
                       <option value="recruitment-ganhos">Quiz: Ganhos e Prosperidade</option>
                       <option value="recruitment-proposito">Quiz: Propósito e Equilíbrio</option>
-                      <option value="portal-saude">🏥 Portal de Saúde</option>
                       <option value="parasite">Quiz: Diagnostico de Parasitas</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">🎯 Título Principal</label>
+                    <label className="block text-sm font-medium text-gray-700">Título Principal</label>
                     <input
                       type="text"
                       value={newLink.page_title}
@@ -2850,6 +2874,8 @@ export default function UserDashboard() {
                       💡 <strong>Controle total:</strong> Cole aqui apenas o telefone OU clique no 📝 para adicionar a mensagem automaticamente
                     </p>
                   </div>
+
+                  {/* Campo para mensagem do WhatsApp - MODAL DE CRIAÇÃO */}
                 </div>
 
                 {/* Coluna direita - Preview */}
@@ -2861,7 +2887,7 @@ export default function UserDashboard() {
                     <div className="text-center space-y-4">
                       {/* Título Principal */}
                       <h2 className="text-xl font-bold text-gray-800">
-                        🎯 {newLink.page_title || 'Quer uma análise mais completa?'}
+                        {newLink.page_title || 'Quer uma análise mais completa?'}
                       </h2>
                       
                       {/* Texto Descritivo */}
@@ -2988,39 +3014,84 @@ export default function UserDashboard() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Ferramenta</label>
-                  <select
-                    value={newLink.tool_name}
-                    onChange={(e) => setNewLink({
-                      ...newLink, 
-                      tool_name: e.target.value,
-                      button_text: getButtonTextForTool(e.target.value),
-                      page_title: getTitleForTool(e.target.value),
-                      page_greeting: getDescriptionForTool(e.target.value)
-                    })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    size={15}
-                  >
-                    <option value="portal-saude">🏥 Portal de Saúde</option>
-                    <option value="parasite">Quiz: Diagnostico de Parasitas</option>
-                    <option value="bmi">Calculadora IMC</option>
-                    <option value="protein">Calculadora de Proteína</option>
-                    <option value="hydration">Calculadora de Hidratação</option>
-                    <option value="body-composition">Composição Corporal</option>
-                    <option value="meal-planner">Planejador de Refeições</option>
-                    <option value="nutrition-assessment">Avaliação Nutricional</option>
-                    <option value="wellness-profile">Quiz: Perfil de Bem-Estar</option>
-                    <option value="daily-wellness">Tabela: Bem-Estar Diário</option>
-                    <option value="healthy-eating">Quiz: Alimentação Saudável</option>
-                    <option value="recruitment-potencial">Quiz: Potencial e Crescimento</option>
-                    <option value="recruitment-ganhos">Quiz: Ganhos e Prosperidade</option>
-                    <option value="recruitment-proposito">Quiz: Propósito e Equilíbrio</option>
-                  </select>
-                </div>
+                {/* Seção específica para Portal de Saúde - Edição */}
+                {newLink.tool_name === 'portal-saude' ? (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      🎯 Escolha as ferramentas para incluir no Portal
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { id: 'bmi', name: '📊 Calculadora IMC', description: 'Descobrir peso ideal' },
+                        { id: 'protein', name: '💪 Calculadora Proteína', description: 'Calcular proteína diária' },
+                        { id: 'hydration', name: '💧 Calculadora Hidratação', description: 'Calcular hidratação' },
+                        { id: 'body-composition', name: '📏 Composição Corporal', description: 'Avaliar composição' },
+                        { id: 'meal-planner', name: '🍎 Planejador Refeições', description: 'Planejar alimentação' },
+                        { id: 'nutrition-assessment', name: '🎯 Avaliação Nutricional', description: 'Avaliar nutrição' },
+                        { id: 'wellness-profile', name: '🧘 Quiz Bem-estar', description: 'Testar bem-estar' },
+                        { id: 'daily-wellness', name: '📅 Bem-Estar Diário', description: 'Acompanhar bem-estar' },
+                        { id: 'healthy-eating', name: '🥗 Alimentação Saudável', description: 'Quiz alimentação' },
+                        { id: 'parasite', name: '🦠 Diagnóstico Parasitas', description: 'Verificar saúde' }
+                      ].map((tool) => (
+                        <label key={tool.id} className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedTools.includes(tool.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedTools([...selectedTools, tool.id])
+                              } else {
+                                setSelectedTools(selectedTools.filter(t => t !== tool.id))
+                              }
+                            }}
+                            className="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                          />
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-900">{tool.name}</div>
+                            <div className="text-xs text-gray-500">{tool.description}</div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      💡 Selecione pelo menos 2 ferramentas para criar o Portal de Saúde
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Ferramenta</label>
+                    <select
+                      value={newLink.tool_name}
+                      onChange={(e) => setNewLink({
+                        ...newLink, 
+                        tool_name: e.target.value,
+                        button_text: getButtonTextForTool(e.target.value),
+                        page_title: getTitleForTool(e.target.value),
+                        page_greeting: getDescriptionForTool(e.target.value)
+                      })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="parasite">Quiz: Diagnostico de Parasitas</option>
+                      <option value="bmi">Calculadora IMC</option>
+                      <option value="protein">Calculadora de Proteína</option>
+                      <option value="hydration">Calculadora de Hidratação</option>
+                      <option value="body-composition">Composição Corporal</option>
+                      <option value="meal-planner">Planejador de Refeições</option>
+                      <option value="nutrition-assessment">Avaliação Nutricional</option>
+                      <option value="wellness-profile">Quiz: Perfil de Bem-Estar</option>
+                      <option value="daily-wellness">Tabela: Bem-Estar Diário</option>
+                      <option value="healthy-eating">Quiz: Alimentação Saudável</option>
+                      <option value="recruitment-potencial">Quiz: Potencial e Crescimento</option>
+                      <option value="recruitment-ganhos">Quiz: Ganhos e Prosperidade</option>
+                      <option value="recruitment-proposito">Quiz: Propósito e Equilíbrio</option>
+                    </select>
+                  </div>
+                )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">🎯 Título Principal</label>
+                  <InfoTooltip content="Este é o título principal que aparecerá no topo da página do seu link personalizado. É a primeira coisa que o cliente verá.">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Título Principal</label>
+                  </InfoTooltip>
                   <input
                     type="text"
                     value={newLink.page_title}
@@ -3031,7 +3102,9 @@ export default function UserDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">💬 Texto Descritivo</label>
+                  <InfoTooltip content="Esta mensagem descritiva aparecerá abaixo do título para explicar melhor o que o cliente pode esperar da ferramenta.">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">💬 Texto Descritivo</label>
+                  </InfoTooltip>
                   <textarea
                     value={newLink.page_greeting}
                     onChange={(e) => setNewLink({...newLink, page_greeting: e.target.value})}
@@ -3045,7 +3118,9 @@ export default function UserDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">🔗 Texto do Botão</label>
+                  <InfoTooltip content="Este é o texto que aparecerá no botão principal. É o que o cliente clicará para entrar em contato com você.">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">🔗 Texto do Botão</label>
+                  </InfoTooltip>
                   <input
                     type="text"
                     value={newLink.button_text}
@@ -3056,7 +3131,9 @@ export default function UserDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">📱 URL de Redirecionamento</label>
+                  <InfoTooltip content="Esta é a URL para onde o cliente será redirecionado quando clicar no botão. Geralmente é um link do WhatsApp com seu número.">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">📱 URL de Redirecionamento</label>
+                  </InfoTooltip>
                   <div className="flex gap-2">
                     <input
                       type="url"
@@ -3084,6 +3161,9 @@ export default function UserDashboard() {
                     💡 <strong>Controle total:</strong> Cole aqui apenas o telefone OU clique no 📝 para adicionar a mensagem automaticamente
                   </p>
                 </div>
+
+                {/* Campo para mensagem do WhatsApp - MODAL DE EDIÇÃO */}
+
               </div>
 
               {/* Coluna direita - Preview */}

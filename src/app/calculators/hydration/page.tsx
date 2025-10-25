@@ -281,8 +281,9 @@ export default function HydrationCalculatorPage() {
             </p>
             <button 
               onClick={() => {
-                const whatsappUrl = getWhatsAppUrl()
-                console.log('📱 Abrindo WhatsApp:', whatsappUrl)
+                const specificMessage = 'Olá! Fiz o teste de hidratação e gostaria de saber como melhorar minha hidratação diária. Poderia me ajudar?'
+                const whatsappUrl = getWhatsAppUrl(specificMessage)
+                console.log('📱 Abrindo WhatsApp com mensagem específica:', whatsappUrl)
                 console.log('👤 Dados do usuário:', userData)
                 window.open(whatsappUrl, '_blank')
               }}

@@ -152,7 +152,7 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
         // Buscar todos os links do usuário e comparar com o slug normalizado
         const { data: allLinks, error: linksError } = await supabase
           .from('links')
-          .select('*')
+          .select('id, name, tool_name, redirect_url, cta_text, custom_message, capture_type, material_title, material_description, page_title, page_greeting, button_text, whatsapp_message, og_image, status, clicks, leads, created_at, updated_at, user_id')
           .eq('user_id', professional.id)
         
         if (linksError) {
@@ -242,6 +242,7 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
             userPhone: professional.phone, // Usar telefone do profissional (já validado acima)
             linkId: link.id,
             customMessage: link.page_greeting || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!', // Mensagem personalizada do link (page_greeting)
+            whatsappMessage: '', // Campo removido - usando mensagens prefixadas
             pageTitle: link.page_title || 'Quer uma análise mais completa?', // Título personalizado
             buttonText: link.button_text || 'Consultar Especialista' // Texto do botão personalizado
           }
@@ -251,8 +252,10 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
           console.log('  - professional.phone:', professional?.phone)
           console.log('  - link.custom_message:', link.custom_message)
           console.log('  - link.page_greeting:', link.page_greeting)
+          console.log('  - link.whatsapp_message:', 'Campo removido - usando mensagens prefixadas')
           console.log('  - userData:', userData)
           console.log('  - customMessage sendo passado:', userData.customMessage)
+          console.log('  - whatsappMessage sendo passado:', 'Campo removido - usando mensagens prefixadas')
           
           const params = new URLSearchParams({
             user: JSON.stringify(userData)
