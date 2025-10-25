@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Plus, Link as LinkIcon, Users, TrendingUp, Settings, BookOpen, KeyRound, Eye, EyeOff } from 'lucide-react'
+import { Plus, Link as LinkIcon, Users, TrendingUp, Settings, BookOpen, KeyRound, Eye, EyeOff, Heart } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 import HelpButton from '@/components/HelpButton'
@@ -11,6 +11,7 @@ import { getToolImage } from '@/lib/tool-image-mapping'
 
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
+  const [selectedTools, setSelectedTools] = useState<string[]>(['bmi', 'wellness-profile', 'parasite'])
   const [showCreateLinkModal, setShowCreateLinkModal] = useState(false)
   const [newLink, setNewLink] = useState({
     name: '',
@@ -103,7 +104,8 @@ export default function UserDashboard() {
       'recruitment-potencial': 'Quero despertar meu potencial 🌱',
       'recruitment-ganhos': 'Quero multiplicar minha renda 💰',
       'recruitment-proposito': 'Quero multiplicar meu impacto 💚',
-      'parasite': 'Consultar Especialista'
+      'parasite': 'Consultar Especialista',
+      'portal-saude': 'Falar com Especialista'
     }
     return buttonTexts[toolName] || 'Consultar Especialista'
   }
@@ -123,7 +125,8 @@ export default function UserDashboard() {
       'recruitment-potencial': '🌱 Descobriu seu potencial real?',
       'recruitment-ganhos': '💰 Quer ganhar mais do que imagina?',
       'recruitment-proposito': '💫 Pronto para viver com propósito?',
-      'parasite': '🦠 Descubra se você tem parasitas'
+      'parasite': '🦠 Descubra se você tem parasitas',
+      'portal-saude': '🏥 Vamos cuidar da sua saúde!'
     }
     return titles[toolName] || 'Quer uma análise mais completa?'
   }
@@ -143,7 +146,8 @@ export default function UserDashboard() {
       'recruitment-potencial': 'Veja como transformar suas habilidades em crescimento real',
       'recruitment-ganhos': 'Descubra formas validadas de aumentar sua renda',
       'recruitment-proposito': 'Encontre o equilíbrio entre propósito e resultados',
-      'parasite': 'Descubra se você tem parasitas que estão afetando sua saúde'
+      'parasite': 'Descubra se você tem parasitas que estão afetando sua saúde',
+      'portal-saude': 'Que tal fazermos alguns testes rápidos para ver como está seu corpo hoje?'
     }
     return descriptions[toolName] || 'Quer uma análise mais completa?'
   }
@@ -1400,6 +1404,27 @@ export default function UserDashboard() {
     setShowCreateLinkModal(true)
   }
 
+  const openPortalSaudeModal = () => {
+    // Pré-configurar para Portal de Saúde
+    console.log('🏥 Abrindo modal Portal de Saúde')
+    
+    setNewLink({
+      name: '',
+      tool_name: 'portal-saude',
+      cta_text: 'Falar com Especialista',
+      redirect_url: '',
+      custom_url: '',
+      custom_message: 'Que tal fazermos alguns testes rápidos para ver como está seu corpo hoje?',
+      capture_type: 'direct',
+      material_title: '',
+      material_description: '',
+      page_title: '🏥 Vamos cuidar da sua saúde!',
+      page_greeting: 'Que tal fazermos alguns testes rápidos para ver como está seu corpo hoje?',
+      button_text: 'Falar com Especialista'
+    })
+    setShowCreateLinkModal(true)
+  }
+
   const createLink = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -2055,7 +2080,7 @@ export default function UserDashboard() {
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Botões de ação compactos no topo */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <button
                 onClick={openCreateLinkModal}
                 disabled={!userProfile.subscription_status || userProfile.subscription_status !== 'active'}
@@ -2096,6 +2121,20 @@ export default function UserDashboard() {
               >
                 <BookOpen className="w-5 h-5" />
                 <span>Acessar Curso</span>
+            </button>
+            
+            <button
+                onClick={openPortalSaudeModal}
+                disabled={!userProfile.subscription_status || userProfile.subscription_status !== 'active'}
+                className={`p-4 rounded-lg flex items-center justify-center space-x-2 transition-colors ${
+                  (!userProfile.subscription_status || userProfile.subscription_status !== 'active')
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                    : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                }`}
+                title={(!userProfile.subscription_status || userProfile.subscription_status !== 'active') ? 'Ative sua assinatura para criar portal de saúde' : ''}
+              >
+                <Heart className="w-5 h-5" />
+                <span>Portal de Saúde</span>
             </button>
               
         </div>
@@ -2666,6 +2705,54 @@ export default function UserDashboard() {
                     )}
                   </div>
 
+                  {/* Seção específica para Portal de Saúde */}
+                  {newLink.tool_name === 'portal-saude' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        🎯 Escolha as ferramentas para incluir no Portal
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {[
+                          { id: 'bmi', name: '📊 Calculadora IMC', description: 'Descobrir peso ideal' },
+                          { id: 'protein', name: '💪 Calculadora Proteína', description: 'Calcular proteína diária' },
+                          { id: 'hydration', name: '💧 Calculadora Hidratação', description: 'Calcular hidratação' },
+                          { id: 'body-composition', name: '📏 Composição Corporal', description: 'Avaliar composição' },
+                          { id: 'meal-planner', name: '🍎 Planejador Refeições', description: 'Planejar alimentação' },
+                          { id: 'nutrition-assessment', name: '🎯 Avaliação Nutricional', description: 'Avaliar nutrição' },
+                          { id: 'wellness-profile', name: '🧘 Quiz Bem-estar', description: 'Testar bem-estar' },
+                          { id: 'daily-wellness', name: '📅 Bem-Estar Diário', description: 'Acompanhar bem-estar' },
+                          { id: 'healthy-eating', name: '🥗 Alimentação Saudável', description: 'Quiz alimentação' },
+                          { id: 'parasite', name: '🦠 Diagnóstico Parasitas', description: 'Verificar saúde' },
+                          { id: 'recruitment-potencial', name: '🌱 Potencial Crescimento', description: 'Descobrir potencial' },
+                          { id: 'recruitment-ganhos', name: '💰 Ganhos Prosperidade', description: 'Multiplicar renda' },
+                          { id: 'recruitment-proposito', name: '💫 Propósito Equilíbrio', description: 'Viver com propósito' }
+                        ].map((tool) => (
+                          <label key={tool.id} className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedTools.includes(tool.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedTools([...selectedTools, tool.id])
+                                } else {
+                                  setSelectedTools(selectedTools.filter(t => t !== tool.id))
+                                }
+                              }}
+                              className="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                            />
+                            <div className="flex-1">
+                              <div className="text-sm font-medium text-gray-900">{tool.name}</div>
+                              <div className="text-xs text-gray-500">{tool.description}</div>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        💡 Selecione pelo menos 2 ferramentas para criar o Portal de Saúde
+                      </p>
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Ferramenta</label>
                     <select
@@ -2678,7 +2765,9 @@ export default function UserDashboard() {
                         page_greeting: getDescriptionForTool(e.target.value)
                       })}
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      size={15}
                     >
+                      <option value="portal-saude">🏥 Portal de Saúde</option>
                       <option value="bmi">Calculadora IMC</option>
                       <option value="protein">Calculadora de Proteína</option>
                       <option value="hydration">Calculadora de Hidratação</option>
@@ -2691,6 +2780,7 @@ export default function UserDashboard() {
                       <option value="recruitment-potencial">Quiz: Potencial e Crescimento</option>
                       <option value="recruitment-ganhos">Quiz: Ganhos e Prosperidade</option>
                       <option value="recruitment-proposito">Quiz: Propósito e Equilíbrio</option>
+                      <option value="portal-saude">🏥 Portal de Saúde</option>
                       <option value="parasite">Quiz: Diagnostico de Parasitas</option>
                     </select>
                   </div>
@@ -2910,8 +3000,9 @@ export default function UserDashboard() {
                       page_greeting: getDescriptionForTool(e.target.value)
                     })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    size={13}
+                    size={15}
                   >
+                    <option value="portal-saude">🏥 Portal de Saúde</option>
                     <option value="parasite">Quiz: Diagnostico de Parasitas</option>
                     <option value="bmi">Calculadora IMC</option>
                     <option value="protein">Calculadora de Proteína</option>

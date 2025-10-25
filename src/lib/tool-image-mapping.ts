@@ -13,6 +13,7 @@ export const toolImageMap = {
   'recruitment-ganhos': 'https://www.herbalead.com/logos/herbalead/recruitment-ganhos-og-image.jpg',
   'recruitment-proposito': 'https://www.herbalead.com/logos/herbalead/recruitment-proposito-og-image.jpg',
   'parasite': 'https://www.herbalead.com/logos/herbalead/parasite-og-image.jpg',
+  'portal-saude': 'https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg',
   // Fallback para ferramentas não mapeadas
   'default': 'https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg'
 } as const

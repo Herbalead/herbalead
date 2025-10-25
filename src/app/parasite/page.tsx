@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { MessageCircle } from 'lucide-react'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 import { useUserData } from '@/lib/useUserData'
+import BackToPortalButton from '@/components/BackToPortalButton'
 
 export default function ParasitePage() {
   const { userData, getWhatsAppUrl, getCustomMessage, getPageTitle, getButtonText } = useUserData()
@@ -182,18 +183,15 @@ export default function ParasitePage() {
               <p className="text-gray-600 mb-8 text-lg">
                 {getCustomMessage()}
               </p>
-              <button 
-                onClick={() => {
-                  const whatsappUrl = getWhatsAppUrl()
-                  console.log('📱 Abrindo WhatsApp:', whatsappUrl)
-                  console.log('👤 Dados do usuário:', userData)
-                  window.open(whatsappUrl, '_blank')
-                }}
-                className="px-12 py-6 bg-green-600 text-white rounded-xl font-bold text-xl hover:bg-green-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-green-500"
-              >
-                <MessageCircle className="w-8 h-8 mr-3" />
-                {getButtonText()}
-              </button>
+            </div>
+
+            {/* Botões de ação */}
+            <div className="mt-8 flex justify-center">
+              <BackToPortalButton 
+                portalUrl={typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('returnToPortal') || undefined : undefined}
+                toolId="parasite"
+                showWhatsAppButton={true}
+              />
             </div>
 
             <div className="mt-8 pt-6 border-t border-gray-200">

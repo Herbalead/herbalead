@@ -212,7 +212,8 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
             'recruitment-potencial': '/quiz/potencial',
             'recruitment-ganhos': '/quiz/ganhos',
             'recruitment-proposito': '/quiz/proposito',
-            'parasite': '/parasite'
+            'parasite': '/parasite',
+            'portal-saude': '/portal-saude'
           }
           
           const toolUrl = toolUrls[link.tool_name]
