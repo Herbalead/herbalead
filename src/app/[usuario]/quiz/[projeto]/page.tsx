@@ -38,8 +38,8 @@ interface Question {
   question_text: string
   question_type: 'multiple' | 'essay'
   order_number: number
-  options: string[]
-  correct_answer: number | string
+  options: string[]  // SEMPRE deve ser um array
+  correct_answer?: number | string  // OPCIONAL - não é usado no sistema atual
   points: number
   button_text: string
 }
@@ -122,6 +122,30 @@ export default function QuizPage({ params }: { params: Promise<{ usuario: string
         }
         
         console.log('✅ Perguntas encontradas:', questionsData)
+        
+        // Debug: verificar options de cada pergunta
+        if (questionsData) {
+          questionsData.forEach((q: any, index: number) => {
+            console.log(`🔍 ============ PERGUNTA ${index + 1} ============`)
+            console.log('question_text:', q.question_text)
+            console.log('question_type:', q.question_type)
+            console.log('options CRUZ:', q.options)
+            console.log('options tipo:', typeof q.options)
+            console.log('options é array?', Array.isArray(q.options))
+            console.log('options como JSON:', JSON.stringify(q.options))
+            
+            // Tentar diferentes formas de acesso
+            if (q.options) {
+              console.log('Tentando q.options:', q.options)
+            }
+            if (q['options']) {
+              console.log('Tentando q["options"]:', q['options'])
+            }
+            
+            console.log('======================')
+          })
+        }
+        
         setQuestions(questionsData || [])
         
         // Incrementar contador de cliques
@@ -144,11 +168,35 @@ export default function QuizPage({ params }: { params: Promise<{ usuario: string
     loadQuiz()
   }, [params])
 
-  const handleAnswer = (questionIndex: number, answer: number | string) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionIndex]: answer
-    }))
+  const handleAnswer = (questionIndex: number, answer: number | string, isMultiple: boolean = false) => {
+    if (isMultiple) {
+      // Para múltiplas escolhas, gerenciar array de respostas
+      setAnswers(prev => {
+        const currentAnswers = prev[questionIndex] as number[] || []
+        const index = currentAnswers.indexOf(answer as number)
+        
+        if (index > -1) {
+          // Remover resposta se já está selecionada
+          const newAnswers = currentAnswers.filter(a => a !== answer)
+          return {
+            ...prev,
+            [questionIndex]: newAnswers.length > 0 ? newAnswers : []
+          }
+        } else {
+          // Adicionar resposta
+          return {
+            ...prev,
+            [questionIndex]: [...currentAnswers, answer as number]
+          }
+        }
+      })
+    } else {
+      // Para resposta única, usar o comportamento original
+      setAnswers(prev => ({
+        ...prev,
+        [questionIndex]: answer
+      }))
+    }
   }
 
   const nextQuestion = () => {
@@ -261,6 +309,19 @@ export default function QuizPage({ params }: { params: Promise<{ usuario: string
 
   const currentQ = questions[currentQuestion]
   const progress = ((currentQuestion + 1) / questions.length) * 100
+  
+  // Debug: verificar currentQ
+  if (currentQ && currentQuestion === 0) {
+    console.log('🔍 ====== DEBUG PERGUNTA ATUAL ======')
+    console.log('currentQ completo:', currentQ)
+    console.log('question_text:', currentQ.question_text)
+    console.log('question_type:', currentQ.question_type)
+    console.log('options:', currentQ.options)
+    console.log('options é array?:', Array.isArray(currentQ.options))
+    console.log('options length:', currentQ.options?.length)
+    console.log('options conteúdo:', currentQ.options)
+    console.log('=====================================')
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: quiz.colors.background }}>
@@ -295,25 +356,88 @@ export default function QuizPage({ params }: { params: Promise<{ usuario: string
           </h2>
           
           {/* Multiple Choice Questions */}
-          {currentQ.question_type === 'multiple' && (
+          {(currentQ.question_type === 'multiple' || currentQ.question_type === 'multiple_select') && (
             <div className="space-y-3">
-              {currentQ.options.map((option, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleAnswer(currentQuestion, index)}
-                  className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
-                    answers[currentQuestion] === index
-                      ? 'border-emerald-500 bg-emerald-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  style={{
-                    backgroundColor: answers[currentQuestion] === index ? quiz.colors.background : 'white',
-                    borderColor: answers[currentQuestion] === index ? quiz.colors.primary : undefined
-                  }}
-                >
-                  <span className="font-medium">{option}</span>
-                </button>
-              ))}
+              {(() => {
+                // Garantir que options é um array válido
+                let optionsArray: string[] = []
+                
+                if (Array.isArray(currentQ.options)) {
+                  optionsArray = currentQ.options
+                } else if (currentQ.options) {
+                  // Se não é array, tentar converter
+                  try {
+                    optionsArray = JSON.parse(currentQ.options as unknown as string)
+                  } catch {
+                    optionsArray = []
+                  }
+                }
+                
+                console.log('🔍 Renderizando opções para pergunta:', currentQuestion)
+                console.log('  - currentQ.options original:', currentQ.options)
+                console.log('  - optionsArray final:', optionsArray)
+                console.log('  - Número de opções:', optionsArray.length)
+                
+                if (optionsArray.length === 0) {
+                  console.error('⚠️ ERRO: Nenhuma opção encontrada para esta pergunta!')
+                  return (
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-red-600 text-sm">Erro: Esta pergunta não tem opções cadastradas.</p>
+                    </div>
+                  )
+                }
+                
+                const isMultiple = currentQ.question_type === 'multiple_select'
+                const isSelected = (index: number) => {
+                  if (isMultiple) {
+                    const selected = answers[currentQuestion] as number[] || []
+                    return selected.includes(index)
+                  } else {
+                    return answers[currentQuestion] === index
+                  }
+                }
+                
+                return optionsArray.map((option, index) => {
+                  console.log(`  - Renderizando opção ${index + 1}: "${option}"`)
+                  const selected = isSelected(index)
+                  
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => handleAnswer(currentQuestion, index, isMultiple)}
+                      className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 flex items-start gap-3 ${
+                        selected
+                          ? 'border-emerald-500 bg-emerald-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      style={{
+                        backgroundColor: selected ? quiz.colors.background : 'white',
+                        borderColor: selected ? quiz.colors.primary : undefined
+                      }}
+                    >
+                      {/* Checkbox ou Radio */}
+                      <div className="mt-1">
+                        {isMultiple ? (
+                          <input
+                            type="checkbox"
+                            checked={selected}
+                            readOnly
+                            className="w-5 h-5"
+                          />
+                        ) : (
+                          <input
+                            type="radio"
+                            checked={selected}
+                            readOnly
+                            className="w-5 h-5"
+                          />
+                        )}
+                      </div>
+                      <span className="font-medium">{option}</span>
+                    </button>
+                  )
+                })
+              })()}
             </div>
           )}
           

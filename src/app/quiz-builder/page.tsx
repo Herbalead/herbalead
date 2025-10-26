@@ -602,19 +602,12 @@ function QuizBuilderContent() {
         if (q.options.some(option => !option.trim())) {
           return true
         }
-        // Verificar se tem pelo menos uma resposta correta
-        if (q.question_type === 'multiple' && (q.correct_answer === null || q.correct_answer === undefined)) {
-          return true
-        }
-        if (q.question_type === 'multiple_select' && (!q.correct_answer || (q.correct_answer as number[]).length === 0)) {
-          return true
-        }
       }
       return false
     })
 
     if (invalidQuestions) {
-      alert('⚠️ Todas as perguntas de múltipla escolha devem ter:\n\n• Pelo menos 2 opções\n• Todas as opções preenchidas\n• Pelo menos uma resposta correta selecionada')
+      alert('⚠️ Todas as perguntas de múltipla escolha devem ter:\n\n• Pelo menos 2 opções\n• Todas as opções preenchidas')
       return
     }
 
@@ -660,16 +653,26 @@ function QuizBuilderContent() {
         }
 
         // Inserir novas perguntas
-        const questionsToInsert = quiz.questions.map((q, index) => ({
-          quiz_id: quizData.id,
-          question_text: q.question_text,
-          question_type: q.question_type,
-          order_number: index,
-          options: q.options,
-          correct_answer: q.correct_answer,
-          points: q.points || 1,
-          button_text: q.button_text
-        }))
+        const questionsToInsert = quiz.questions.map((q, index) => {
+          console.log(`📝 Processando pergunta ${index + 1}:`, {
+            question_text: q.question_text,
+            question_type: q.question_type,
+            options: q.options,
+            options_length: q.options?.length,
+            correct_answer: q.correct_answer
+          })
+          
+          return {
+            quiz_id: quizData.id,
+            question_text: q.question_text,
+            question_type: q.question_type,
+            order_number: index,
+            options: q.options,
+            correct_answer: q.correct_answer,
+            points: q.points || 1,
+            button_text: q.button_text
+          }
+        })
 
         console.log('📋 Perguntas para inserir:', questionsToInsert)
 
@@ -1389,7 +1392,7 @@ function QuizBuilderContent() {
                     <div className="space-y-2 mb-3">
                       <div className="flex justify-between items-center mb-2">
                         <p className="text-xs font-medium text-gray-500">
-                          {question.question_type === 'multiple' ? 'Opções (selecione a correta):' : 'Opções (selecione as corretas):'}
+                          Opções:
                         </p>
                         <div className="flex gap-1">
                           <button
@@ -1418,27 +1421,6 @@ function QuizBuilderContent() {
                       {question.options?.map((option, oIndex) => (
                         <div key={oIndex} className="flex gap-2 items-center">
                           <input
-                            type={question.question_type === 'multiple' ? 'radio' : 'checkbox'}
-                            name={`correct-${qIndex}`}
-                            checked={question.question_type === 'multiple' 
-                              ? question.correct_answer === oIndex
-                              : (question.correct_answer as number[])?.includes(oIndex)
-                            }
-                            onChange={() => {
-                              if (question.question_type === 'multiple') {
-                                updateQuestion(qIndex, 'correct_answer', oIndex)
-                              } else {
-                                const currentCorrect = question.correct_answer as number[] || []
-                                const newCorrect = currentCorrect.includes(oIndex)
-                                  ? currentCorrect.filter(i => i !== oIndex)
-                                  : [...currentCorrect, oIndex]
-                                updateQuestion(qIndex, 'correct_answer', newCorrect)
-                              }
-                            }}
-                            className="w-4 h-4"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                          <input
                             type="text"
                             value={option}
                             onChange={(e) => updateOption(qIndex, oIndex, e.target.value)}
@@ -1451,7 +1433,6 @@ function QuizBuilderContent() {
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation()
-                                console.log('🔴 Botão X clicado:', { qIndex, oIndex, questionType: question.question_type })
                                 removeOption(qIndex, oIndex)
                               }}
                               className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
