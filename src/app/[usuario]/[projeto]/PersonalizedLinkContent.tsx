@@ -117,24 +117,27 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
           console.log(`  - Slug esperado: "${slugLower}"`)
           
           // Estratégia 1: Match exato após normalização
-          const normalizedName = nameLower.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+          // Normalizar nome removendo acentos
+          const nameWithoutAccents = nameLower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          const normalizedName = nameWithoutAccents.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
           if (normalizedName === slugLower) {
             console.log(`✅ MATCH EXATO encontrado!`)
             return true
           }
           
           // Estratégia 2: Match por partes (mais restritivo)
-          const nameParts = nameLower.split(/\s+/).filter(part => part.length > 2)
+          // Remover acentos das partes do nome
+          const namePartsNormalized = nameWithoutAccents.split(/\s+/).filter(part => part.length > 2)
           const slugParts = slugLower.split('-').filter(part => part.length > 2)
           
           // Verificar se TODAS as partes do slug estão presentes no nome
           const allSlugPartsMatch = slugParts.every(slugPart => 
-            nameParts.some(namePart => 
+            namePartsNormalized.some(namePart => 
               namePart.startsWith(slugPart) || slugPart.startsWith(namePart)
             )
           )
           
-          console.log(`  - Partes do nome: [${nameParts.join(', ')}]`)
+          console.log(`  - Partes do nome: [${namePartsNormalized.join(', ')}]`)
           console.log(`  - Partes do slug: [${slugParts.join(', ')}]`)
           console.log(`  - Match por partes: ${allSlugPartsMatch}`)
           
