@@ -56,9 +56,11 @@ export default function PaidUsersPhones() {
             id,
             status,
             plan_type,
+            payment_source,
+            current_period_end,
             created_at
           ),
-          payments!inner(
+          payments(
             id,
             amount,
             created_at,
@@ -67,7 +69,6 @@ export default function PaidUsersPhones() {
         `)
         .eq('subscription_status', 'active')
         .eq('subscriptions.status', 'active')
-        .eq('payments.status', 'succeeded')
         .order('created_at', { ascending: false })
 
       if (error) {
