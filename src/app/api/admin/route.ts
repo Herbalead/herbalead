@@ -97,11 +97,15 @@ export async function GET(request: NextRequest) {
           status,
           description,
           created_at,
+          payment_source,
           subscriptions (
             user_id,
-            professionals (
+            plan_type,
+            status,
+            professionals!subscriptions_user_id_fkey (
               name,
-              email
+              email,
+              phone
             )
           )
         `)

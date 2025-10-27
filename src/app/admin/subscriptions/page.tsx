@@ -798,6 +798,7 @@ export default function AdminDashboard() {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gateway</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
@@ -818,6 +819,17 @@ export default function AdminDashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                         {formatCurrency(payment.amount, payment.currency)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {payment.payment_source && (
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            payment.payment_source === 'mercadopago' 
+                              ? 'bg-blue-100 text-blue-800' 
+                              : 'bg-purple-100 text-purple-800'
+                          }`}>
+                            {payment.payment_source === 'mercadopago' ? 'Mercado Pago' : 'Stripe'}
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
