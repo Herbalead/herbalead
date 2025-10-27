@@ -1,0 +1,57 @@
+🔧 COMO CRIAR AUTH DA MARCELA - 2 OPÇÕES:
+
+═══════════════════════════════════════════════════════
+
+OPÇÃO 1: VIA API (MAIS RÁPIDO) ⚡
+
+1. Faça commit e deploy:
+   git add .
+   git commit -m "feat: API para criar auth da Marcela"
+   git push
+
+2. Após deploy, execute no navegador ou Postman:
+   POST https://herbalead.com/api/admin/create-marcela-auth
+
+3. Você receberá as credenciais:
+   {
+     "email": "marcela_roberto@hotmail.com",
+     "senha": "MarcelaTemporaria123!",
+     "userId": "..."
+   }
+
+═══════════════════════════════════════════════════════
+
+OPÇÃO 2: VIA DASHBOARD (MANUAL) 🖐️
+
+1. Acesse: https://supabase.com/dashboard
+2. Vá em: Authentication → Users
+3. Clique em: "Add user"
+4. Preencha:
+   
+   📧 Email: marcela_roberto@hotmail.com
+   🔑 Password: MarcelaTemporaria123!
+   🆔 UUID: a30b5935-3bdc-4b30-a78b-346d10c287c4
+   ☑️ Auto Confirm User: SIM ✅
+   ☑️ Email Confirmed: SIM ✅
+
+5. Clique em: "Create User"
+
+═══════════════════════════════════════════════════════
+
+DEPOIS, ENVIE ESTA MENSAGEM PARA MARCELA:
+
+───────────
+Olá Marcela!
+
+Sua conta foi criada:
+
+📧 Email: marcela_roberto@hotmail.com
+🔑 Senha: MarcelaTemporaria123!
+
+Acesse: https://herbalead.com/login
+
+⚠️ Troque a senha após entrar no sistema.
+
+Atenciosamente!
+───────────
+

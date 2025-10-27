@@ -146,7 +146,8 @@ export async function POST(request: NextRequest) {
                 plan_type: plan,
                 current_period_start: new Date().toISOString(),
                 current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 dias
-                cancel_at_period_end: false
+                cancel_at_period_end: false,
+                payment_source: 'mercadopago'
               })
             
             if (subError) {

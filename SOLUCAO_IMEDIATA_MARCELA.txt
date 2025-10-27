@@ -1,0 +1,39 @@
+═══ PROBLEMA IDENTIFICADO ═══
+
+Auth criada com UUID diferente do professional:
+- Auth ID: f7a15f22-9699-4b04-9f9d-0d48dd558989 ✅
+- Professional ID: a30b5935-3bdc-4b30-a78b-346d10c287c4 ❌
+
+O sistema precisa que ambos sejam IGUAIS!
+
+═══════════════════════════════════════════════════
+
+SOLUÇÃO RÁPIDA (2 etapas):
+
+1️⃣ Abra: https://supabase.com/dashboard
+   SQL Editor → New Query
+
+2️⃣ Cole e execute ESTE SQL:
+
+   UPDATE professionals
+   SET id = 'f7a15f22-9699-4b04-9f9d-0d48dd558989'
+   WHERE id = 'a30b5935-3bdc-4b30-a78b-346d10c287c4';
+
+3️⃣ Se der erro de constraint, execute TUDO do arquivo:
+   sql/fix_marcela_uuid_correto.sql
+
+4️⃣ Envie a mensagem para Marcela:
+
+   Olá Marcela!
+   
+   Email: marcela_roberto@hotmail.com
+   Senha: MarcelaTemporaria123!
+   
+   Acesse: https://herbalead.com/login
+   
+   ⏰ Troque a senha após entrar!
+
+═══════════════════════════════════════════════════
+
+FEITO!
+

@@ -216,7 +216,8 @@ export async function POST(request: NextRequest) {
             plan_type: subscription.items.data[0].price.recurring?.interval === 'year' ? 'yearly' : 'monthly',
             current_period_start: safeTimestampToISOString(subscription.current_period_start),
             current_period_end: safeTimestampToISOString(subscription.current_period_end),
-            cancel_at_period_end: subscription.cancel_at_period_end
+            cancel_at_period_end: subscription.cancel_at_period_end,
+            payment_source: 'stripe'
           })
 
         if (subError) {

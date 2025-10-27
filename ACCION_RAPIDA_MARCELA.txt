@@ -1,0 +1,32 @@
+═══ AÇÃO RÁPIDA - CRIAR AUTH MARCELA ═══
+
+1️⃣ Abra: https://supabase.com/dashboard
+   Authentication → Users → Add user
+
+2️⃣ Preencha:
+   Email: marcela_roberto@hotmail.com
+   Password: MarcelaTemporaria123!
+   UUID: a30b5935-3bdc-4b30-a78b-346d10c287c4
+   Auto Confirm: ✅ SIM
+
+3️⃣ Crie o usuário
+
+4️⃣ Envie este WhatsApp para Marcela:
+
+─── COPIE DAQUI ───
+
+Olá Marcela!
+
+Sua conta está pronta! 😊
+
+Email: marcela_roberto@hotmail.com
+Senha: MarcelaTemporaria123!
+
+Acesse: https://herbalead.com/login
+
+⏰ Importante: Troque a senha após entrar.
+
+─── ATÉ AQUI ───
+
+═══ PRONTO! ═══
+

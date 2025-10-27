@@ -49,6 +49,7 @@ interface User {
     plan_type: string
     current_period_end: string
     cancel_at_period_end: boolean
+    payment_source?: string
   }>
 }
 
@@ -59,6 +60,7 @@ interface Payment {
   status: string
   description: string
   created_at: string
+  payment_source?: string
   subscriptions: {
     user_id: string
     professionals: {
@@ -717,10 +719,23 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {user.subscriptions?.[0]?.plan_type === 'monthly' ? 'Mensal' : 
-                         user.subscriptions?.[0]?.plan_type === 'yearly' ? 'Anual' : 
-                         user.subscription_plan === 'monthly' ? 'Mensal' :
-                         user.subscription_plan === 'yearly' ? 'Anual' : 'N/A'}
+                        <div className="flex flex-col gap-1">
+                          <div>
+                            {user.subscriptions?.[0]?.plan_type === 'monthly' ? 'Mensal' : 
+                             user.subscriptions?.[0]?.plan_type === 'yearly' ? 'Anual' : 
+                             user.subscription_plan === 'monthly' ? 'Mensal' :
+                             user.subscription_plan === 'yearly' ? 'Anual' : 'N/A'}
+                          </div>
+                          {user.subscriptions?.[0]?.payment_source && (
+                            <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${
+                              user.subscriptions[0].payment_source === 'mercadopago' 
+                                ? 'bg-blue-100 text-blue-800' 
+                                : 'bg-purple-100 text-purple-800'
+                            }`}>
+                              {user.subscriptions[0].payment_source === 'mercadopago' ? 'Mercado Pago' : 'Stripe'}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(user.created_at)}

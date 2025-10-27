@@ -1,0 +1,27 @@
+📋 PASSO A PASSO - CRIAR AUTH DA MARCELA NO SUPABASE
+
+1️⃣ IR NO SUPABASE:
+https://supabase.com/dashboard
+
+2️⃣ SELECIONAR PROJETO
+
+3️⃣ CLICAR EM: Authentication (menu lateral esquerdo)
+
+4️⃣ CLICAR EM: Users
+
+5️⃣ CLICAR NO BOTÃO: "Add user" (topo direito)
+
+6️⃣ PREENCHER O FORMULÁRIO:
+   📧 Email: marcela_roberto@hotmail.com
+   🔑 Password: MarcelaTemporaria123!
+   🆔 UUID: a30b5935-3bdc-4b30-a78b-346d10c287c4
+   ☑️ Auto Confirm User: MARCAR ✅
+   ☑️ Email Confirmed: MARCAR ✅
+
+7️⃣ CLICAR EM: "Create User"
+
+8️⃣ ENVIAR PARA MARCELA NO WHATSAPP:
+   Copy/paste a mensagem do arquivo MENSAGEM_WHATSAPP_MARCELA.txt
+
+✅ PRONTO!
+

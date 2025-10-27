@@ -1,0 +1,62 @@
+-- ============================================
+-- SOLUÇÃO FINAL - MIGRAR MARCELA
+-- ============================================
+
+-- 1. VER todos os professionals da Marcela
+SELECT id, email, name FROM professionals 
+WHERE email = 'marcela_roberto@hotmail.com' OR email LIKE '%marcela%';
+
+-- 2. DELETAR o professional ANTIGO (quebrado)
+DELETE FROM professionals WHERE id = 'a30b5935-3bdc-4b30-a78b-346d10c287c4';
+
+-- 3. CRIAR o professional NOVO com auth.id correto
+INSERT INTO professionals (
+    id,
+    email,
+    name,
+    phone,
+    specialty,
+    company,
+    subscription_status,
+    is_active,
+    max_leads,
+    created_at,
+    updated_at
+)
+VALUES (
+    'f7a15f22-9699-4b04-9f9d-0d48dd558989',
+    'marcela_roberto@hotmail.com',
+    'marcela_roberto',
+    NULL,
+    NULL,
+    NULL,
+    'active',
+    true,
+    100,
+    NOW(),
+    NOW()
+);
+
+-- 4. Atualizar subscriptions
+UPDATE subscriptions
+SET user_id = 'f7a15f22-9699-4b04-9f9d-0d48dd558989'
+WHERE user_id = 'a30b5935-3bdc-4b30-a78b-346d10c287c4';
+
+-- 5. Atualizar links
+UPDATE links
+SET user_id = 'f7a15f22-9699-4b04-9f9d-0d48dd558989'
+WHERE user_id = 'a30b5935-3bdc-4b30-a78b-346d10c287c4';
+
+-- 6. VERIFICAR tudo
+SELECT 
+    p.id,
+    p.email,
+    p.name,
+    COUNT(DISTINCT s.id) as subscriptions,
+    COUNT(DISTINCT l.id) as links
+FROM professionals p
+LEFT JOIN subscriptions s ON p.id = s.user_id
+LEFT JOIN links l ON p.id = l.user_id
+WHERE p.id = 'f7a15f22-9699-4b04-9f9d-0d48dd558989'
+GROUP BY p.id, p.email, p.name;
+

@@ -1,0 +1,63 @@
+-- ============================================
+-- SOLUÇÃO COMPLETA - MIGRAR MARCELA
+-- ============================================
+
+-- PASSO 1: Buscar os dados atuais
+SELECT * FROM professionals 
+WHERE id = 'a30b5935-3bdc-4b30-a78b-346d10c287c4';
+
+-- PASSO 2: Criar NOVO professional com auth.id
+INSERT INTO professionals (
+    id,
+    email,
+    name,
+    phone,
+    specialty,
+    company,
+    subscription_status,
+    is_active,
+    max_leads,
+    created_at,
+    updated_at
+)
+SELECT 
+    'f7a15f22-9699-4b04-9f9d-0d48dd558989' as id,
+    email,
+    name,
+    phone,
+    specialty,
+    company,
+    subscription_status,
+    is_active,
+    max_leads,
+    created_at,
+    NOW() as updated_at
+FROM professionals
+WHERE id = 'a30b5935-3bdc-4b30-a78b-346d10c287c4';
+
+-- PASSO 3: Atualizar subscriptions para o novo ID
+UPDATE subscriptions
+SET user_id = 'f7a15f22-9699-4b04-9f9d-0d48dd558989'
+WHERE user_id = 'a30b5935-3bdc-4b30-a78b-346d10c287c4';
+
+-- PASSO 4: Atualizar links para o novo ID
+UPDATE links
+SET user_id = 'f7a15f22-9699-4b04-9f9d-0d48dd558989'
+WHERE user_id = 'a30b5935-3bdc-4b30-a78b-346d10c287c4';
+
+-- PASSO 5: Verificar se deu certo
+SELECT 
+    p.id,
+    p.email,
+    p.name,
+    COUNT(DISTINCT s.id) as subscriptions,
+    COUNT(DISTINCT l.id) as links
+FROM professionals p
+LEFT JOIN subscriptions s ON p.id = s.user_id
+LEFT JOIN links l ON p.id = l.user_id
+WHERE p.email = 'marcela_roberto@hotmail.com'
+GROUP BY p.id, p.email, p.name;
+
+-- PASSO 6 (OPCIONAL): Deletar o professional antigo
+-- DELETE FROM professionals WHERE id = 'a30b5935-3bdc-4b30-a78b-346d10c287c4';
+

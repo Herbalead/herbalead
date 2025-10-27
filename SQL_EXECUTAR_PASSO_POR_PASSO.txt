@@ -1,0 +1,55 @@
+-- ════════════════════════════════════════
+-- PASSO 1: VERIFICAR
+-- ════════════════════════════════════════
+SELECT id, email, name FROM professionals 
+WHERE email LIKE '%marcela%' OR id LIKE '%marcela%';
+
+-- ════════════════════════════════════════
+-- PASSO 2: DELETAR ANTIGO (se existir)
+-- ════════════════════════════════════════
+DELETE FROM professionals WHERE id = 'a30b5935-3bdc-4b30-a78b-346d10c287c4';
+
+-- ════════════════════════════════════════
+-- PASSO 3: CRIAR NOVO PROFESSIONAL
+-- ════════════════════════════════════════
+INSERT INTO professionals (
+    id,
+    email,
+    name,
+    subscription_status,
+    is_active,
+    max_leads,
+    created_at,
+    updated_at
+)
+VALUES (
+    'f7a15f22-9699-4b04-9f9d-0d48dd558989',
+    'marcela_roberto@hotmail.com',
+    'Marcela Roberto',
+    'active',
+    true,
+    100,
+    NOW(),
+    NOW()
+)
+ON CONFLICT (id) DO UPDATE 
+SET email = EXCLUDED.email, name = EXCLUDED.name;
+
+-- ════════════════════════════════════════
+-- PASSO 4: ATUALIZAR FOREIGN KEYS
+-- ════════════════════════════════════════
+UPDATE subscriptions SET user_id = 'f7a15f22-9699-4b04-9f9d-0d48dd558989' WHERE user_id = 'a30b5935-3bdc-4b30-a78b-346d10c287c4';
+UPDATE links SET user_id = 'f7a15f22-9699-4b04-9f9d-0d48dd558989' WHERE user_id = 'a30b5935-3bdc-4b30-a78b-346d10c287c4';
+
+-- ════════════════════════════════════════
+-- PASSO 5: VERIFICAR RESULTADO
+-- ════════════════════════════════════════
+SELECT p.id, p.email, p.name,
+       COUNT(DISTINCT s.id) as subs,
+       COUNT(DISTINCT l.id) as links
+FROM professionals p
+LEFT JOIN subscriptions s ON p.id = s.user_id
+LEFT JOIN links l ON p.id = l.user_id
+WHERE p.id = 'f7a15f22-9699-4b04-9f9d-0d48dd558989'
+GROUP BY p.id, p.email, p.name;
+
