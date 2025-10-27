@@ -1,65 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json()
+    
+    console.log('🔍 Buscando email em professionals:', email)
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email é obrigatório' }, { status: 400 })
-    }
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
-    console.log('🔍 Recuperando pagamento para:', email)
-
-    // Buscar profissional com este email
+    // Buscar profissional
     const { data: professional } = await supabase
       .from('professionals')
-      .select('id, email, subscription_status, is_active, created_at')
+      .select('id, email, name, subscription_status')
       .eq('email', email)
       .single()
 
-    if (!professional) {
+    if (professional) {
+      console.log('✅ Profissional encontrado:', professional.email)
+      
+      // Verificar se tem subscription
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', professional.id)
+        .single()
+
       return NextResponse.json({ 
-        error: 'Nenhum pagamento encontrado para este email',
-        found: false 
-      }, { status: 404 })
+        found: true,
+        email: professional.email,
+        name: professional.name,
+        hasSubscription: !!subscription,
+        subscriptionStatus: professional.subscription_status
+      })
     }
 
-    // Buscar assinatura relacionada
-    const { data: subscription } = await supabase
-      .from('subscriptions')
-      .select('id, status, plan_type, customer_email, created_at')
-      .eq('customer_email', email)
-      .single()
-
-    // Verificar se já tem conta de autenticação
-    const { data: authUser } = await supabase.auth.admin.getUserById(professional.id)
-
-    return NextResponse.json({
-      found: true,
-      email: email,
-      professional_id: professional.id,
-      subscription_status: professional.subscription_status,
-      is_active: professional.is_active,
-      subscription_id: subscription?.id,
-      plan_type: subscription?.plan_type,
-      subscription_status: subscription?.status,
-      has_auth_account: !!authUser.user,
-      created_at: professional.created_at,
-      can_complete_registration: !authUser.user || !professional.name,
-      gateway: 'mercadopago'
+    // Se não encontrou em professionals, retornar false
+    console.log('❌ Profissional não encontrado')
+    return NextResponse.json({ 
+      found: false 
     })
 
   } catch (error) {
-    console.error('Erro ao recuperar pagamento:', error)
+    console.error('Erro ao buscar profissional:', error)
     return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+      found: false,
+      error: 'Erro ao buscar email'
+    })
   }
 }
