@@ -193,10 +193,16 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
       setShowForm(true)
     } else {
       // Se for botão direto, redirecionar para WhatsApp/Site
-      if (linkData.redirect_url) {
-        window.location.href = linkData.redirect_url
+      if (linkData.redirect_url && linkData.redirect_url !== '#') {
+        try {
+          window.location.href = linkData.redirect_url
+        } catch (error) {
+          console.error('Erro ao redirecionar:', error)
+          alert('Não foi possível abrir o WhatsApp. Verifique se o telefone está configurado.')
+        }
       } else {
-        window.location.href = '/herbalead'
+        console.error('❌ Telefone não configurado ou URL inválida')
+        alert('Telefone não configurado. Por favor, atualize seu perfil com um número de WhatsApp válido.')
       }
     }
   }
