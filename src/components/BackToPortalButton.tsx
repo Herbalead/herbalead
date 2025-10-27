@@ -17,38 +17,56 @@ export default function BackToPortalButton({
   const { userData, getWhatsAppUrl, getButtonText } = useUserData()
 
   const handleBackToPortal = () => {
-    if (portalUrl) {
-      // Adicionar parâmetro indicando que a ferramenta foi completada
-      const url = new URL(portalUrl)
-      if (toolId) {
-        url.searchParams.set('completedTool', toolId)
-      }
-      window.location.href = url.toString()
-    } else {
-      // Fallback: redirecionar para o Portal de Saúde
-      // Extrair informações do usuário da URL atual
-      const currentUrl = new URL(window.location.href)
-      const userParam = currentUrl.searchParams.get('user')
-      
-      if (userParam) {
+    try {
+      if (typeof window === 'undefined') return
+
+      if (portalUrl) {
+        // Adicionar parâmetro indicando que a ferramenta foi completada
         try {
-          const userData = JSON.parse(userParam)
-          // Construir URL do Portal de Saúde com os dados do usuário
-          const portalUrl = `/portal-saude?user=${encodeURIComponent(userParam)}`
+          const url = new URL(portalUrl, window.location.origin)
           if (toolId) {
-            const url = new URL(portalUrl, window.location.origin)
             url.searchParams.set('completedTool', toolId)
-            window.location.href = url.toString()
-          } else {
-            window.location.href = portalUrl
           }
+          window.location.href = url.toString()
         } catch (error) {
-          console.error('Erro ao processar dados do usuário:', error)
-          // Fallback final: ir para página inicial
-          window.location.href = '/'
+          // Se não conseguir parsear a URL, adicionar parâmetro manualmente
+          const separator = portalUrl.includes('?') ? '&' : '?'
+          const newUrl = toolId 
+            ? `${portalUrl}${separator}completedTool=${toolId}`
+            : portalUrl
+          window.location.href = newUrl
         }
       } else {
-        // Se não há dados do usuário, ir para página inicial
+        // Fallback: redirecionar para o Portal de Saúde
+        // Extrair informações do usuário da URL atual
+        const currentUrl = new URL(window.location.href)
+        const userParam = currentUrl.searchParams.get('user')
+        
+        if (userParam) {
+          try {
+            const userData = JSON.parse(userParam)
+            // Construir URL do Portal de Saúde com os dados do usuário
+            const portalUrl = `/portal-saude?user=${encodeURIComponent(userParam)}`
+            if (toolId) {
+              const separator = portalUrl.includes('?') ? '&' : '?'
+              window.location.href = `${portalUrl}&completedTool=${toolId}`
+            } else {
+              window.location.href = portalUrl
+            }
+          } catch (error) {
+            console.error('Erro ao processar dados do usuário:', error)
+            // Fallback final: ir para página inicial
+            window.location.href = '/'
+          }
+        } else {
+          // Se não há dados do usuário, ir para página inicial
+          window.location.href = '/'
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erro ao redirecionar:', error)
+      // Fallback: ir para página inicial
+      if (typeof window !== 'undefined') {
         window.location.href = '/'
       }
     }
