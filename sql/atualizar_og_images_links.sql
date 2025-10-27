@@ -4,7 +4,8 @@
 -- 1. Adicionar coluna se não existir
 ALTER TABLE links ADD COLUMN IF NOT EXISTS og_image TEXT;
 
--- 2. Atualizar todos os links existentes com imagens baseadas na ferramenta
+-- 2. Atualizar TODOS os links existentes com imagens baseadas na ferramenta
+-- IMPORTANTE: Remove a condição WHERE para atualizar TODOS os links, mesmo os que já têm imagem
 UPDATE links 
 SET og_image = CASE 
     WHEN tool_name = 'bmi' THEN 'https://www.herbalead.com/logos/herbalead/imc-og-image.jpg'
@@ -21,8 +22,7 @@ SET og_image = CASE
     WHEN tool_name = 'recruitment-proposito' THEN 'https://www.herbalead.com/logos/herbalead/recruitment-proposito-og-image.jpg'
     WHEN tool_name = 'portal-saude' THEN 'https://www.herbalead.com/logos/herbalead/portal-saude-og-image.jpg'
     ELSE 'https://www.herbalead.com/logos/herbalead/herbalead-og-image.jpg'
-END
-WHERE og_image IS NULL OR og_image = '';
+END;
 
 -- 3. Verificar resultado
 SELECT 
