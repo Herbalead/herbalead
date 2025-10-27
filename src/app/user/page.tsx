@@ -2737,45 +2737,9 @@ export default function UserDashboard() {
 
                   {/* Seção específica para Portal de Saúde */}
                   {newLink.tool_name === 'portal-saude' && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
-                        🎯 Escolha as ferramentas para incluir no Portal
-                      </label>
-                      <div className="grid grid-cols-2 gap-3">
-                        {[
-                          { id: 'bmi', name: '📊 Calculadora IMC', description: 'Descobrir peso ideal' },
-                          { id: 'protein', name: '💪 Calculadora Proteína', description: 'Calcular proteína diária' },
-                          { id: 'hydration', name: '💧 Calculadora Hidratação', description: 'Calcular hidratação' },
-                          { id: 'body-composition', name: '📏 Composição Corporal', description: 'Avaliar composição' },
-                          { id: 'meal-planner', name: '🍎 Planejador Refeições', description: 'Planejar alimentação' },
-                          { id: 'nutrition-assessment', name: '🎯 Avaliação Nutricional', description: 'Avaliar nutrição' },
-                          { id: 'wellness-profile', name: '🧘 Quiz Bem-estar', description: 'Testar bem-estar' },
-                          { id: 'daily-wellness', name: '📅 Bem-Estar Diário', description: 'Acompanhar bem-estar' },
-                          { id: 'healthy-eating', name: '🥗 Alimentação Saudável', description: 'Quiz alimentação' },
-                          { id: 'parasite', name: '🦠 Diagnóstico Parasitas', description: 'Verificar saúde' }
-                        ].map((tool) => (
-                          <label key={tool.id} className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={selectedTools.includes(tool.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedTools([...selectedTools, tool.id])
-                                } else {
-                                  setSelectedTools(selectedTools.filter(t => t !== tool.id))
-                                }
-                              }}
-                              className="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-                            />
-                            <div className="flex-1">
-                              <div className="text-sm font-medium text-gray-900">{tool.name}</div>
-                              <div className="text-xs text-gray-500">{tool.description}</div>
-                            </div>
-                          </label>
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        💡 Selecione pelo menos 2 ferramentas para criar o Portal de Saúde
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <p className="text-sm text-gray-700">
+                        💡 O Portal de Saúde incluirá <strong>todas as ferramentas disponíveis</strong> para seus clientes escolherem e realizarem.
                       </p>
                     </div>
                   )}
@@ -3016,45 +2980,9 @@ export default function UserDashboard() {
 
                 {/* Seção específica para Portal de Saúde - Edição */}
                 {newLink.tool_name === 'portal-saude' ? (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      🎯 Escolha as ferramentas para incluir no Portal
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        { id: 'bmi', name: '📊 Calculadora IMC', description: 'Descobrir peso ideal' },
-                        { id: 'protein', name: '💪 Calculadora Proteína', description: 'Calcular proteína diária' },
-                        { id: 'hydration', name: '💧 Calculadora Hidratação', description: 'Calcular hidratação' },
-                        { id: 'body-composition', name: '📏 Composição Corporal', description: 'Avaliar composição' },
-                        { id: 'meal-planner', name: '🍎 Planejador Refeições', description: 'Planejar alimentação' },
-                        { id: 'nutrition-assessment', name: '🎯 Avaliação Nutricional', description: 'Avaliar nutrição' },
-                        { id: 'wellness-profile', name: '🧘 Quiz Bem-estar', description: 'Testar bem-estar' },
-                        { id: 'daily-wellness', name: '📅 Bem-Estar Diário', description: 'Acompanhar bem-estar' },
-                        { id: 'healthy-eating', name: '🥗 Alimentação Saudável', description: 'Quiz alimentação' },
-                        { id: 'parasite', name: '🦠 Diagnóstico Parasitas', description: 'Verificar saúde' }
-                      ].map((tool) => (
-                        <label key={tool.id} className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedTools.includes(tool.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedTools([...selectedTools, tool.id])
-                              } else {
-                                setSelectedTools(selectedTools.filter(t => t !== tool.id))
-                              }
-                            }}
-                            className="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-                          />
-                          <div className="flex-1">
-                            <div className="text-sm font-medium text-gray-900">{tool.name}</div>
-                            <div className="text-xs text-gray-500">{tool.description}</div>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      💡 Selecione pelo menos 2 ferramentas para criar o Portal de Saúde
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p className="text-sm text-gray-700">
+                      💡 O Portal de Saúde incluirá <strong>todas as ferramentas disponíveis</strong> para seus clientes escolherem e realizarem.
                     </p>
                   </div>
                 ) : (
