@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
           
           // Criar assinatura no Supabase
           if (professionalId) {
-            const { error: subError } = await supabase
+            const { data: newSubscription, error: subError } = await supabase
               .from('subscriptions')
               .insert({
                 user_id: professionalId,
@@ -149,11 +149,35 @@ export async function POST(request: NextRequest) {
                 cancel_at_period_end: false,
                 payment_source: 'mercadopago'
               })
+              .select()
+              .single()
             
             if (subError) {
               console.error('❌ Erro ao criar assinatura:', subError)
             } else {
-              console.log('✅ Assinatura criada com sucesso')
+              console.log('✅ Assinatura criada com sucesso:', newSubscription.id)
+              
+              // Criar registro de pagamento
+              if (newSubscription) {
+                const { error: paymentError } = await supabase
+                  .from('payments')
+                  .insert({
+                    subscription_id: newSubscription.id,
+                    stripe_payment_intent_id: `mp_pi_${paymentData.id}`,
+                    stripe_invoice_id: `mp_inv_${paymentData.id}`,
+                    amount: paymentData.transaction_amount * 100, // Converter para centavos
+                    currency: paymentData.currency_id?.toLowerCase() || 'brl',
+                    status: 'succeeded',
+                    description: `Pagamento ${plan_name || plan} - ${customer_email}`,
+                    payment_source: 'mercadopago'
+                  })
+                
+                if (paymentError) {
+                  console.error('❌ Erro ao criar pagamento:', paymentError)
+                } else {
+                  console.log('✅ Pagamento registrado com sucesso')
+                }
+              }
             }
           }
         }
