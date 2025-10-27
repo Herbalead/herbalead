@@ -2672,7 +2672,7 @@ export default function UserDashboard() {
                 {/* Coluna esquerda - Formulário */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Nome da Ferramenta</label>
+                    <label className="block text-sm font-medium text-gray-700">Nome do Projeto</label>
                     <input
                       type="text"
                       value={newLink.name}

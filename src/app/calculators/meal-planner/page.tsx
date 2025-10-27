@@ -14,6 +14,7 @@ import {
   Target
 } from 'lucide-react'
 import { useUserData } from '@/lib/useUserData'
+import BackToPortalButton from '@/components/BackToPortalButton'
 
 interface MealPlanResults {
   dailyCalories: string
@@ -377,19 +378,11 @@ export default function MealPlannerCalculatorPage() {
             <p className="text-gray-600 mb-8 text-lg">
               {getCustomMessage()}
             </p>
-            <button 
-              onClick={() => {
-                const specificMessage = 'Olá! Fiz o teste de planejamento alimentar e gostaria de receber orientações nutricionais. Poderia me ajudar?'
-                const whatsappUrl = getWhatsAppUrl(specificMessage)
-                console.log('📱 Abrindo WhatsApp com mensagem específica:', whatsappUrl)
-                console.log('👤 Dados do usuário:', userData)
-                window.open(whatsappUrl, '_blank')
-              }}
-              className="px-12 py-6 bg-orange-600 text-white rounded-xl font-bold text-xl hover:bg-orange-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-orange-500"
-            >
-              <MessageCircle className="w-8 h-8 mr-3" />
-              {getButtonText()}
-            </button>
+            <BackToPortalButton 
+              portalUrl={typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('returnToPortal') || undefined : undefined}
+              toolId="meal-planner"
+              showWhatsAppButton={true}
+            />
           </div>
         </main>
       </div>
