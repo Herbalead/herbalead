@@ -66,55 +66,15 @@ export async function POST(request: NextRequest) {
           let professionalId = existingProfessional?.id
           
           if (!professionalId) {
-            // Criar profissional E autenticação
-            // Primeiro criar auth
-            const randomPassword = Math.random().toString(36).slice(-12) + 'A1!'
+            // NÃO criar automaticamente - apenas registrar o pagamento
+            // O usuário vai completar o cadastro manualmente
+            console.log('📧 Pagamento confirmado para novo usuário:', customer_email)
+            console.log('⚠️ Usuário deve completar cadastro em /complete-registration')
             
-            console.log('🔐 Criando conta de autenticação...')
-            const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-              email: customer_email,
-              password: randomPassword,
-              email_confirm: true,
-              user_metadata: {
-                full_name: customer_email.split('@')[0]
-              }
-            })
-
-            if (authError) {
-              console.error('❌ Erro ao criar auth:', authError)
-            } else {
-              console.log('✅ Auth criada:', authUser.user.id)
-              professionalId = authUser.user.id
-
-              // Agora criar professional usando o mesmo ID da auth
-              const { data: newProfessional, error: createError } = await supabase
-                .from('professionals')
-                .insert({
-                  id: authUser.user.id, // Usar o mesmo ID da auth
-                  email: customer_email,
-                  name: customer_email.split('@')[0],
-                  phone: '',
-                  specialty: '',
-                  company: '',
-                  subscription_status: 'active',
-                  is_active: true,
-                  max_leads: 1000
-                })
-                .select()
-                .single()
-              
-              if (createError) {
-                console.error('❌ Erro ao criar profissional:', createError)
-              } else {
-                console.log('✅ Profissional criado:', newProfessional.id)
-                
-                // Log das credenciais (salvar de forma segura)
-                console.log('📧 Credenciais para o cliente:')
-                console.log('   Email:', customer_email)
-                console.log('   Senha temporária:', randomPassword)
-                console.log('⚠️ IMPORTANTE: Enviar estas credenciais por email para o cliente')
-              }
-            }
+            // Apenas criar um registro básico para tracking
+            const tempId = paymentData.id // Usar ID do pagamento como temp ID
+            professionalId = tempId
+            
           } else {
             // Atualizar status do profissional existente
             const { error: updateError } = await supabase
@@ -132,8 +92,8 @@ export async function POST(request: NextRequest) {
             }
           }
           
-          // Criar assinatura no Supabase
-          if (professionalId) {
+          // Criar assinatura no Supabase APENAS se professional já existe
+          if (professionalId && !professionalId.includes('mp_')) {
             const { data: newSubscription, error: subError } = await supabase
               .from('subscriptions')
               .insert({
