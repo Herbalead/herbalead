@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import HerbaleadLogo from '@/components/HerbaleadLogo'
 import HelpButton from '@/components/HelpButton'
 import WhatsAppLinkGenerator from '@/components/WhatsAppLinkGenerator'
+import QRCodeGenerator from '@/components/QRCodeGenerator'
 import { getToolImage } from '@/lib/tool-image-mapping'
 
 export default function UserDashboard() {
@@ -2276,7 +2277,7 @@ export default function UserDashboard() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2 flex-wrap">
                         <button 
                             onClick={() => copyLink(link)}
                             className={`text-sm px-3 py-1 rounded-md transition-colors ${
@@ -2287,6 +2288,10 @@ export default function UserDashboard() {
                           >
                             {copiedLinkId === link?.id ? '✓ Copiado!' : '📋 Copiar Link'}
                         </button>
+                        <QRCodeGenerator 
+                          url={`${typeof window !== 'undefined' ? window.location.origin : ''}/${normalizeText(userProfile.name)}/${normalizeText(String(link?.name || 'unknown'))}`}
+                          linkName={String(link?.name || 'unknown')}
+                        />
                         <button 
                           onClick={() => openWhatsAppGenerator(link)}
                           className="text-sm px-3 py-1 bg-green-100 text-green-600 rounded-md hover:bg-green-200 transition-colors"
