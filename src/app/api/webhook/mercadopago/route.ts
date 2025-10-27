@@ -108,8 +108,8 @@ export async function POST(request: NextRequest) {
                 })
             }
             
-            // Não continuar criando subscription duplicada
-            break
+            // Finalizar processamento para este pagamento
+            return NextResponse.json({ received: true })
           } else {
             // Atualizar status do profissional existente
             const { error: updateError } = await supabase
