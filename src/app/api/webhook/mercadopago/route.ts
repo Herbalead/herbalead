@@ -66,15 +66,50 @@ export async function POST(request: NextRequest) {
           let professionalId = existingProfessional?.id
           
           if (!professionalId) {
-            // NÃO criar automaticamente - apenas registrar o pagamento
-            // O usuário vai completar o cadastro manualmente
+            // CRIAR SUBSCRIPTION SEM USER_ID (será vinculada depois no cadastro)
             console.log('📧 Pagamento confirmado para novo usuário:', customer_email)
-            console.log('⚠️ Usuário deve completar cadastro em /complete-registration')
+            console.log('📝 Criando subscription pendente de vinculação...')
             
-            // Apenas criar um registro básico para tracking
-            const tempId = paymentData.id // Usar ID do pagamento como temp ID
-            professionalId = tempId
+            const { data: pendingSubscription, error: pendingError } = await supabase
+              .from('subscriptions')
+              .insert({
+                user_id: null, // Será vinculado depois
+                stripe_customer_id: `mp_${paymentData.id}`,
+                stripe_subscription_id: `mp_sub_${paymentData.id}`,
+                stripe_price_id: `mp_price_${plan}`,
+                customer_email: customer_email,
+                status: 'active',
+                plan_type: plan,
+                current_period_start: new Date().toISOString(),
+                current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                cancel_at_period_end: false,
+                payment_source: 'mercadopago'
+              })
+              .select()
+              .single()
             
+            if (pendingError) {
+              console.error('❌ Erro ao criar subscription pendente:', pendingError)
+            } else {
+              console.log('✅ Subscription pendente criada:', pendingSubscription.id)
+              
+              // Criar registro de pagamento
+              await supabase
+                .from('payments')
+                .insert({
+                  subscription_id: pendingSubscription.id,
+                  stripe_payment_intent_id: `mp_pi_${paymentData.id}`,
+                  stripe_invoice_id: `mp_inv_${paymentData.id}`,
+                  amount: paymentData.transaction_amount * 100,
+                  currency: paymentData.currency_id?.toLowerCase() || 'brl',
+                  status: 'succeeded',
+                  description: `Pagamento ${plan_name || plan} - ${customer_email}`,
+                  payment_source: 'mercadopago'
+                })
+            }
+            
+            // Não continuar criando subscription duplicada
+            break
           } else {
             // Atualizar status do profissional existente
             const { error: updateError } = await supabase

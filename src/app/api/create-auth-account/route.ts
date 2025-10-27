@@ -137,6 +137,33 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Erro ao criar profissional' }, { status: 500 })
       }
 
+      // Verificar se existe pagamento pendente do Mercado Pago para vincular subscription
+      const { data: existingSubscription } = await supabaseAdmin
+        .from('subscriptions')
+        .select('*')
+        .eq('customer_email', email)
+        .eq('status', 'active')
+        .limit(1)
+
+      if (existingSubscription && existingSubscription.length > 0) {
+        console.log('🔗 Encontrada subscription pendente, vinculando ao usuário...')
+        
+        // Vincular subscription ao novo professional
+        const { error: linkError } = await supabaseAdmin
+          .from('subscriptions')
+          .update({ 
+            user_id: userId,
+            payment_source: 'mercadopago'
+          })
+          .eq('id', existingSubscription[0].id)
+        
+        if (linkError) {
+          console.error('Erro ao vincular subscription:', linkError)
+        } else {
+          console.log('✅ Subscription vinculada com sucesso!')
+        }
+      }
+
       return NextResponse.json({ 
         success: true, 
         message: 'Conta criada com sucesso!',
