@@ -1,0 +1,49 @@
+═══ COMO ATUALIZAR A IMAGEM OG DO PORTAL DE SAÚDE ═══
+
+Problema: WhatsApp/Facebook ainda mostram imagem antiga (cache)
+
+Solução: Pedir para o Facebook/WhatsApp revisarem a cache
+
+═══════════════════════════════════════════════════════
+
+OPÇÃO 1: Facebook Sharing Debugger (MAIS RÁPIDO)
+
+1. Acesse: https://developers.facebook.com/tools/debug/
+2. Cole esta URL: https://herbalead.com/portal-saude
+3. Clique em "Debugar"
+4. Depois clique em "Refrescar informações do Scraper"
+5. Pronto! 🎉
+
+═══════════════════════════════════════════════════════
+
+OPÇÃO 2: WhatsApp Click to Chat
+
+1. Compartilhe o link como iframe numa página web
+2. Ou teste diretamente pelo WhatsApp Web
+
+═══════════════════════════════════════════════════════
+
+VERIFICAR SE A IMAGEM ESTÁ CORRETA:
+
+1. Abra: https://herbalead.com/portal-saude
+2. View Source (Ctrl+U ou Cmd+U)
+3. Procure por: <meta property="og:image" 
+4. Deve mostrar: https://www.herbalead.com/logos/herbalead/portal-saude-og-image.jpg
+
+═══════════════════════════════════════════════════════
+
+TAMANHO RECOMENDADO DA IMAGEM:
+
+- Tamanho: 1200x630 pixels
+- Formato: JPG ou PNG
+- Peso: Máximo 1MB
+
+═══════════════════════════════════════════════════════
+
+A imagem atual está em:
+public/logos/herbalead/portal-saude-og-image.jpg
+
+Você pode substituir este arquivo pela nova imagem que você criou.
+
+═══════════════════════════════════════════════════════
+
