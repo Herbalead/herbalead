@@ -66,27 +66,54 @@ export async function POST(request: NextRequest) {
           let professionalId = existingProfessional?.id
           
           if (!professionalId) {
-            // Criar novo profissional
-            const { data: newProfessional, error: createError } = await supabase
-              .from('professionals')
-              .insert({
-                email: customer_email,
-                name: customer_email.split('@')[0], // Nome baseado no email
-                phone: '',
-                specialty: '',
-                company: '',
-                subscription_status: 'active',
-                is_active: true,
-                max_leads: 1000
-              })
-              .select()
-              .single()
+            // Criar profissional E autenticação
+            // Primeiro criar auth
+            const randomPassword = Math.random().toString(36).slice(-12) + 'A1!'
             
-            if (createError) {
-              console.error('❌ Erro ao criar profissional:', createError)
+            console.log('🔐 Criando conta de autenticação...')
+            const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+              email: customer_email,
+              password: randomPassword,
+              email_confirm: true,
+              user_metadata: {
+                full_name: customer_email.split('@')[0]
+              }
+            })
+
+            if (authError) {
+              console.error('❌ Erro ao criar auth:', authError)
             } else {
-              professionalId = newProfessional.id
-              console.log('✅ Profissional criado:', professionalId)
+              console.log('✅ Auth criada:', authUser.user.id)
+              professionalId = authUser.user.id
+
+              // Agora criar professional usando o mesmo ID da auth
+              const { data: newProfessional, error: createError } = await supabase
+                .from('professionals')
+                .insert({
+                  id: authUser.user.id, // Usar o mesmo ID da auth
+                  email: customer_email,
+                  name: customer_email.split('@')[0],
+                  phone: '',
+                  specialty: '',
+                  company: '',
+                  subscription_status: 'active',
+                  is_active: true,
+                  max_leads: 1000
+                })
+                .select()
+                .single()
+              
+              if (createError) {
+                console.error('❌ Erro ao criar profissional:', createError)
+              } else {
+                console.log('✅ Profissional criado:', newProfessional.id)
+                
+                // Log das credenciais (salvar de forma segura)
+                console.log('📧 Credenciais para o cliente:')
+                console.log('   Email:', customer_email)
+                console.log('   Senha temporária:', randomPassword)
+                console.log('⚠️ IMPORTANTE: Enviar estas credenciais por email para o cliente')
+              }
             }
           } else {
             // Atualizar status do profissional existente
