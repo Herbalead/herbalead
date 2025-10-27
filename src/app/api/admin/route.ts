@@ -73,6 +73,7 @@ export async function GET(request: NextRequest) {
             id,
             status,
             plan_type,
+            payment_source,
             current_period_end,
             cancel_at_period_end
           )
