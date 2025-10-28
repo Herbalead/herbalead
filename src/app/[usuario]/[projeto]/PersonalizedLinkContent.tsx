@@ -196,7 +196,27 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
 
         setLinkData(link)
         
-        // REDIRECIONAMENTO AUTOMÁTICO para a ferramenta baseada no Eu já estou tentando alterar o linktool_name
+        // VERIFICAR SE TEM REDIRECT_URL PERSONALIZADO (não WhatsApp)
+        // Se a redirect_url existe e NÃO é WhatsApp, usar a URL personalizada
+        const hasCustomUrl = link.redirect_url && 
+          link.redirect_url.trim() !== '' && 
+          !link.redirect_url.includes('wa.me/')
+        
+        if (hasCustomUrl) {
+          console.log('🌐 URL personalizada detectada:', link.redirect_url)
+          console.log('🚀 Redirecionando para URL personalizada...')
+          
+          // Garantir scroll para o topo
+          sessionStorage.setItem('scrollToTop', 'true')
+          
+          // Redirecionar para a URL personalizada
+          setTimeout(() => {
+            window.location.href = link.redirect_url
+          }, 100)
+          return
+        }
+        
+        // REDIRECIONAMENTO AUTOMÁTICO para a ferramenta baseada no tool_name
         if (link.tool_name) {
           console.log('🚀 Redirecionando para ferramenta:', link.tool_name)
           console.log('🔍 Link completo:', link)
