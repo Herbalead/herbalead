@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -46,6 +46,32 @@ export default function MealPlannerCalculatorPage() {
   })
   const [results, setResults] = useState<MealPlanResults | null>(null)
   const [showResults, setShowResults] = useState(false)
+
+  // Fazer scroll para o topo quando os resultados aparecerem
+  useEffect(() => {
+    if (showResults && results) {
+      setTimeout(() => {
+        window.scrollTo(0, 0)
+        document.documentElement.scrollTop = 0
+        document.body.scrollTop = 0
+      }, 10)
+    }
+  }, [showResults, results])
+
+  // Fazer scroll para o topo quando o componente montar
+  useEffect(() => {
+    // Verificar se veio de um link personalizado
+    const shouldScrollToTop = sessionStorage.getItem('scrollToTop')
+    if (shouldScrollToTop === 'true') {
+      sessionStorage.removeItem('scrollToTop')
+    }
+    
+    setTimeout(() => {
+      window.scrollTo(0, 0)
+      document.documentElement.scrollTop = 0
+      document.body.scrollTop = 0
+    }, shouldScrollToTop === 'true' ? 50 : 10)
+  }, [])
 
   const calculateMealPlan = () => {
     const weight = parseFloat(formData.weight)

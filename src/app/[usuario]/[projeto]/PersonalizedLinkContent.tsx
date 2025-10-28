@@ -117,22 +117,22 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
           console.log(`  - Slug esperado: "${slugLower}"`)
           
           // Estratégia 1: Match exato após normalização
-          // Normalizar nome removendo acentos
+          // Normalizar nome removendo acentos e convertendo underscore para hífen
           const nameWithoutAccents = nameLower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          const normalizedName = nameWithoutAccents.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+          const normalizedName = nameWithoutAccents.replace(/[_\s]+/g, '-').replace(/[^a-z0-9-]/g, '')
           if (normalizedName === slugLower) {
             console.log(`✅ MATCH EXATO encontrado!`)
             return true
           }
           
           // Estratégia 2: Match por partes (mais restritivo)
-          // Remover acentos das partes do nome
-          const namePartsNormalized = nameWithoutAccents.split(/\s+/).filter(part => part.length > 2)
-          const slugParts = slugLower.split('-').filter(part => part.length > 2)
+          // Remover acentos das partes do nome e tratar underscore como separador
+          const namePartsNormalized = nameWithoutAccents.split(/[_\s]+/).filter((part: string) => part.length > 2)
+          const slugParts = slugLower.split('-').filter((part: string) => part.length > 2)
           
           // Verificar se TODAS as partes do slug estão presentes no nome
           const allSlugPartsMatch = slugParts.every(slugPart => 
-            namePartsNormalized.some(namePart => 
+            namePartsNormalized.some((namePart: string) => 
               namePart.startsWith(slugPart) || slugPart.startsWith(namePart)
             )
           )
@@ -270,6 +270,8 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
           // REDIRECIONAMENTO SEGURO - com timeout para evitar travamento
           setTimeout(() => {
             try {
+              // Garantir que o próximo scroll será para o topo
+              sessionStorage.setItem('scrollToTop', 'true')
               window.location.href = finalUrl
             } catch (error) {
               console.error('❌ Erro no redirecionamento:', error)

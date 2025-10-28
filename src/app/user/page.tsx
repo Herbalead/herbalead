@@ -1397,31 +1397,15 @@ export default function UserDashboard() {
   }
 
   const openCreateLinkModal = () => {
-    // Pré-preencher apenas o telefone básico - sem mensagem automática
-    console.log('🔍 DEBUG openCreateLinkModal:')
-    console.log('  - userProfile.phone:', userProfile.phone)
-    console.log('  - countryCode atual:', countryCode)
-    
-    const cleanPhone = userProfile.phone.replace(/\D/g, '')
-    const fullPhone = `${countryCode}${cleanPhone}`
-    
-    // URL básica apenas com telefone - distribuidor controla a mensagem
-    const whatsappUrl = userProfile.phone 
-      ? `https://wa.me/${fullPhone}`
-      : 'https://wa.me/5511999999999'
-    
     // Mensagem padrão apenas para o preview/exibição
     const defaultMessage = getCustomMessageByTool()
     
-    console.log('📱 URL básica WhatsApp (sem mensagem):', whatsappUrl)
-    console.log('👤 Telefone do usuário:', userProfile.phone)
-    console.log('🌍 Código do país selecionado:', countryCode)
-    console.log('📞 Telefone completo:', fullPhone)
-    console.log('💬 Mensagem para preview:', defaultMessage)
+    console.log('🔍 Abrindo modal de criação de link')
+    console.log('💬 Mensagem padrão:', defaultMessage)
     
     setNewLink({
       ...newLink,
-      redirect_url: whatsappUrl, // Apenas telefone - distribuidor adiciona mensagem se quiser
+      redirect_url: '', // SEMPRE usar URL digitada pelo usuário
       custom_message: defaultMessage,
       page_greeting: newLink.page_greeting || defaultMessage // Usar a mensagem já editada ou a padrão
     })
@@ -1731,7 +1715,7 @@ export default function UserDashboard() {
           updated_at: new Date().toISOString()
         })
         .eq('id', editingLink.id)
-        .eq('user_id', user.id)
+        .eq('user_id', professional.id)
         .select()
 
       if (error) {
@@ -2827,20 +2811,29 @@ export default function UserDashboard() {
                       <button
                         type="button"
                         onClick={() => {
-                          const cleanPhone = userProfile.phone.replace(/\D/g, '')
-                          const fullPhone = `${countryCode}${cleanPhone}`
-                          const whatsappUrl = `https://wa.me/${fullPhone}?text=${encodeURIComponent(newLink.page_greeting)}`
-                          setNewLink({...newLink, redirect_url: whatsappUrl})
-                          console.log('📝 URL atualizada com mensagem:', whatsappUrl)
+                          // Só usar telefone do perfil se o campo estiver vazio
+                          if (!newLink.redirect_url || newLink.redirect_url.trim() === '') {
+                            const cleanPhone = userProfile.phone.replace(/\D/g, '')
+                            const fullPhone = `${countryCode}${cleanPhone}`
+                            const whatsappUrl = `https://wa.me/${fullPhone}?text=${encodeURIComponent(newLink.page_greeting)}`
+                            setNewLink({...newLink, redirect_url: whatsappUrl})
+                            console.log('📝 URL preenchida com telefone do perfil:', whatsappUrl)
+                          } else {
+                            // Se já tem URL, apenas adicionar mensagem à URL existente
+                            const url = new URL(newLink.redirect_url)
+                            url.searchParams.set('text', newLink.page_greeting)
+                            setNewLink({...newLink, redirect_url: url.toString()})
+                            console.log('📝 Mensagem adicionada à URL existente:', url.toString())
+                          }
                         }}
                         className="mt-1 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
-                        title="Adicionar mensagem do texto descritivo"
+                        title="Usar telefone do perfil (se vazio) ou adicionar mensagem à URL"
                       >
                         📝
                       </button>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      💡 <strong>Controle total:</strong> Cole aqui apenas o telefone OU clique no 📝 para adicionar a mensagem automaticamente
+                      💡 <strong>Digite a URL completa:</strong> O sistema sempre usará a URL que você digitar. O botão 📝 é opcional e ajuda a preencher automaticamente.
                     </p>
                   </div>
 
