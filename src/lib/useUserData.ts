@@ -10,6 +10,7 @@ interface UserData {
   customMessage?: string
   pageTitle?: string // Título personalizado
   buttonText?: string // Texto do botão personalizado
+  redirect_url?: string // URL de redirecionamento personalizada
 }
 
 export function useUserData() {
@@ -61,6 +62,12 @@ export function useUserData() {
   }, [])
 
   const getWhatsAppUrl = (message?: string) => {
+    // Se houver redirect_url personalizado (não WhatsApp), usar ela
+    if (userData?.redirect_url && userData.redirect_url.trim() !== '' && !userData.redirect_url.includes('wa.me')) {
+      console.log('🌐 Usando URL personalizada:', userData.redirect_url)
+      return userData.redirect_url
+    }
+    
     // SEMPRE priorizar mensagem específica passada como parâmetro, senão usar customMessage
     const finalMessage = message || userData?.customMessage || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!'
     
@@ -69,6 +76,7 @@ export function useUserData() {
     console.log('  - userPhone:', userData?.userPhone)
     console.log('  - customMessage:', userData?.customMessage)
     console.log('  - finalMessage:', finalMessage)
+    console.log('  - redirect_url:', userData?.redirect_url)
     
     if (!userData?.userPhone) {
       console.log('⚠️ SEM TELEFONE - não é possível gerar URL do WhatsApp')

@@ -196,26 +196,6 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
 
         setLinkData(link)
         
-        // VERIFICAR SE TEM REDIRECT_URL PERSONALIZADO (não WhatsApp)
-        // Se a redirect_url existe e NÃO é WhatsApp, usar a URL personalizada
-        const hasCustomUrl = link.redirect_url && 
-          link.redirect_url.trim() !== '' && 
-          !link.redirect_url.includes('wa.me/')
-        
-        if (hasCustomUrl) {
-          console.log('🌐 URL personalizada detectada:', link.redirect_url)
-          console.log('🚀 Redirecionando para URL personalizada...')
-          
-          // Garantir scroll para o topo
-          sessionStorage.setItem('scrollToTop', 'true')
-          
-          // Redirecionar para a URL personalizada
-          setTimeout(() => {
-            window.location.href = link.redirect_url
-          }, 100)
-          return
-        }
-        
         // REDIRECIONAMENTO AUTOMÁTICO para a ferramenta baseada no tool_name
         if (link.tool_name) {
           console.log('🚀 Redirecionando para ferramenta:', link.tool_name)
@@ -267,7 +247,8 @@ export default function PersonalizedLinkContent({ params }: PersonalizedLinkCont
             customMessage: link.page_greeting || 'Quer receber orientações personalizadas? Clique abaixo e fale comigo!', // Mensagem personalizada do link (page_greeting)
             whatsappMessage: '', // Campo removido - usando mensagens prefixadas
             pageTitle: link.page_title || 'Quer uma análise mais completa?', // Título personalizado
-            buttonText: link.button_text || 'Consultar Especialista' // Texto do botão personalizado
+            buttonText: link.button_text || 'Consultar Especialista', // Texto do botão personalizado
+            redirect_url: link.redirect_url || '' // URL de redirecionamento personalizada
           }
           
           console.log('🔍 Debug redirecionamento:')
