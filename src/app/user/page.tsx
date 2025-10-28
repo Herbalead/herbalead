@@ -1548,7 +1548,8 @@ export default function UserDashboard() {
         valor_original: newLink.redirect_url,
         valor_limpo: newLink.redirect_url.trim(),
         tem_valor: !!newLink.redirect_url,
-        tamanho: newLink.redirect_url.length
+        tamanho: newLink.redirect_url ? newLink.redirect_url.length : 0,
+        valor_em_insertData: insertData.redirect_url
       })
 
       const { data, error } = await supabase
