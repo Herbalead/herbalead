@@ -1133,6 +1133,12 @@ export default function UserDashboard() {
       suggestions.push(inputName.toLowerCase())
     }
     
+    // Verificar underscore
+    if (/_/.test(inputName)) {
+      warnings.push('⚠️ Evite underscore (_) - use hífen (-)')
+      suggestions.push(inputName.replace(/_/g, '-'))
+    }
+    
     if (/[àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]/.test(inputName)) {
       warnings.push('❌ Evite acentos e caracteres especiais')
       suggestions.push(normalizeText(inputName))
@@ -1143,9 +1149,9 @@ export default function UserDashboard() {
       suggestions.push(inputName.replace(/\s+/g, '-'))
     }
     
-    if (/[^a-zA-Z0-9\s-]/.test(inputName)) {
-      warnings.push('❌ Evite símbolos especiais')
-      suggestions.push(inputName.replace(/[^a-zA-Z0-9\s-]/g, ''))
+    if (/[^a-zA-Z0-9\s_-]/.test(inputName)) {
+      warnings.push('❌ Evite símbolos especiais (@, #, !, etc)')
+      suggestions.push(inputName.replace(/[^a-zA-Z0-9\s_-]/g, ''))
     }
     
     // Sugestão final otimizada
@@ -2409,12 +2415,33 @@ export default function UserDashboard() {
               <div>
                 <label className="block text-sm font-medium text-gray-700">Nome</label>
                 {editingProfile ? (
+                  <>
                     <input
                       type="text"
-                    value={editedProfile.name}
-                    onChange={(e) => setEditedProfile({...editedProfile, name: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                  />
+                      value={editedProfile.name}
+                      onChange={(e) => setEditedProfile({...editedProfile, name: e.target.value})}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      placeholder="Seu nome completo"
+                    />
+                    {/* Orientação */}
+                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                      <p className="text-xs font-medium text-blue-800 mb-2">💡 Dica importante:</p>
+                      <ul className="text-xs text-blue-700 space-y-1 list-disc list-inside">
+                        <li>Use apenas letras, espaços e números</li>
+                        <li>Evite underline (_) - use hífen (-) se necessário</li>
+                        <li>Evite caracteres especiais (@, #, !, etc)</li>
+                      </ul>
+                    </div>
+                    {/* Preview da URL */}
+                    {editedProfile.name && (
+                      <div className="mt-2 p-2 bg-gray-50 border rounded-md">
+                        <p className="text-xs text-gray-600 mb-1">🔗 Seus links ficarão assim:</p>
+                        <code className="text-xs text-gray-800">
+                          herbalead.com/{editedProfile.name ? normalizeText(editedProfile.name) : 'seu-nome'}/projeto
+                        </code>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <p className="mt-1 text-sm text-gray-900">{userProfile.name}</p>
                 )}
@@ -2661,7 +2688,10 @@ export default function UserDashboard() {
                 {/* Coluna esquerda - Formulário */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Nome do Projeto</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Nome do Projeto
+                      <span className="text-xs text-gray-500 ml-2">(use apenas letras e números, evite caracteres especiais)</span>
+                    </label>
                     <input
                       type="text"
                       value={newLink.name}
@@ -2674,6 +2704,10 @@ export default function UserDashboard() {
                       }`}
                       placeholder={`Ex: ${getToolDisplayName(newLink.tool_name)}`}
                     />
+                    {/* Dica rápida */}
+                    <p className="mt-1 text-xs text-gray-500">
+                      💡 Dica: Use nomes simples como "minha-calculadora" ou "analise-completa"
+                    </p>
                     
                     {/* Avisos e Sugestões */}
                     {urlWarnings.length > 0 && (
