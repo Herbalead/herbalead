@@ -1544,6 +1544,12 @@ export default function UserDashboard() {
       }
 
       console.log('📋 Dados para inserção:', insertData)
+      console.log('🔍 DEBUG redirect_url:', {
+        valor_original: newLink.redirect_url,
+        valor_limpo: newLink.redirect_url.trim(),
+        tem_valor: !!newLink.redirect_url,
+        tamanho: newLink.redirect_url.length
+      })
 
       const { data, error } = await supabase
         .from('links')
@@ -1579,6 +1585,9 @@ export default function UserDashboard() {
         setErrorMessage(userFriendlyMessage)
         setShowErrorModal(true)
       } else {
+        console.log('✅ Link criado com sucesso!')
+        console.log('🔍 Dados retornados do banco:', data)
+        console.log('🔍 redirect_url salvo:', data?.[0]?.redirect_url)
         console.log('✅ Link criado com sucesso:', data)
         setUserLinks([data[0], ...userLinks])
         setShowCreateLinkModal(false)
