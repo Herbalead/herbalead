@@ -254,7 +254,22 @@ export default function PortalSaudePage() {
               const whatsappUrl = getWhatsAppUrl()
               console.log('📱 Abrindo WhatsApp:', whatsappUrl)
               console.log('👤 Dados do usuário:', userData)
-              window.open(whatsappUrl, '_blank')
+              
+              // Validar URL antes de abrir
+              if (!whatsappUrl || whatsappUrl === '#' || whatsappUrl.trim() === '') {
+                console.error('❌ URL do WhatsApp inválida:', whatsappUrl)
+                alert('Erro: Não foi possível gerar o link. Verifique se o telefone ou URL de redirecionamento está configurado corretamente.')
+                return
+              }
+              
+              // Validar se é uma URL válida
+              try {
+                new URL(whatsappUrl)
+                window.open(whatsappUrl, '_blank')
+              } catch (error) {
+                console.error('❌ URL inválida:', whatsappUrl, error)
+                alert('Erro: A URL configurada é inválida. Por favor, verifique as configurações do link.')
+              }
             }}
             className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-emerald-500"
           >
