@@ -14,70 +14,26 @@ envFile.split('\n').forEach(line => {
 
 const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
 
-// Dados da Carol Garcia
 // Pode passar o email como argumento: node liberar-acesso-carol-garcia.js email@exemplo.com
 const emailArg = process.argv[2]
 
+if (!emailArg) {
+  console.error('❌ Por favor, forneça o email do usuário.')
+  console.log('   Execute: node liberar-acesso-carol-garcia.js email@exemplo.com')
+  process.exit(1)
+}
+
 const usuario = {
-  nome: 'Carol Garcia',
-  email: emailArg || null, // Email pode vir do argumento da linha de comando
+  email: emailArg,
   senhaProvisoria: 'HerbaLead2025!'
 }
 
 async function liberarAcessoCarol() {
-  console.log('🔍 Verificando e liberando acesso para Carol Garcia...\n')
+  console.log(`🔍 Verificando e liberando acesso para ${usuario.email}...\n`)
   
   try {
-    // 1. Buscar por nome na tabela professionals
-    console.log('🔍 Buscando por nome "Carol Garcia"...')
-    const { data: professionals, error: profSearchError } = await supabase
-      .from('professionals')
-      .select('*')
-      .or('name.ilike.%carol%,name.ilike.%garcia%')
-    
-    if (profSearchError) {
-      console.error('❌ Erro ao buscar professionals:', profSearchError)
-    } else if (professionals && professionals.length > 0) {
-      console.log(`✅ Encontrados ${professionals.length} professional(s) com nome similar:`)
-      professionals.forEach((p, i) => {
-        console.log(`   ${i + 1}. ${p.name} - ${p.email} (ID: ${p.id})`)
-      })
-      
-      // Se encontrou exatamente um, usar esse
-      if (professionals.length === 1) {
-        usuario.email = professionals[0].email
-        console.log(`\n✅ Usando email encontrado: ${usuario.email}`)
-      } else {
-        // Se encontrou múltiplos, usar o primeiro ou pedir confirmação
-        console.log(`\n⚠️  Múltiplos profissionais encontrados. Usando o primeiro: ${professionals[0].email}`)
-        usuario.email = professionals[0].email
-      }
-    } else {
-      console.log('⚠️  Nenhum professional encontrado por nome')
-      
-      if (!usuario.email) {
-        console.log('\n❌ Email não encontrado!')
-        console.log('   Por favor, forneça o email da Carol Garcia de uma das formas:')
-        console.log('   1. Execute: node liberar-acesso-carol-garcia.js email@exemplo.com')
-        console.log('   2. Ou edite o arquivo e adicione o email na variável "usuario.email"')
-        return
-      } else {
-        console.log(`   Usando email fornecido: ${usuario.email}`)
-      }
-    }
-    
-    if (!usuario.email) {
-      console.error('❌ Email não encontrado. Por favor, forneça o email da Carol Garcia.')
-      console.log('   Execute: node liberar-acesso-carol-garcia.js email@exemplo.com')
-      return
-    }
-    
-    console.log(`\n${'='.repeat(60)}`)
-    console.log(`👤 Processando: ${usuario.nome}`)
-    console.log(`📧 Email: ${usuario.email}`)
-    console.log(`${'='.repeat(60)}\n`)
-    
-    // 2. Verificar se existe na tabela professionals
+    // 1. Buscar professional pelo email
+    console.log(`🔍 Buscando professional com email: ${usuario.email}...`)
     const { data: professional, error: profError } = await supabase
       .from('professionals')
       .select('*')
@@ -89,6 +45,20 @@ async function liberarAcessoCarol() {
       return
     }
     
+    if (professional) {
+      usuario.nome = professional.name || 'Usuário'
+      console.log(`✅ Professional encontrado: ${usuario.nome}`)
+    } else {
+      console.log('⚠️  Professional não encontrado. Será criado durante o processo.')
+      usuario.nome = 'Usuário' // Será atualizado quando criarmos o professional
+    }
+    
+    console.log(`\n${'='.repeat(60)}`)
+    console.log(`👤 Processando: ${usuario.nome}`)
+    console.log(`📧 Email: ${usuario.email}`)
+    console.log(`${'='.repeat(60)}\n`)
+    
+    // 2. Criar/atualizar professional se necessário
     let professionalId
     let authUserId
     
@@ -96,12 +66,12 @@ async function liberarAcessoCarol() {
       console.log('⚠️  Professional não encontrado na tabela professionals')
       console.log('   Criando professional...')
       
-      // Criar professional temporário primeiro
+      // Criar professional
       const { data: newProfessional, error: createProfError } = await supabase
         .from('professionals')
         .insert({
           email: usuario.email,
-          name: usuario.nome,
+          name: usuario.nome || 'Usuário',
           subscription_status: 'active',
           is_active: true,
           max_leads: 100
@@ -116,6 +86,9 @@ async function liberarAcessoCarol() {
       
       console.log('✅ Professional criado com ID:', newProfessional.id)
       professionalId = newProfessional.id
+      if (newProfessional.name) {
+        usuario.nome = newProfessional.name
+      }
     } else {
       console.log('✅ Professional encontrado')
       console.log('   ID:', professional.id)
@@ -160,9 +133,13 @@ async function liberarAcessoCarol() {
         password: usuario.senhaProvisoria,
         email_confirm: true,
         user_metadata: {
-          name: usuario.nome
+          name: usuario.nome || 'Usuário'
         }
       })
+      
+      if (newAuthUser && newAuthUser.user) {
+        usuario.nome = newAuthUser.user.user_metadata?.name || usuario.nome || 'Usuário'
+      }
       
       if (createAuthError) {
         console.error('❌ Erro ao criar usuário auth:', createAuthError)
@@ -230,7 +207,7 @@ async function liberarAcessoCarol() {
           .insert({
             id: authUserId,
             email: usuario.email,
-            name: usuario.nome,
+            name: usuario.nome || profData.name || 'Usuário',
             subscription_status: profData.subscription_status || 'active',
             is_active: profData.is_active !== false,
             max_leads: profData.max_leads || 100,
@@ -318,9 +295,9 @@ async function liberarAcessoCarol() {
     console.log(`👤 ID: ${authUserId}`)
     console.log('─'.repeat(60))
     
-    console.log('\n📱 MENSAGEM PARA ENVIAR À CAROL GARCIA:')
+    console.log('\n📱 MENSAGEM PARA ENVIAR AO USUÁRIO:')
     console.log('─'.repeat(60))
-    console.log('Olá Carol!\n')
+    console.log(`Olá ${usuario.nome}!\n`)
     console.log('Sua conta foi criada/atualizada com sucesso! 🎉\n')
     console.log(`📧 Email: ${usuario.email}`)
     console.log(`🔑 Senha provisória: ${usuario.senhaProvisoria}\n`)

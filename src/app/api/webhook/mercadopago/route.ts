@@ -70,6 +70,15 @@ export async function POST(request: NextRequest) {
             console.log('📧 Pagamento confirmado para novo usuário:', customer_email)
             console.log('📝 Criando subscription pendente de vinculação...')
             
+            // Calcular current_period_end baseado no tipo de plano
+            const periodStart = new Date()
+            const periodEnd = new Date()
+            if (plan === 'yearly') {
+              periodEnd.setFullYear(periodEnd.getFullYear() + 1) // +1 ano
+            } else {
+              periodEnd.setMonth(periodEnd.getMonth() + 1) // +1 mês
+            }
+            
             const { data: pendingSubscription, error: pendingError } = await supabase
               .from('subscriptions')
               .insert({
@@ -80,8 +89,8 @@ export async function POST(request: NextRequest) {
                 customer_email: customer_email,
                 status: 'active',
                 plan_type: plan,
-                current_period_start: new Date().toISOString(),
-                current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                current_period_start: periodStart.toISOString(),
+                current_period_end: periodEnd.toISOString(),
                 cancel_at_period_end: false,
                 payment_source: 'mercadopago'
               })
@@ -129,6 +138,15 @@ export async function POST(request: NextRequest) {
           
           // Criar assinatura no Supabase APENAS se professional já existe
           if (professionalId && !professionalId.includes('mp_')) {
+            // Calcular current_period_end baseado no tipo de plano
+            const periodStart = new Date()
+            const periodEnd = new Date()
+            if (plan === 'yearly') {
+              periodEnd.setFullYear(periodEnd.getFullYear() + 1) // +1 ano
+            } else {
+              periodEnd.setMonth(periodEnd.getMonth() + 1) // +1 mês
+            }
+            
             const { data: newSubscription, error: subError } = await supabase
               .from('subscriptions')
               .insert({
@@ -139,8 +157,8 @@ export async function POST(request: NextRequest) {
                 customer_email: customer_email,
                 status: 'active',
                 plan_type: plan,
-                current_period_start: new Date().toISOString(),
-                current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 dias
+                current_period_start: periodStart.toISOString(),
+                current_period_end: periodEnd.toISOString(),
                 cancel_at_period_end: false,
                 payment_source: 'mercadopago'
               })
