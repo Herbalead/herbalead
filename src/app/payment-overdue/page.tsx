@@ -34,32 +34,8 @@ export default function PaymentOverduePage() {
   }, [])
 
   const handlePayment = async () => {
-    setLoading(true)
-    
-    try {
-      const response = await fetch('/api/create-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          planType: userData?.subscription_plan || 'monthly',
-          email: userData?.email 
-        })
-      })
-      
-      if (!response.ok) {
-        throw new Error('Erro ao criar assinatura')
-      }
-      
-      const { url } = await response.json()
-      window.location.href = url
-    } catch (error) {
-      console.error('Payment error:', error)
-      alert('Erro ao processar pagamento. Tente novamente.')
-    } finally {
-      setLoading(false)
-    }
+    // Redirecionar para o novo aplicativo Ylada
+    window.location.href = 'https://www.ylada.com/pt/wellness/checkout'
   }
 
   const handleLogout = async () => {

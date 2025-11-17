@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Zap, Shield, ArrowRight, CreditCard, Smartphone, Globe } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -9,6 +9,11 @@ export default function PaymentPage() {
   const [selectedPlan, setSelectedPlan] = useState('monthly')
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
+
+  // Redirecionar automaticamente para o novo aplicativo ao carregar a página
+  useEffect(() => {
+    window.location.href = 'https://www.ylada.com/pt/wellness/checkout'
+  }, [])
 
   const plans = {
         monthly: {
@@ -44,46 +49,8 @@ export default function PaymentPage() {
   const currentPlan = plans[selectedPlan as keyof typeof plans]
 
   const handlePayment = async () => {
-    if (!email) {
-      alert('Por favor, insira seu email')
-      return
-    }
-    
-    setLoading(true)
-    
-    try {
-      // PRIORIZAR MERCADO PAGO - sempre usar Mercado Pago primeiro
-      console.log('🇧🇷 Priorizando Mercado Pago para todos os usuários')
-      
-      const response = await fetch('/api/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          planType: selectedPlan,
-          email: email 
-        })
-      })
-      
-      if (!response.ok) {
-        throw new Error('Erro ao criar pagamento Mercado Pago')
-      }
-      
-      const data = await response.json()
-      
-      // Mercado Pago - redirecionar para init_point
-      if (data.init_point) {
-        window.location.href = data.init_point
-      } else {
-        throw new Error('Erro ao criar pagamento Mercado Pago')
-      }
-    } catch (error) {
-      console.error('Payment error:', error)
-      alert('Erro ao processar pagamento. Tente novamente.')
-    } finally {
-      setLoading(false)
-    }
+    // Redirecionar para o novo aplicativo Ylada
+    window.location.href = 'https://www.ylada.com/pt/wellness/checkout'
   }
 
   return (
